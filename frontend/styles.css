@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #0f172a;
+  --primary-light: #1e293b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  background-color: #0f172a !important; /* Mismo color del header para el notch/Dynamic Island de iOS PWA */
+}
+
+body {
+  min-height: 100%;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  background-color: #f1f5f9;
+}
+
+/* Safe Area Inset Support for Notch Phones (iPhone X/11/12/13/14/15/16, Androids) */
+.safe-top {
+  padding-top: max(10px, env(safe-area-inset-top));
+}
+.safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.safe-paddings {
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+.pulse-alert {
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.22s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Interactive Cards */
+.interactive-card {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.interactive-card:active {
+  transform: scale(0.985);
+}
+@media (min-width: 640px) {
+  .interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* Modal Backdrops */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Fullscreen on Mobile Phones */
+@media (max-width: 639px) {
+  .modal-mobile-fullscreen {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* Touch-friendly Minimum Tap Target */
+.touch-target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (max-width: 639px) {
+  .touch-target {
+    min-height: 40px;
+  }
+}
+
+/* Centrado y alineación perfecta de iconos Lucide y SVGs */
+svg.lucide, [data-lucide] {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Alineación consistente en botones y pestañas */
+.tab-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+/* Centrado exacto de pastillas, badges e insignias numéricas */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+}

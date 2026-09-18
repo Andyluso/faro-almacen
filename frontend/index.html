@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>FARO - Flujo de Almacén y Reorden Operativo</title>
+  <link rel="icon" type="image/svg+xml" href="faro_icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="FARO">
+  <meta name="application-name" content="FARO">
+  <meta name="msapplication-TileColor" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- Tailwind CSS Compilado Estático (Carga instantánea en celulares, ultrarrápido 33KB) -->
+  <link rel="stylesheet" href="tailwind.min.css?v=2.8">
+  <link rel="stylesheet" href="styles.css?v=3.3">
+
+  <!-- Librerías Locales (100% autónomo, no depende de CDNs externos en móviles) -->
+  <script src="lucide.min.js"></script>
+  <script src="qrcode.min.js"></script>
+  <script src="confetti.browser.min.js"></script>
+  <script src="jsbarcode.min.js"></script>
+
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-blue-600 selection:text-white bg-slate-100">
+
+  <!-- ========================================================================= -->
+  <!-- HEADER PRINCIPAL (RESPONSIVO PARA CUALQUIER PANTALLA) -->
+  <!-- ========================================================================= -->
+  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md border-b border-slate-800 safe-top">
+    <div class="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
+      
+      <!-- Fila Superior: Logo + Acciones Rápidas (Adaptado para Móviles) -->
+      <div class="flex items-center justify-between py-2 sm:py-2.5 gap-1.5 sm:gap-2">
+        
+        <!-- Logo & Brand FARO -->
+        <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 border border-slate-700/80 p-0.5 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+            <img src="faro_icon.svg" alt="Faro Logo" class="w-full h-full object-contain">
+          </div>
+          <div class="min-w-0 truncate">
+            <h1 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2 truncate leading-none">
+              <span>FARO</span>
+              <span class="hidden sm:inline-block text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30 tracking-normal badge-pill">
+                v2.0
+              </span>
+              <span id="dbStatusBadge" class="hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded tracking-normal items-center gap-1 cursor-default transition-all" title="Estado de Base de Datos">
+                <span id="dbStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="dbStatusText">Cloud</span>
+              </span>
+            </h1>
+            <p class="text-[9px] sm:text-[10px] font-semibold text-sky-400 truncate leading-tight mt-1 hidden xs:block">Flujo de Almacén y Reorden Operativo</p>
+          </div>
+        </div>
+
+        <!-- Acciones en Cabecera (Compactas y Flexibles) -->
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          
+          <!-- Botón Subir Excel -->
+          <button id="btnOpenUpload" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap touch-target sm:min-w-0" title="Subir archivo Excel de lectura">
+            <i data-lucide="upload-cloud" class="w-4 h-4 shrink-0"></i>
+            <span class="hidden sm:inline">Subir Excel</span>
+          </button>
+
+          <!-- Botón Copiar Correo -->
+          <button id="btnOpenEmailModal" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap touch-target sm:min-w-0" title="Copiar informe para correo de respuesta">
+            <i data-lucide="mail-check" class="w-4 h-4 shrink-0"></i>
+            <span class="hidden md:inline">Para Correo</span>
+          </button>
+
+          <!-- Botón Descargar Excel -->
+          <button id="btnDownloadExcel" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors touch-target sm:min-w-0" title="Descargar Excel con validaciones">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span class="hidden xl:inline">Exportar</span>
+          </button>
+
+          <!-- Botón Instalar App PWA (Visible cuando esté disponible para instalar) -->
+          <button id="btnInstallPWA" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-all shadow-md whitespace-nowrap touch-target sm:min-w-0 cursor-pointer" title="Instalar FARO en tu celular o computador">
+            <i data-lucide="download" class="w-4 h-4 shrink-0"></i>
+            <span class="hidden sm:inline">Instalar App</span>
+          </button>
+
+          <!-- Botón Celular / Wi-Fi QR (Oculto en celulares ya que se usa el propio dispositivo) -->
+          <button id="btnOpenMobileQR" class="hidden sm:inline-flex bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs p-2 rounded-lg items-center justify-center transition-colors touch-target" title="Abrir en celular con cámara">
+            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- Fila Inferior de Cabecera: Selector de Auditoría y Filtro por Fecha (100% Adaptable en Móviles) -->
+      <div id="auditSelectorBar" class="pb-2 pt-0.5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full transition-all">
+        <!-- Selector desplegable de inventario (ocupa el ancho completo en celular para leerlo cómodo) -->
+        <div class="relative flex-1 min-w-0 w-full">
+          <select id="auditSelector" class="w-full bg-slate-800/90 text-slate-100 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer truncate shadow-inner">
+            <option value="" disabled selected>Cargando inventarios...</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
+            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <!-- Fila de Fecha e Historial (se ajusta fluidamente) -->
+        <div class="flex items-center gap-1.5 w-full sm:w-auto shrink-0">
+          <!-- Filtro rápido por fecha -->
+          <div class="relative flex-1 sm:flex-initial flex items-center gap-1 min-w-0">
+            <input type="date" id="auditDateFilter" class="w-full sm:w-auto bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-inner" title="Filtrar inventarios por fecha exacta">
+            <button id="btnClearDateFilter" class="hidden text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800/80 border border-slate-700 transition-colors shrink-0" title="Limpiar filtro de fecha">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Botón Ver Historial Completo -->
+          <button id="btnOpenAuditHistory" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors touch-target shadow-xs" title="Explorar todo el historial de inventarios">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
+            <span>Historial</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fila 3: Barra de Navegación por Pestañas (Auditoría / Catálogo / Archivos) -->
+      <div class="flex items-center gap-1 sm:gap-2 pb-2 pt-1 overflow-x-auto no-scrollbar border-t border-slate-800/80">
+        <!-- Pestaña 1: Auditoría -->
+        <button id="tabBtnAudit" type="button" class="tab-nav-btn active py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 bg-blue-600 text-white shadow-xs">
+          <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
+          <span>Auditoría</span>
+        </button>
+
+        <!-- Pestaña 2: Catálogo de Referencias (Buscador) -->
+        <button id="tabBtnCatalog" type="button" class="tab-nav-btn py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Catálogo de Referencias</span>
+          <span id="tabCatalogBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/30 badge-pill">...</span>
+        </button>
+
+        <!-- Pestaña 3: Archivos Excel -->
+        <button id="tabBtnFiles" type="button" class="tab-nav-btn py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800">
+          <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Archivos Excel</span>
+          <span id="tabFilesBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 badge-pill">...</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- BARRA DE AVISO OFFLINE (Aparece suavemente si el celular entra en zona sin señal) -->
+  <div id="offlineBanner" class="hidden bg-amber-600 text-white text-xs font-bold py-1.5 px-4 text-center flex items-center justify-center gap-2 shadow-xs transition-all z-20">
+    <i data-lucide="wifi-off" class="w-3.5 h-3.5 shrink-0"></i>
+    <span>Modo sin conexión: Puedes seguir consultando el catálogo y referencias cargadas en caché.</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- CONTENIDO PRINCIPAL FLUIDO (SE ADAPTA A MÓVILES Y MONITORES ANCHOS) -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 max-w-7xl 2xl:max-w-screen-2xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-5 flex flex-col gap-3.5 sm:gap-4 overflow-y-auto safe-paddings">
+
+    <!-- SECCIÓN 1: AUDITORÍA DE INVENTARIO (CONCILIACIÓN Y NOVEDADES) -->
+    <div id="sectionAudit" class="flex flex-col gap-3.5 sm:gap-4 flex-1">
+
+    <!-- KPI STRIP RESPONSIVO (2 cols en celular, 3 en tablet, 6 en desktop) -->
+    <section id="kpiSection" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+      
+      <!-- Total Referencias -->
+      <div class="bg-white rounded-xl p-2.5 sm:p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
+        <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Total Prendas</span>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpiTotal" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">-</span>
+          <span class="text-[11px] text-slate-400 font-semibold">refs</span>
+        </div>
+      </div>
+
+      <!-- Faltantes -->
+      <div id="kpiFaltantesCard" class="bg-red-50/70 rounded-xl p-2.5 sm:p-3.5 border border-red-100 shadow-xs flex flex-col justify-between cursor-pointer hover:bg-red-100/70 transition-colors" title="Filtrar solo prendas faltantes">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] sm:text-xs font-bold text-red-700 uppercase tracking-wider">Faltantes</span>
+          <i data-lucide="trending-down" class="w-3.5 h-3.5 text-red-500"></i>
+        </div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpiFaltantes" class="text-xl sm:text-2xl font-black text-red-700 leading-tight">-</span>
+          <span id="kpiFaltantesUnits" class="text-[10px] sm:text-xs text-red-600 font-bold">unids</span>
+        </div>
+      </div>
+
+      <!-- Sobrantes -->
+      <div id="kpiSobrantesCard" class="bg-emerald-50/70 rounded-xl p-2.5 sm:p-3.5 border border-emerald-100 shadow-xs flex flex-col justify-between cursor-pointer hover:bg-emerald-100/70 transition-colors" title="Filtrar solo prendas sobrantes">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider">Sobrantes</span>
+          <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-500"></i>
+        </div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpiSobrantes" class="text-xl sm:text-2xl font-black text-emerald-700 leading-tight">-</span>
+          <span id="kpiSobrantesUnits" class="text-[10px] sm:text-xs text-emerald-600 font-bold">unids</span>
+        </div>
+      </div>
+
+      <!-- Reincidentes (Prendas Repetidas) -->
+      <div id="kpiRecurrentCard" class="bg-amber-50/80 rounded-xl p-2.5 sm:p-3.5 border border-amber-200 shadow-xs flex flex-col justify-between cursor-pointer hover:bg-amber-100/70 transition-colors" title="Ver prendas que se repiten con diferencias">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider">Reincidentes</span>
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-600"></i>
+        </div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpiReincidentes" class="text-xl sm:text-2xl font-black text-amber-700 leading-tight">-</span>
+          <span class="text-[10px] text-amber-800 font-extrabold px-1.5 py-0.5 bg-amber-200/80 rounded">Alerta</span>
+        </div>
+      </div>
+
+      <!-- Validadas & Progreso -->
+      <div class="bg-white rounded-xl p-2.5 sm:p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between col-span-1 sm:col-span-2 lg:col-span-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Validadas</span>
+          <span id="kpiValidadasPercent" class="text-[11px] sm:text-xs font-extrabold text-blue-600">0%</span>
+        </div>
+        <div class="mt-1">
+          <div class="flex items-baseline justify-between mb-1">
+            <span id="kpiValidadasCount" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">0</span>
+            <span id="kpiValidadasTotal" class="text-[10px] sm:text-xs text-slate-400 font-medium">/ 0</span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div id="progressBar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Con Foto / Sin Foto -->
+      <div id="kpiPhotoCard" class="bg-white rounded-xl p-2.5 sm:p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between cursor-pointer hover:bg-slate-50 transition-colors" title="Filtrar prendas sin foto en el catálogo">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Fotos</span>
+          <i data-lucide="camera" class="w-3.5 h-3.5 text-slate-400"></i>
+        </div>
+        <div class="flex items-baseline justify-between mt-1">
+          <div class="flex items-baseline gap-1">
+            <span id="kpiConFoto" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">0</span>
+            <span class="text-[10px] text-emerald-600 font-bold">con</span>
+          </div>
+          <div class="text-right">
+            <span id="kpiSinFoto" class="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded whitespace-nowrap">0 sin foto</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- MENÚ RETRÁCTIL DE BÚSQUEDA Y FILTROS (SENCILLO, SIN CUADROS) -->
+    <section id="filterDrawer" class="hidden bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200 shadow-sm flex flex-col gap-3 transition-all animate-fade-in">
+      
+      <!-- Encabezado del Menú Retráctil -->
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+          </div>
+          <span class="text-xs font-bold text-slate-800">Menú de Filtros</span>
+          <span id="activeFilterDrawerBadge" class="hidden text-[10px] bg-blue-600 text-white font-black px-2 py-0.5 rounded-full">0 activos</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnResetAllFilters" type="button" class="text-xs font-semibold text-slate-500 hover:text-red-600 transition-colors cursor-pointer">
+            Limpiar filtros
+          </button>
+          <button id="btnCloseFilterDrawer" type="button" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer" title="Cerrar menú (Esc)">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Buscador Rápido -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </div>
+        <input type="text" id="searchInput" placeholder="Buscar por referencia, código de barras (EAN), prenda, color..." 
+               class="w-full pl-10 pr-9 py-2 bg-slate-50 text-slate-800 text-xs sm:text-sm rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400">
+        <button id="btnClearSearch" type="button" class="hidden absolute inset-y-0 right-0 w-9 inline-flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer" title="Limpiar búsqueda">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Selectores Simples en Rejilla (Sin cuadros ni botones invasivos) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        
+        <!-- Selector 1: Estado / Tipo de Diferencia -->
+        <div class="flex flex-col gap-1">
+          <label for="statusFilter" class="text-[11px] font-bold text-slate-600">Estado / Diferencia</label>
+          <div class="relative">
+            <select id="statusFilter" class="w-full bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer">
+              <option value="all">Todas las prendas</option>
+              <option value="faltantes">🔴 Solo Faltantes</option>
+              <option value="sobrantes">🟢 Solo Sobrantes</option>
+              <option value="reincidentes">🔥 Repetidas en otros inventarios</option>
+              <option value="pendientes">⏳ Solo Pendientes de validar</option>
+              <option value="validadas">✅ Solo Validadas</option>
+              <option value="sin_foto">📷 Solo Sin Foto</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector 2: Género / Departamento Oficial -->
+        <div class="flex flex-col gap-1">
+          <label for="genderFilter" class="text-[11px] font-bold text-slate-600">Género / Depto</label>
+          <div class="relative">
+            <select id="genderFilter" onchange="selectGenderFilter(this.value)" class="w-full bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer">
+              <option value="all">Todos los departamentos</option>
+              <option value="Dama">👗 Dama (28)</option>
+              <option value="Caballero">👔 Caballero (45)</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector 3: Tipo de Prenda / Categoría Oficial -->
+        <div class="flex flex-col gap-1">
+          <label for="categoryFilter" class="text-[11px] font-bold text-slate-600">Tipo de Prenda / Cód.</label>
+          <div class="relative">
+            <select id="categoryFilter" class="w-full bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer">
+              <option value="all">Todas las prendas</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector 4: Talla -->
+        <div class="flex flex-col gap-1">
+          <label for="sizeFilter" class="text-[11px] font-bold text-slate-600">Talla</label>
+          <div class="relative">
+            <select id="sizeFilter" class="w-full bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer">
+              <option value="all">Todas las tallas</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-400">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- LISTADO DE REFERENCIAS (FLUIDO PARA PANTALLAS DE 320px A 4K) -->
+    <section class="flex-1 flex flex-col min-h-0">
+      
+      <!-- BARRA COMPACTA: SOLO ICONO DE LUPA (EXPANDIBLE) Y CONTADOR DE RESULTADOS -->
+      <div class="flex items-center justify-between gap-2 px-1 mb-2">
+        <div class="flex items-center gap-2">
+          <!-- Icono de la Lupa: Clic para expandir/colapsar panel de búsqueda -->
+          <button id="btnToggleFilters" 
+                  type="button" 
+                  class="relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group" 
+                  title="Buscar y filtrar prendas (o presiona Ctrl+F)">
+            <i data-lucide="search" class="w-4 h-4 text-slate-600 group-hover:text-blue-600 transition-colors"></i>
+            <span class="hidden sm:inline text-xs font-bold ml-1.5">Buscar</span>
+            <!-- Badge numérico cuando hay filtros aplicados mientras está oculto -->
+            <span id="activeFiltersPill" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-black bg-blue-600 text-white rounded-full badge-pill">0</span>
+          </button>
+
+          <!-- Resumen de etiquetas activas cuando el panel está oculto -->
+          <div id="activeFiltersSummaryBar" class="hidden sm:flex items-center gap-1.5 flex-wrap text-xs">
+            <!-- Chips dinámicos generados desde JavaScript -->
+          </div>
+        </div>
+
+        <!-- Contador de Resultados Visibles y Limpiar Rápido -->
+        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+          <button id="btnQuickClearFilters" type="button" class="hidden text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer">
+            Limpiar filtros
+          </button>
+          <div>
+            Mostrando <span id="visibleCount" class="font-bold text-slate-900">0</span> prendas de <span id="totalAuditCount" class="font-bold text-slate-900">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA MODO TARJETAS (OCULTA POR DEFECTO) -->
+      <div id="cardsContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3.5 overflow-y-auto pb-4">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <!-- VISTA MODO TABLA PRINCIPAL (CON SCROLL HORIZONTAL PROTEGIDO EN MÓVILES) -->
+      <div id="tableContainer" class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex-1 overflow-y-auto">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs min-w-[750px]">
+            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th class="py-3 px-3">Referencia / EAN</th>
+                <th class="py-3 px-2 text-center">Talla</th>
+                <th class="py-3 px-2 text-center">Color</th>
+                <th class="py-3 px-2 text-right">Teórico</th>
+                <th class="py-3 px-2 text-right">Tienda</th>
+                <th class="py-3 px-2 text-right">Bodega</th>
+                <th class="py-3 px-2 text-center">Diferencia</th>
+                <th class="py-3 px-2 text-center" title="Prendas que se repiten en otros inventarios">Repetida</th>
+                <th class="py-3 px-3 text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-100">
+              <!-- Generado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Estado Vacío -->
+      <div id="emptyState" class="hidden flex-1 flex flex-col items-center justify-center py-16 text-center">
+        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-3">
+          <i data-lucide="package-search" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800">No se encontraron referencias</h3>
+        <p class="text-xs text-slate-500 max-w-sm mt-1 px-4">Prueba cambiando los filtros o la búsqueda, o sube un nuevo archivo de lectura de inventario.</p>
+      </div>
+
+    </section>
+
+    </div> <!-- /#sectionAudit -->
+
+    <!-- ======================================================================= -->
+    <!-- SECCIÓN 2: CATÁLOGO DE REFERENCIAS (BUSCADOR & DIRECTORIO VISUAL)        -->
+    <!-- ======================================================================= -->
+    <section id="sectionCatalog" class="hidden flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+      
+      <!-- Barra Superior del Catálogo: Buscador Principal + Filtros Rápidos -->
+      <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200/90 shadow-xs flex flex-col gap-2.5">
+        
+        <!-- Fila 1: Input de Búsqueda Grande con Icono -->
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="search" class="w-4 h-4 text-amber-500"></i>
+            </div>
+            <input type="text" id="catalogSearchInput" 
+                   placeholder="Buscar por referencia (ej. 28068218), nombre, código EAN o color..." 
+                   class="w-full bg-slate-50 text-slate-900 text-xs sm:text-sm font-semibold rounded-xl pl-10 pr-9 py-2.5 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all placeholder:text-slate-400">
+            <button id="btnClearCatalogSearch" type="button" class="hidden absolute inset-y-0 right-0 w-9 inline-flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer" title="Limpiar búsqueda">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Conmutador de Vista (Cuadrícula vs Tabla) -->
+          <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 shrink-0">
+            <button id="btnCatalogViewGrid" type="button" class="w-8 h-8 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-2xs inline-flex items-center justify-center cursor-pointer" title="Ver como tarjetas con foto">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-amber-600"></i>
+            </button>
+            <button id="btnCatalogViewTable" type="button" class="w-8 h-8 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-900 inline-flex items-center justify-center cursor-pointer" title="Ver como tabla de referencias">
+              <i data-lucide="table" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Fila 2: Filtros de Género, Tipo de Prenda y Fotos -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <!-- Filtro Género -->
+          <div>
+            <label for="catalogGenderFilter" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Género</label>
+            <select id="catalogGenderFilter" class="w-full bg-slate-50 text-slate-700 font-semibold rounded-lg px-2.5 py-1.5 border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="all">Todos los géneros</option>
+              <option value="Dama">👗 Dama (28)</option>
+              <option value="Caballero">👔 Caballero (45)</option>
+            </select>
+          </div>
+
+          <!-- Filtro Tipo de Prenda -->
+          <div>
+            <label for="catalogTypeFilter" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Tipo de Prenda</label>
+            <select id="catalogTypeFilter" class="w-full bg-slate-50 text-slate-700 font-semibold rounded-lg px-2.5 py-1.5 border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="all">Todas las prendas</option>
+            </select>
+          </div>
+
+          <!-- Filtro Foto -->
+          <div>
+            <label for="catalogPhotoFilter" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Disponibilidad Foto</label>
+            <select id="catalogPhotoFilter" class="w-full bg-slate-50 text-slate-700 font-semibold rounded-lg px-2.5 py-1.5 border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="all">Con o sin foto</option>
+              <option value="with_photo">📷 Solo con foto</option>
+              <option value="without_photo">⚠️ Solo sin foto</option>
+            </select>
+          </div>
+
+          <!-- Resumen de Conteo -->
+          <div class="flex flex-col justify-end">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Resultados</span>
+            <div class="text-xs font-bold text-slate-700 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200 flex items-center justify-between">
+              <span>Mostrando:</span>
+              <span id="catalogCountText" class="font-black text-amber-800 font-mono">0</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VISTA CATÁLOGO MODO CUADRÍCULA DE TARJETAS (Visual con fotos grandes) -->
+      <div id="catalogGridContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 overflow-y-auto pb-6">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <!-- VISTA CATÁLOGO MODO TABLA (Compacta) -->
+      <div id="catalogTableContainer" class="hidden bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex-1 overflow-y-auto">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs min-w-[700px]">
+            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th class="py-3 px-3 w-14">Foto</th>
+                <th class="py-3 px-3">Referencia</th>
+                <th class="py-3 px-3">Nombre de Prenda</th>
+                <th class="py-3 px-2">Género / Tipo</th>
+                <th class="py-3 px-2">Tallas Registradas</th>
+                <th class="py-3 px-2">Código EAN</th>
+                <th class="py-3 px-3 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="catalogTableBody" class="divide-y divide-slate-100">
+              <!-- Generado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Estado Vacío Catálogo -->
+      <div id="catalogEmptyState" class="hidden flex-1 flex flex-col items-center justify-center py-16 text-center">
+        <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 mb-3 border border-amber-200">
+          <i data-lucide="package-search" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800">No se encontraron prendas en el catálogo</h3>
+        <p class="text-xs text-slate-500 max-w-sm mt-1 px-4">Prueba ajustando el texto de búsqueda o cambiando los filtros de género y tipo de prenda.</p>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- SECCIÓN 3: ARCHIVOS EXCEL (GESTOR DE INVENTARIOS SUBIDOS)                -->
+    <!-- ======================================================================= -->
+    <section id="sectionFiles" class="hidden flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+      
+      <!-- Cabecera de la Sección Archivos Excel -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-600"></i>
+            <span>Archivos Excel e Inventarios</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Consulta, descarga los archivos originales .xlsx o administra los inventarios cargados en FARO.</p>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="btnFilesUploadNew" type="button" class="py-2 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 touch-target">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            <span>Subir Nuevo Excel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros Rápidos de Archivos -->
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Filtro:</span>
+          <button type="button" data-files-filter="all" class="files-chip active px-3 py-1 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-xs">Todos</button>
+          <button type="button" data-files-filter="lunes" class="files-chip px-3 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Lunes</button>
+          <button type="button" data-files-filter="miercoles" class="files-chip px-3 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Miércoles</button>
+          <button type="button" data-files-filter="this_month" class="files-chip px-3 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Este Mes</button>
+        </div>
+
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="filesSearchInput" placeholder="Buscar por nombre de archivo..." class="w-full bg-white text-xs rounded-lg pl-8 pr-3 py-1.5 border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+            <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listado de Archivos Excel -->
+      <div id="filesListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 overflow-y-auto pb-6">
+        <!-- Tarjetas generadas dinámicamente -->
+      </div>
+
+      <!-- Estado Vacío Archivos -->
+      <div id="filesEmptyState" class="hidden flex-1 flex flex-col items-center justify-center py-16 text-center">
+        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-3">
+          <i data-lucide="folder-search" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800">No se encontraron archivos Excel</h3>
+        <p class="text-xs text-slate-500 max-w-sm mt-1 px-4">Sube un nuevo archivo de lectura de inventario para comenzar a consultar.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE INSPECCIÓN: PANTALLA COMPLETA EN MÓVIL, MODAL ELEGANTE EN DESKTOP -->
+  <!-- ========================================================================= -->
+  <div id="inspectorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-0 sm:p-4 modal-backdrop bg-slate-950/75">
+    <div class="bg-white modal-mobile-fullscreen sm:rounded-2xl shadow-2xl w-full sm:max-w-4xl max-h-none sm:max-h-[96vh] flex flex-col overflow-hidden border-0 sm:border border-slate-200 animate-slide-up sm:animate-fade-in">
+      
+      <!-- Modal Header Sticky -->
+      <div class="px-4 sm:px-5 py-3 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0 safe-top">
+        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-wrap">
+          <span id="modalGenderBadge" class="hidden text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded shrink-0">
+            Dama
+          </span>
+          <span id="modalCategoryBadge" class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30 shrink-0">
+            Categoría
+          </span>
+          <h2 id="modalRefTitle" class="text-sm sm:text-base md:text-lg font-black tracking-tight truncate">
+            77-REF-000
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <!-- Controles de navegación de prendas -->
+          <div class="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700">
+            <button id="btnModalPrev" class="p-1.5 sm:p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors touch-target sm:min-w-0" title="Prenda anterior (←)">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="modalNavCounter" class="text-[11px] sm:text-xs text-slate-300 px-1.5 sm:px-2 font-bold whitespace-nowrap">1/200</span>
+            <button id="btnModalNext" class="p-1.5 sm:p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors touch-target sm:min-w-0" title="Prenda siguiente (→)">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Cerrar modal -->
+          <button id="btnCloseInspector" class="p-1.5 sm:p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors touch-target">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body Minimalista -->
+      <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 flex flex-col gap-3 pb-24 sm:pb-5">
+
+        <!-- 1. ENCABEZADO MINIMALISTA DE LA PRENDA (Nombre, Talla, Color, EAN en 1 sola fila limpia) -->
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <h3 id="modalGarmentName" class="text-sm sm:text-base font-black text-slate-900 leading-tight truncate">
+              CAMISETA OVERSIZE ESTAMPADA GRAPHIC
+            </h3>
+            <div class="flex items-center gap-2 sm:gap-3 text-xs text-slate-600 mt-1 flex-wrap font-medium">
+              <span>Talla: <b id="modalSize" class="text-slate-900 font-black">M</b></span>
+              <span class="text-slate-300">•</span>
+              <span>Color: <b id="modalColor" class="text-slate-900 font-bold">NEGRO</b></span>
+              <span class="text-slate-300">•</span>
+              <span class="flex items-center gap-1 font-mono text-[11px] text-slate-500">
+                EAN: <span id="modalBarcode" class="font-bold text-slate-700">7701234567890</span>
+                <button id="btnCopyBarcode" type="button" class="text-slate-400 hover:text-blue-600 p-0.5 rounded transition-colors" title="Copiar código de barras">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Código de barras visual escaneable con pistola lectora o celular -->
+          <div id="modalBarcodeCard" class="bg-white p-2 rounded-xl border border-slate-200 shadow-2xs flex flex-col items-center justify-center shrink-0 cursor-pointer hover:border-blue-300 transition-all" title="Haz clic para copiar el código EAN">
+            <svg id="modalBarcodeSvg" class="max-w-[170px] sm:max-w-[190px] h-10 sm:h-11"></svg>
+            <span class="text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="scan" class="w-2.5 h-2.5 text-slate-400"></i> Escaneable
+            </span>
+          </div>
+
+          <!-- Micro-alerta de reincidencia o estado -->
+          <div id="recurrenceSection" class="hidden shrink-0">
+            <button id="btnScrollToRecurrence" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition-all shadow-2xs cursor-pointer active:scale-95" title="Ver las fechas en que se repitió esta prenda">
+              <span>🔥 Repetida en otros inventarios</span>
+            </button>
+            <div id="recurrenceHistoryList" class="hidden"></div>
+          </div>
+        </div>
+
+        <!-- 2. FILA PRINCIPAL: FOTO + CONTROLES DE CÁMARA (IZQ) Y MÉTRICAS + DICTAMEN (DER) -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-start">
+          
+          <!-- COLUMNA FOTO Y ACCESO RÁPIDO A CÁMARA/ARCHIVO (md:col-span-4) -->
+          <div class="md:col-span-4 flex flex-col gap-2">
+            <div class="relative bg-slate-100 rounded-xl border border-slate-200 overflow-hidden flex flex-col items-center justify-center h-44 sm:h-52 group shadow-inner">
+              <!-- Imagen si existe -->
+              <img id="modalGarmentImage" src="" alt="Foto prenda" class="hidden w-full h-full object-contain bg-white">
+              
+              <!-- Placeholder si NO tiene foto -->
+              <div id="modalNoImagePlaceholder" class="flex flex-col items-center justify-center p-3 text-center">
+                <div class="w-11 h-11 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center mb-1.5">
+                  <i data-lucide="camera" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-700">Sin foto en catálogo</span>
+                <span class="text-[10px] text-slate-400 mt-0.5">Toma o sube una imagen universal</span>
+              </div>
+
+              <!-- Acciones sobre la foto existente (Cambiar y Eliminar) -->
+              <div id="modalPhotoActions" class="hidden absolute bottom-2 right-2 flex items-center gap-1.5">
+                <button id="btnTriggerPhotoChange" type="button" class="bg-slate-900/85 hover:bg-slate-900 text-white text-[11px] font-bold px-2 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1 shadow-sm transition-all" title="Cambiar por otra foto">
+                  <i data-lucide="camera" class="w-3 h-3"></i>
+                  <span>Cambiar</span>
+                </button>
+                <button id="btnDeletePhoto" type="button" class="bg-red-600/90 hover:bg-red-700 text-white text-[11px] font-bold px-2 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer" title="Eliminar foto incorrecta">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  <span>Eliminar</span>
+                </button>
+              </div>
+
+              <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+              <input type="file" id="fileInput" accept="image/*" class="hidden">
+            </div>
+
+            <!-- Botones directos para Tomar o Subir Foto (Siempre disponibles y minimalistas) -->
+            <div class="flex items-center gap-2">
+              <button id="btnCaptureCamera" type="button" class="flex-1 py-2 px-2.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-blue-200/80 transition-colors shadow-2xs touch-target sm:min-w-0" title="Tomar foto con la cámara del celular">
+                <i data-lucide="camera" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>Tomar Foto</span>
+              </button>
+              <button id="btnUploadFile" type="button" class="flex-1 py-2 px-2.5 rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-medium text-xs flex items-center justify-center gap-1.5 border border-slate-200 transition-colors shadow-2xs touch-target sm:min-w-0" title="Subir imagen desde galería o archivo">
+                <i data-lucide="image-plus" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>Subir Imagen</span>
+              </button>
+            </div>
+
+            <!-- Micro Alerta si falta foto al validar -->
+            <div id="mandatoryPhotoAlert" class="hidden text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 p-2 rounded-lg flex items-center gap-1.5">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+              <span>Foto requerida para validar</span>
+            </div>
+          </div>
+
+          <!-- COLUMNA MÉTRICAS, TALLAS Y VALIDACIÓN (md:col-span-8) -->
+          <div class="md:col-span-8 flex flex-col gap-2.5 sm:gap-3">
+
+            <!-- BARRA DE CONTEO FÍSICO VS TEÓRICO (~40px de altura) -->
+            <div id="modalDiffBanner" class="p-2.5 sm:p-3 rounded-xl border flex items-center justify-between bg-slate-50 border-slate-200 transition-all">
+              <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                <span id="modalDiffIcon" class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0">
+                  =
+                </span>
+                <div class="text-xs leading-tight">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-slate-500">Físico: <strong id="modalCountTotalPhysical" class="text-slate-900 font-black">0</strong> <span class="text-[11px] text-slate-400 font-normal">(Tienda: <span id="modalCountStore">0</span> · Bodega: <span id="modalCountWarehouse">0</span>)</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-slate-500">Teórico: <strong id="modalCountTheoretical" class="text-slate-900 font-black">0</strong></span>
+                  </div>
+                  <span id="modalDiffExplanation" class="text-[10px] text-slate-400 block mt-0.5"></span>
+                </div>
+              </div>
+              <div class="text-right shrink-0 pl-2">
+                <span id="modalDiffLabel" class="text-[9px] uppercase font-bold text-slate-400 block">Diferencia</span>
+                <span id="modalDiffValue" class="text-base sm:text-lg font-black leading-none">0</span>
+              </div>
+            </div>
+
+            <!-- CHIPS MINIMALISTAS DE TALLAS DEL MODELO -->
+            <div id="modalUnifiedDifferencesSection" class="bg-white rounded-xl p-2.5 sm:p-3 border border-slate-200/80 shadow-2xs flex flex-col gap-1.5">
+              <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                  <i data-lucide="git-compare" class="w-3.5 h-3.5 text-blue-600"></i>
+                  <span>Tallas de esta referencia:</span>
+                </div>
+                <span id="modalNetBalanceBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                  Neto: 0
+                </span>
+              </div>
+
+              <!-- Banner de trocada compacto -->
+              <div id="modalUnifiedSummaryBanner" class="hidden text-[11px] p-2 rounded-lg border font-medium"></div>
+
+              <!-- Chips horizontales de tallas -->
+              <div id="modalUnifiedDifferencesContainer" class="flex flex-wrap gap-1.5 pt-0.5">
+                <!-- Chips generados dinámicamente -->
+              </div>
+            </div>
+
+            <!-- HISTORIAL COMPACTO DE FECHAS PREVIAS (UNIFICADO, SIN CAJAS EXCESIVAS) -->
+            <div id="recurrenceDetailedCard" class="hidden bg-amber-50/70 rounded-xl p-2.5 sm:p-3 border border-amber-200/90 shadow-2xs flex flex-col gap-2 transition-all">
+              <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-amber-950">
+                  <span class="text-base leading-none">🔥</span>
+                  <span>Repetida en <span id="recurrenceTotalAuditsBadge" class="font-black text-amber-900">1 inventario previo</span></span>
+                </div>
+                <span id="recurrenceLastDateBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-200/70 text-amber-900 border border-amber-300/80">
+                  Fechas previas
+                </span>
+              </div>
+              
+              <!-- Contenedor Unificado (Una sola lista compacta) -->
+              <div id="recurrenceDatesList" class="bg-white rounded-lg border border-amber-200/80 divide-y divide-slate-100 overflow-hidden text-xs">
+                <!-- Filas compactas generadas dinámicamente -->
+              </div>
+
+              <!-- Botón Ver Más / Ver Menos (se muestra si son más de 3 inventarios) -->
+              <button id="btnToggleAllRecurrences" type="button" class="hidden w-full text-center text-xs font-bold text-amber-800 hover:text-amber-950 py-1.5 px-2 rounded-lg bg-amber-100/50 hover:bg-amber-100 border border-amber-200/60 transition-colors flex items-center justify-center gap-1 cursor-pointer touch-target sm:min-w-0">
+                <span id="btnToggleAllRecurrencesText">Ver todas las fechas</span>
+                <i id="btnToggleAllRecurrencesIcon" data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- FORMULARIO DE VALIDACIÓN MINIMALISTA -->
+            <div class="bg-white rounded-xl p-2.5 sm:p-3 border border-slate-200/80 shadow-2xs flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label id="verdictOptionsLabel" class="text-xs font-bold text-slate-700 block">
+                  Motivo de la diferencia:
+                </label>
+                <span id="modalStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                  Pendiente
+                </span>
+              </div>
+
+              <!-- Dictámenes en botones limpios de 1 sola línea (Pills) -->
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="verdictOptions">
+                <!-- Se genera dinámicamente según si es FALTANTE, SOBRANTE o EXACTO -->
+              </div>
+
+              <!-- Campo de Observaciones en 1 fila limpia -->
+              <div>
+                <input id="validationNotes" type="text" placeholder="Observaciones para el correo (opcional)..."
+                       class="w-full text-xs py-1.5 px-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder:text-slate-400">
+              </div>
+
+              <!-- Botones de Acción Desktop -->
+              <div class="hidden sm:flex items-center justify-end gap-2 pt-0.5">
+                <button id="btnSaveValidationOnly" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors touch-target sm:min-w-0">
+                  Solo Guardar
+                </button>
+                <button id="btnSaveAndNext" type="button" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-black transition-all shadow-xs flex items-center justify-center gap-1.5 touch-target sm:min-w-0">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  Guardar y Siguiente
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BARRA DE ACCIÓN INFERIOR FIJA PARA CELULARES (THUMB-FRIENDLY) -->
+      <div class="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2.5 flex items-center gap-2 shadow-lg safe-bottom z-10">
+        <button id="btnSaveValidationOnlyMobile" type="button" class="flex-1 py-2.5 px-3 rounded-lg border border-slate-300 text-slate-700 font-bold text-xs active:bg-slate-100 touch-target">
+          Solo Guardar
+        </button>
+        <button id="btnSaveAndNextMobile" type="button" class="flex-2 py-2.5 px-4 rounded-lg bg-blue-600 active:bg-blue-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md touch-target">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          Guardar y Siguiente
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE SUBIR NUEVO EXCEL (ADAPTABLE) -->
+  <!-- ========================================================================= -->
+  <div id="uploadModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 modal-backdrop bg-slate-950/75">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 animate-fade-in">
+      <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="upload-cloud" class="w-5 h-5 text-blue-400"></i>
+          <h3 class="text-sm sm:text-base font-bold">Subir Excel de Inventario</h3>
+        </div>
+        <button id="btnCloseUpload" class="text-slate-400 hover:text-white transition-colors touch-target">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="uploadForm" class="p-4 sm:p-6 flex flex-col gap-3.5">
+        <div>
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+            Nombre de la Lectura / Auditoría (Opcional)
+          </label>
+          <input type="text" id="auditNameInput" placeholder="Ej. Lectura Lunes 15 Septiembre"
+                 class="w-full text-xs sm:text-sm p-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <p class="text-[11px] text-slate-400 mt-1">Si lo dejas vacío, se nombrará automáticamente según el día actual.</p>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+            Fecha del Inventario / Lectura
+          </label>
+          <input type="date" id="uploadAuditDate"
+                 class="w-full text-xs sm:text-sm p-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <p class="text-[11px] text-slate-400 mt-1">Por defecto toma hoy. Puedes cambiarla si estás subiendo una lectura pasada para consultar su historial.</p>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+            Archivo Excel (.xlsx o .xls)
+          </label>
+          <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-5 sm:p-6 text-center bg-slate-50 hover:bg-blue-50/50 cursor-pointer transition-all flex flex-col items-center justify-center">
+            <i data-lucide="file-spreadsheet" class="w-8 h-8 sm:w-10 sm:h-10 text-slate-400 mb-2"></i>
+            <span id="dropZoneFileName" class="text-xs sm:text-sm font-bold text-slate-700">Arrastra tu Excel aquí o haz clic para seleccionar</span>
+            <span class="text-[11px] text-slate-400 mt-1">Detecta columnas de Tienda, Bodega, Referencia, Diferencias, etc.</span>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden">
+          </div>
+        </div>
+
+        <div id="uploadStatusMessage" class="hidden text-xs p-3 rounded-lg"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" id="btnCancelUpload" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors touch-target">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSubmitUpload" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition-colors flex items-center gap-1.5 shadow-md touch-target">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            Cargar y Procesar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE COPIAR PARA CORREO (RESPONSIVO) -->
+  <!-- ========================================================================= -->
+  <div id="emailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-2.5 sm:p-5 modal-backdrop bg-slate-950/75">
+    <div class="bg-white modal-mobile-fullscreen sm:rounded-2xl shadow-2xl w-full sm:max-w-4xl max-h-none sm:max-h-[92vh] flex flex-col overflow-hidden border-0 sm:border border-slate-200 animate-fade-in">
+      <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-900 text-white flex items-center justify-between shrink-0 safe-top">
+        <div class="flex items-center gap-2">
+          <i data-lucide="mail-check" class="w-5 h-5 text-emerald-400"></i>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold">Informe para Correo de Respuesta</h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-400">Copia la tabla formateada y pégala con Ctrl + V en Outlook o Gmail</p>
+          </div>
+        </div>
+        <button id="btnCloseEmailModal" class="text-slate-400 hover:text-white transition-colors touch-target">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Filtros de exportación -->
+      <div class="p-3 sm:p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shrink-0">
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-700 whitespace-nowrap">Incluir en reporte:</label>
+          <select id="emailScopeSelector" class="w-full sm:w-auto text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="validated">Solo prendas ya validadas</option>
+            <option value="all">Todas las prendas de la lectura</option>
+          </select>
+        </div>
+
+        <button id="btnCopyEmailTable" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all touch-target">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          Copiar Tabla al Portapapeles (Ctrl + V)
+        </button>
+      </div>
+
+      <!-- Vista previa de la tabla con scroll horizontal -->
+      <div id="emailPreviewContainer" class="flex-1 overflow-auto p-3 sm:p-4 bg-white">
+        <!-- Renderizado de la tabla HTML -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE HISTORIAL COMPLETO DE INVENTARIOS POR FECHA -->
+  <!-- ========================================================================= -->
+  <div id="auditHistoryModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 modal-backdrop bg-slate-950/75">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-fade-in">
+      
+      <!-- Cabecera modal -->
+      <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600/30 border border-blue-500/40 flex items-center justify-center">
+            <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black">Historial de Inventarios</h3>
+            <p class="text-[11px] text-slate-400">Busca y carga inventarios pasados por fecha o nombre</p>
+          </div>
+        </div>
+        <button id="btnCloseAuditHistory" class="text-slate-400 hover:text-white transition-colors touch-target">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Filtros de búsqueda y fecha -->
+      <div class="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200 shrink-0 space-y-2.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Búsqueda por texto -->
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <input type="text" id="historySearchInput" placeholder="Buscar por nombre o archivo..."
+                   class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-xs font-medium">
+          </div>
+          <!-- Búsqueda por fecha exacta -->
+          <div class="relative flex items-center gap-1.5">
+            <input type="date" id="historyDateInput"
+                   class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-xs font-medium text-slate-700">
+            <button id="btnClearHistoryDate" class="hidden px-2.5 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-200/70 hover:bg-slate-300 rounded-xl transition-colors shrink-0" title="Limpiar fecha">
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Chips de acceso rápido (Todos, Lunes, Miércoles, Este Mes) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+          <span class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">Rápido:</span>
+          <button type="button" data-history-filter="all" class="history-chip active px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-xs">Todos</button>
+          <button type="button" data-history-filter="lunes" class="history-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Lunes</button>
+          <button type="button" data-history-filter="miercoles" class="history-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Miércoles</button>
+          <button type="button" data-history-filter="this_month" class="history-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Este Mes</button>
+        </div>
+      </div>
+
+      <!-- Lista de inventarios -->
+      <div id="auditHistoryList" class="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-2.5 min-h-[220px]">
+        <!-- Generado dinámicamente por JS -->
+      </div>
+
+      <!-- Footer modal -->
+      <div class="px-4 py-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
+        <span id="auditHistoryCount" class="font-medium">Cargando inventarios...</span>
+        <button id="btnCloseAuditHistoryBottom" class="px-4 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-colors">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE CONEXIÓN MÓVIL (QR & URL WI-FI) -->
+  <!-- ========================================================================= -->
+  <div id="mobileQRModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop bg-slate-950/75">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 animate-fade-in text-center p-5 sm:p-6 flex flex-col items-center">
+      <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2.5">
+        <i data-lucide="smartphone" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Conectar Celular con Escáner</h3>
+      <p id="mobileQRDescription" class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">
+        Escanea este código QR con la cámara de tu celular para abrir el inventario y habilitar el escáner de códigos de barras.
+      </p>
+
+      <!-- Selector de Modo de Conexión (Nube / Wi-Fi) -->
+      <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full mt-3">
+        <button id="btnQRModeCloud" type="button" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-xs flex items-center justify-center gap-1">
+          <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+          <span>En la Nube (4G/5G)</span>
+        </button>
+        <button id="btnQRModeLocal" type="button" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1">
+          <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+          <span>Wi-Fi Local</span>
+        </button>
+      </div>
+
+      <!-- Contenedor del QR -->
+      <div id="qrcodeContainer" class="my-3.5 p-3 bg-white border-2 border-slate-100 rounded-2xl shadow-inner flex items-center justify-center min-h-[180px] min-w-[180px]"></div>
+
+      <!-- Enlace directo -->
+      <div class="w-full bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2">
+        <span id="mobileUrlText" class="font-mono font-bold text-blue-700 truncate text-[11px] sm:text-xs select-all">https://...</span>
+        <button id="btnCopyMobileUrl" class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-lg transition-colors shrink-0 touch-target">
+          Copiar
+        </button>
+      </div>
+
+      <div id="qrHelpNote" class="mt-2 text-[11px] text-slate-400">
+        💡 <strong class="text-blue-600 font-semibold">En la Nube</strong> funciona con cualquier celular (datos o Wi-Fi) y permite usar la cámara sin bloqueos de seguridad.
+      </div>
+
+      <button id="btnCloseMobileQR" class="mt-3.5 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors w-full touch-target">
+        Entendido / Cerrar
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE CONFIRMACIÓN ESTILIZADO (REEMPLAZA EL AVISO NATIVO DEL NAVEGADOR) -->
+  <!-- ========================================================================= -->
+  <div id="confirmActionModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop bg-slate-950/75 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 animate-fade-in text-center p-5 sm:p-6 flex flex-col items-center">
+      
+      <!-- Icono de Alerta / Peligro -->
+      <div id="confirmModalIconWrapper" class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-3 shadow-xs">
+        <i id="confirmModalIcon" data-lucide="trash-2" class="w-6 h-6"></i>
+      </div>
+
+      <!-- Título -->
+      <h3 id="confirmModalTitle" class="text-base sm:text-lg font-black text-slate-900 leading-tight">
+        ¿Eliminar este inventario?
+      </h3>
+
+      <!-- Elemento Destacado (Nombre de la auditoría / ID) -->
+      <div id="confirmModalTargetBox" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl p-3 my-3 text-left">
+        <div id="confirmModalTargetName" class="text-xs sm:text-sm font-bold text-slate-800 break-words">
+          "Inventario 9 Septiembre"
+        </div>
+        <div id="confirmModalTargetMeta" class="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-2 flex-wrap">
+          <span>246 prendas</span>
+          <span>•</span>
+          <span class="font-mono text-[10px] bg-slate-200/80 px-1.5 py-0.5 rounded text-slate-700">ID #9</span>
+        </div>
+      </div>
+
+      <!-- Mensaje secundario / Advertencia -->
+      <p id="confirmModalMessage" class="text-xs text-slate-500 leading-relaxed mb-4">
+        Esta acción borrará definitivamente este archivo y todas sus prendas registradas de la base de datos.
+      </p>
+
+      <!-- Botones de Acción -->
+      <div class="grid grid-cols-2 gap-2.5 w-full">
+        <button id="btnConfirmCancel" type="button" class="py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-bold text-xs transition-colors touch-target">
+          Cancelar
+        </button>
+        <button id="btnConfirmAccept" type="button" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-1.5 touch-target">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span id="confirmModalAcceptText">Eliminar</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL INSTRUCCIONES INSTALACIÓN iOS / PWA -->
+  <div id="pwaInstallModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/70 backdrop-blur-xs transition-opacity">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 flex flex-col gap-4 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-slate-900 mx-auto flex items-center justify-center shadow-md p-1 border border-slate-800">
+        <img src="icon-192.png" alt="FARO Logo" class="w-full h-full object-contain rounded-xl">
+      </div>
+      <div>
+        <h3 class="text-base font-black text-slate-900">Instalar FARO en tu celular</h3>
+        <p class="text-xs text-slate-500 mt-1">Úsala a pantalla completa como una aplicación nativa, más rápida y sin barras de navegador.</p>
+      </div>
+      <div id="pwaIosInstructions" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-left text-xs text-slate-700 flex flex-col gap-2.5">
+        <div class="flex items-center gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black flex items-center justify-center text-[11px] shrink-0">1</span>
+          <span>Toca el botón <strong>Compartir</strong> <i data-lucide="share" class="w-3.5 h-3.5 inline text-blue-600 align-middle"></i> en la barra inferior de Safari.</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black flex items-center justify-center text-[11px] shrink-0">2</span>
+          <span>Desliza y pulsa <strong>"Añadir a pantalla de inicio"</strong> <i data-lucide="plus-square" class="w-3.5 h-3.5 inline text-slate-800 align-middle"></i>.</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-black flex items-center justify-center text-[11px] shrink-0">3</span>
+          <span>Pulsa <strong>Añadir</strong> en la esquina superior derecha.</span>
+        </div>
+      </div>
+      <button id="btnClosePwaModal" type="button" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
+        Entendido
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES FLOTANTE RESPONSIVO -->
+  <div id="toast" class="fixed bottom-4 sm:bottom-5 inset-x-4 sm:inset-x-auto sm:right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none">
+    <span id="toastIcon" class="shrink-0"></span>
+    <span id="toastMessage" class="flex-1">Mensaje</span>
+  </div>
+
+  <script src="app.js?v=3.4"></script>
+</body>
+</html>

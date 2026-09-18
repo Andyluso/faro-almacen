@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Variables de entorno secretas (se configuran en el panel de Render)
+.env
+
+# Bases de datos SQLite locales (en la nube se usa Supabase)
+*.db
+*.db-journal
+backend/*.db
+backend/*.db-journal
+
+# Uploads temporales locales
+backend/uploads/*.jpg
+backend/uploads/*.png
+backend/uploads/excels/*
+
+# Archivos de túnel local y logs
+tunnel.log
+cloudflared.exe
+tunnel_url.txt
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db

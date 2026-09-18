@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "FARO - Flujo de Almacén y Reorden Operativo",
+  "short_name": "FARO",
+  "description": "Sistema de conciliación de inventario, auditoría de prendas y catálogo visual de referencias.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "faro_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Auditoría",
+      "short_name": "Auditoría",
+      "description": "Conciliar diferencias de inventario",
+      "url": "/?tab=audit",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Catálogo de Referencias",
+      "short_name": "Catálogo",
+      "description": "Buscar prendas y consultar fotos",
+      "url": "/?tab=catalog",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Archivos Excel",
+      "short_name": "Archivos",
+      "description": "Descargar y gestionar archivos de lectura",
+      "url": "/?tab=files",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

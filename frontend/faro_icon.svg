@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Rayos de luz -->
+  <line x1="50" y1="12" x2="50" y2="4" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="39" y1="16" x2="33" y2="9" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="61" y1="16" x2="67" y2="9" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="31" y1="23" x2="23" y2="20" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="69" y1="23" x2="77" y2="20" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Cúpula / Techo del Faro -->
+  <polygon points="50,14 40,23 60,23" fill="#ea580c"/>
+  <polygon points="50,14 60,23 50,23" fill="#f97316"/>
+  <rect x="44" y="23" width="12" height="9" fill="#f97316"/>
+  <!-- Ventana de luz blanca -->
+  <path d="M47 32 V27 A3 3 0 0 1 53 27 V32 Z" fill="#ffffff"/>
+
+  <!-- Cornisa / Balcón -->
+  <polygon points="38,32 62,32 60,36 40,36" fill="#ea580c"/>
+
+  <!-- Segmento 1: Naranja superior con sombra -->
+  <path d="M41 36 L59 36 L61 46 L41 52 Z" fill="#f97316"/>
+  <path d="M50 36 L59 36 L61 46 L50 49.5 Z" fill="#ea580c"/>
+
+  <!-- Línea diagonal blanca 1 -->
+  <path d="M40.5 51.5 L61.5 45.5 L62 47.5 L39.5 53.5 Z" fill="#ffffff"/>
+
+  <!-- Segmento 2: Turquesa / Teal vibrante -->
+  <path d="M39.5 53.5 L62 47.5 L64 61 L37 67 Z" fill="#0284c7"/>
+  <path d="M50 50.5 L62 47.5 L64 61 L50 63.5 Z" fill="#0369a1"/>
+
+  <!-- Línea diagonal blanca 2 -->
+  <path d="M36.5 66.5 L64.5 60.5 L65 62.5 L35.5 68.5 Z" fill="#ffffff"/>
+
+  <!-- Segmento 3: Base Marina Oscura -->
+  <path d="M35.5 68.5 L65 62.5 L67 86 L33 86 Z" fill="#1e293b"/>
+  <path d="M50 65.5 L65 62.5 L67 86 L50 86 Z" fill="#0f172a"/>
+</svg>
