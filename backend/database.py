@@ -203,6 +203,69 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # Sincronizar automáticamente desde Supabase Cloud si hay datos en la nube
+    sync_from_supabase()
+
+def sync_from_supabase():
+    """Descarga y sincroniza las auditorías, prendas y fotos desde Supabase Cloud a SQLite local."""
+    if not is_supabase_enabled():
+        return
+    client = get_client()
+    if not client:
+        return
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # 1. Audits de Supabase
+        res_a = client.table("audits").select("*").order("id", desc=False).execute()
+        cloud_audits = res_a.data or []
+        for a in cloud_audits:
+            cursor.execute("""
+            INSERT OR REPLACE INTO audits (id, name, filename, uploaded_at, audit_date, total_items, total_faltantes, total_sobrantes, total_validados)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                a.get("id"), a.get("name"), a.get("filename"), a.get("uploaded_at"),
+                a.get("audit_date"), a.get("total_items", 0), a.get("total_faltantes", 0),
+                a.get("total_sobrantes", 0), a.get("total_validados", 0)
+            ))
+
+        # 2. Audit items
+        res_i = client.table("audit_items").select("*").order("id", desc=False).execute()
+        cloud_items = res_i.data or []
+        for item in cloud_items:
+            cursor.execute("""
+            INSERT OR REPLACE INTO audit_items (
+                id, audit_id, reference, base_reference, name, size, color, barcode,
+                store_count, warehouse_count, theoretical_count, difference, category,
+                status, validation_verdict, validation_notes, validated_at,
+                gender, garment_code, garment_type
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                item.get("id"), item.get("audit_id"), item.get("reference"), item.get("base_reference"),
+                item.get("name"), item.get("size"), item.get("color"), item.get("barcode"),
+                item.get("store_count", 0), item.get("warehouse_count", 0), item.get("theoretical_count", 0),
+                item.get("difference", 0), item.get("category"), item.get("status", "pendiente"),
+                item.get("validation_verdict"), item.get("validation_notes"), item.get("validated_at"),
+                item.get("gender"), item.get("garment_code"), item.get("garment_type")
+            ))
+
+        # 3. Catalog photos
+        res_p = client.table("catalog_photos").select("*").execute()
+        cloud_photos = res_p.data or []
+        for p in cloud_photos:
+            cursor.execute("""
+            INSERT OR REPLACE INTO catalog_photos (reference, photo_url, updated_at)
+            VALUES (?, ?, ?)
+            """, (p.get("reference"), p.get("photo_url"), p.get("updated_at")))
+
+        conn.commit()
+        conn.close()
+        print(f"[Supabase Sync] Sincronización exitosa desde la nube: {len(cloud_audits)} auditorías, {len(cloud_items)} prendas, {len(cloud_photos)} fotos.")
+    except Exception as e:
+        print(f"[Supabase Sync] Error sincronizando desde Supabase Cloud: {e}")
+
 def create_audit(name: str, filename: str, items: List[Dict[str, Any]], audit_date: Optional[str] = None) -> int:
     """Crea una auditoría y guarda todos sus items con su referencia base calculada."""
     conn = get_connection()
