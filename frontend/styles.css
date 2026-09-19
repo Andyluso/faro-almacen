@@ -222,3 +222,45 @@ svg.lucide, [data-lucide] {
     print-color-adjust: exact !important;
   }
 }
+
+/* ========================================================================= */
+/* TARJETAS TIPO DECK CON ANIMACIÓN DE TILT (INSPIRADO EN MOCKUP SEVEN SEVEN) */
+/* ========================================================================= */
+.hub-card {
+  background-color: #faf8f4;
+  border: 1px solid #ded9ce;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+  transform-origin: center bottom;
+  transform: rotate(0deg) translateY(0) scale(1);
+  will-change: transform, box-shadow;
+}
+
+.hub-card:hover {
+  box-shadow: 0 24px 38px -8px rgba(15, 23, 42, 0.18), 0 12px 18px -4px rgba(15, 23, 42, 0.09);
+  border-color: #c4b7a1;
+  z-index: 20;
+}
+
+/* Animación sutil de inclinación (tilt) que el usuario especificó al pasar el mouse */
+.hub-card-tilt-1:hover {
+  transform: translateY(-9px) rotate(-2.5deg) scale(1.03);
+}
+
+.hub-card-tilt-2:hover {
+  transform: translateY(-9px) rotate(1.8deg) scale(1.03);
+}
+
+.hub-card-tilt-3:hover {
+  transform: translateY(-9px) rotate(-1.5deg) scale(1.03);
+}
+
+.hub-card-tilt-4:hover {
+  transform: translateY(-9px) rotate(2deg) scale(1.03);
+}
+
+.hub-card-tilt-5:hover {
+  transform: translateY(-9px) rotate(-1.5deg) scale(1.03);
+}
+

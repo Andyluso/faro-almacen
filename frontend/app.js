@@ -4065,58 +4065,72 @@ async function loadHubSummary() {
 
     const dayBadge = document.getElementById('hubLiveDayBadge');
     if (dayBadge) {
-      dayBadge.textContent = `Hoy: ${hubSummaryData.today_day_name || ''} · ${hubSummaryData.today_date || ''}`;
+      dayBadge.textContent = `Hoy: ${hubSummaryData.today_day_name || 'Hoy'} - ${hubSummaryData.today_date || ''}`;
     }
 
-    // Alerta contextual
+    // Alerta contextual de la barra superior (formato conciso del mockup con tooltip)
     const alertText = document.getElementById('hubDayAlertText');
+    const alertBanner = document.getElementById('hubDayAlertBanner');
     if (alertText) {
       const dName = (hubSummaryData.today_day_name || '').toLowerCase();
       if (dName.includes('lunes')) {
-        alertText.innerHTML = '<strong>Lunes de Auditoría:</strong> Recuerda tomar lectura con pistola RFID, subir el archivo a FARO y conciliar diferencias.';
+        alertText.textContent = 'Lunes de Auditoría FARO.';
+        if (alertBanner) alertBanner.title = 'Toma lectura con pistola RFID, sube el archivo a FARO y concilia diferencias.';
       } else if (dName.includes('miércoles') || dName.includes('miercoles')) {
-        alertText.innerHTML = '<strong>Miércoles de Informe:</strong> Realiza el segundo conteo semanal de diferencias y descarga el Excel oficial para enviar por correo.';
-      } else if (dName.includes('sábado') || dName.includes('domingo')) {
-        alertText.innerHTML = '<strong>Fin de Semana de Tráfico Alto:</strong> Supervisa reposición continua desde bodega y sensorizado de prendas en probadores.';
+        alertText.textContent = 'Miércoles de Informe Oficial.';
+        if (alertBanner) alertBanner.title = 'Segundo conteo semanal de diferencias y descarga del Excel oficial.';
+      } else if (dName.includes('sábado') || dName.includes('domingo') || dName.includes('sabado')) {
+        alertText.textContent = 'Fin de Semana de Tráfico Alto.';
+        if (alertBanner) alertBanner.title = 'Supervisa reposición continua desde bodega y sensorizado de prendas.';
       } else {
-        alertText.innerHTML = '<strong>Operación Diaria:</strong> Revisa la apertura, fondos de caja, reposición de tallas faltantes y sensorizado RFID.';
+        alertText.textContent = 'Rutinas de Operación Diaria.';
+        if (alertBanner) alertBanner.title = 'Apertura, fondos de caja, reposición de tallas faltantes y sensorizado RFID.';
       }
     }
 
-    // Info Tarjeta FARO
+    // Info Tarjeta FARO (Pastilla: '271 prendas')
     const auditInfo = document.getElementById('hubCardAuditInfo');
     if (auditInfo) {
       if (hubSummaryData.latest_audit) {
         const la = hubSummaryData.latest_audit;
-        auditInfo.textContent = `Última: ${la.total_items} prendas (${la.total_faltantes} faltantes, ${la.total_sobrantes} sobrantes)`;
+        auditInfo.textContent = `${la.total_items} prendas`;
+        auditInfo.title = `Última auditoría: ${la.total_items} prendas (${la.total_faltantes} faltantes, ${la.total_sobrantes} sobrantes)`;
       } else {
-        auditInfo.textContent = 'Sin inventarios cargados';
+        auditInfo.textContent = '0 prendas';
       }
     }
 
-    // Info Tarjeta Horarios
+    // Info Tarjeta Horarios (Pastilla: 'Asignación Completa')
     const schedInfo = document.getElementById('hubCardScheduleInfo');
     if (schedInfo) {
       const sc = hubSummaryData.schedules_summary;
-      schedInfo.textContent = `${sc.active_employees} colaboradores · ${sc.total_hours || 0} hrs asignadas`;
+      if (sc && sc.has_schedule && sc.total_hours > 0) {
+        schedInfo.textContent = 'Asignación Completa';
+      } else {
+        schedInfo.textContent = `${sc?.active_employees || 0} colaboradores`;
+      }
+      if (sc) schedInfo.title = `${sc.active_employees} colaboradores · ${sc.total_hours || 0} hrs asignadas`;
     }
 
-    // Info Tarjeta Tareas
+    // Info Tarjeta Tareas (Pastilla: '4 Pendientes Hoy')
     const tasksInfo = document.getElementById('hubCardTasksInfo');
     const quickTasksCount = document.getElementById('hubQuickTasksCount');
     if (tasksInfo) {
       const ts = hubSummaryData.tasks_summary;
-      tasksInfo.textContent = `${ts.today_pending} pendientes para hoy (${ts.pending} total)`;
+      const pCount = ts?.today_pending ?? 0;
+      tasksInfo.textContent = `${pCount} Pendientes Hoy`;
+      tasksInfo.title = `${pCount} pendientes para hoy (${ts?.pending || 0} en total)`;
     }
     if (quickTasksCount) {
       quickTasksCount.textContent = hubSummaryData.tasks_summary?.today_pending || 0;
     }
 
-    // Info Tarjeta Catálogo
+    // Info Tarjeta Catálogo (Pastilla: '277 modelos')
     const catInfo = document.getElementById('hubCardCatalogInfo');
     if (catInfo) {
       const cs = hubSummaryData.catalog_summary;
-      catInfo.textContent = `${cs.total_models} modelos (${cs.total_photos} fotos)`;
+      catInfo.textContent = `${cs?.total_models || 0} modelos`;
+      catInfo.title = `${cs?.total_models || 0} modelos (${cs?.total_photos || 0} fotos HD)`;
     }
 
   } catch (err) {
