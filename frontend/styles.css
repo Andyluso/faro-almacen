@@ -224,12 +224,75 @@ svg.lucide, [data-lucide] {
 }
 
 /* ========================================================================= */
-/* ESTILOS DEL DASHBOARD EJECUTIVO SEVEN SEVEN (3 COLUMNAS)                  */
+/* ESTILOS DEL DASHBOARD EJECUTIVO SEVEN SEVEN (3 COLUMNAS REALES)           */
 /* ========================================================================= */
-.hub-canvas-bg {
-  background-color: #f7f6f2;
-  background-image: radial-gradient(#e5e2da 0.75px, transparent 0.75px);
-  background-size: 16px 16px;
+.hub-3col-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .hub-3col-layout {
+    display: grid !important;
+    grid-template-columns: 275px minmax(0, 1fr) 340px !important;
+    gap: 1.5rem !important;
+    align-items: start !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hub-3col-layout {
+    grid-template-columns: 295px minmax(0, 1fr) 370px !important;
+    gap: 1.75rem !important;
+  }
+}
+
+.hub-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.hub-col-center {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.hub-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  width: 100%;
+}
+
+.hub-center-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 3px 12px -2px rgba(15, 23, 42, 0.04);
+}
+
+.hub-stat-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.95rem;
+  padding: 0.85rem 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.hub-stat-card:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 16px -3px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
 }
 
 .hub-nav-button {

@@ -3893,6 +3893,52 @@ async function initHubAndRouter() {
   const btnGoToSched = document.getElementById('btnHubGoToSchedules');
   if (btnGoToSched) btnGoToSched.addEventListener('click', () => switchPortalView('schedules'));
 
+  // Buscador Rápido del Hub Central
+  const fastSearchForm = document.getElementById('hubFastSearchForm');
+  const fastSearchInput = document.getElementById('hubFastSearchInput');
+  const doFastSearch = (query) => {
+    const q = (query || '').trim();
+    if (!q) return;
+    switchPortalView('catalog');
+    const catInput = document.getElementById('catalogSearchInput');
+    if (catInput) {
+      catInput.value = q;
+      handleCatalogSearch();
+    }
+  };
+
+  if (fastSearchForm) {
+    fastSearchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      doFastSearch(fastSearchInput?.value);
+    });
+  }
+
+  document.querySelectorAll('.hub-fast-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      doFastSearch(chip.getAttribute('data-search'));
+    });
+  });
+
+  // Tarjetas de Pulso Central
+  const centerAudit = document.getElementById('hubCenterCardAudit');
+  const centerSched = document.getElementById('hubCenterCardSchedule');
+  const centerTasks = document.getElementById('hubCenterCardTasks');
+  if (centerAudit) centerAudit.addEventListener('click', () => switchPortalView('faro'));
+  if (centerSched) centerSched.addEventListener('click', () => switchPortalView('schedules'));
+  if (centerTasks) centerTasks.addEventListener('click', () => switchPortalView('tasks'));
+
+  // Acciones Rápidas
+  const actUpload = document.getElementById('hubActionFaroUpload');
+  const actWp = document.getElementById('hubActionWhatsapp');
+  const actMail = document.getElementById('hubActionEmail');
+  if (actUpload) actUpload.addEventListener('click', () => {
+    switchPortalView('faro');
+    document.getElementById('btnOpenUploadModal')?.click();
+  });
+  if (actWp) actWp.addEventListener('click', openWhatsappModal);
+  if (actMail) actMail.addEventListener('click', openEmailModal);
+
   // Eventos de Horarios
   const btnPrevWeek = document.getElementById('btnPrevWeek');
   const btnCurrentWeek = document.getElementById('btnCurrentWeek');
@@ -4129,6 +4175,35 @@ async function loadHubSummary() {
     if (catInfo) {
       const cs = hubSummaryData.catalog_summary;
       catInfo.textContent = `${cs?.total_models || 0} modelos`;
+    }
+
+    // Actualizar Indicadores de Pulso Central
+    const cAuditCount = document.getElementById('hubCenterAuditCount');
+    const cAuditDiff = document.getElementById('hubCenterAuditDiff');
+    if (cAuditCount && hubSummaryData.latest_audit) {
+      cAuditCount.textContent = `${hubSummaryData.latest_audit.total_items} prendas`;
+      if (cAuditDiff) cAuditDiff.textContent = `${hubSummaryData.latest_audit.total_faltantes} faltantes a conciliar`;
+    }
+
+    const cSchedCount = document.getElementById('hubCenterSchedCount');
+    const cSchedSub = document.getElementById('hubCenterSchedSub');
+    if (cSchedCount) {
+      const activeToday = (hubSummaryData.today_shifts || []).filter(s => !['Libre', 'Vacaciones', 'Incapacidad'].includes(s.shift_type)).length;
+      cSchedCount.textContent = `${activeToday} Asesores`;
+      if (cSchedSub) cSchedSub.textContent = `En turno activo hoy (${hubSummaryData.today_day_name || 'Hoy'})`;
+    }
+
+    const cTasksCount = document.getElementById('hubCenterTasksCount');
+    const cTasksSub = document.getElementById('hubCenterTasksSub');
+    if (cTasksCount) {
+      const pCount = hubSummaryData.tasks_summary?.today_pending ?? 0;
+      cTasksCount.textContent = `${pCount} Pendientes`;
+      if (cTasksSub) cTasksSub.textContent = `${hubSummaryData.tasks_summary?.completed || 0} completadas en tienda`;
+    }
+
+    const schedSubHeader = document.getElementById('hubScheduleSubHeader');
+    if (schedSubHeader && hubSummaryData.today_day_name) {
+      schedSubHeader.textContent = `Turnos de hoy ${hubSummaryData.today_day_name}`;
     }
 
     // WIDGET 1: Renderizado de Lista de Tareas para Hoy

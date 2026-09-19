@@ -19,7 +19,7 @@
   
   <!-- Tailwind CSS Compilado Estático (Carga instantánea en celulares, ultrarrápido 33KB) -->
   <link rel="stylesheet" href="tailwind.min.css?v=2.8">
-  <link rel="stylesheet" href="styles.css?v=4.0">
+  <link rel="stylesheet" href="styles.css?v=4.2">
 
   <!-- Librerías Locales (100% autónomo, no depende de CDNs externos en móviles) -->
   <script src="lucide.min.js"></script>
@@ -180,27 +180,30 @@
     <!-- ======================================================================= -->
     <!-- VISTA 1: MENÚ PRINCIPAL / HUB DE OPERACIONES SEVEN SEVEN (3 COLUMNAS)   -->
     <!-- ======================================================================= -->
-    <div id="viewHub" class="flex flex-col gap-5 sm:gap-6 flex-1 pb-16 pt-1 sm:pt-2 w-full">
+    <div id="viewHub" class="flex flex-col gap-4 sm:gap-5 flex-1 pb-16 pt-1 sm:pt-2 w-full">
       
       <!-- TÍTULO PRINCIPAL CENTRADO (SEGÚN MOCKUP) -->
       <div class="text-center my-0 sm:my-1">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-sans">
           Gestión Operativa de Tienda
         </h2>
+        <p class="text-xs text-slate-500 font-medium mt-0.5">
+          Portal ejecutivo y herramientas en vivo para el equipo de tienda Seven Seven
+        </p>
       </div>
 
-      <!-- DASHBOARD EN 3 COLUMNAS: NAVEGACIÓN IZQUIERDA | CANVAS CENTRAL CON WATERMARK | WIDGETS DERECHA -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 xl:gap-6 items-start w-full">
+      <!-- DASHBOARD EN 3 COLUMNAS REALES (CSS GRID FORZADO): BOTONES IZQ | CENTRO FUNCIONAL | WIDGETS DER -->
+      <div class="hub-3col-layout w-full">
 
         <!-- =================================================================== -->
-        <!-- COLUMNA 1: MENÚ DE NAVEGACIÓN Y ACCESO A MÓDULOS (IZQUIERDA)        -->
+        <!-- COLUMNA 1 (IZQUIERDA): BOTONES DE MÓDULOS DE OPERACIÓN              -->
         <!-- =================================================================== -->
-        <div class="lg:col-span-3 flex flex-col gap-2.5 sm:gap-3 w-full">
+        <div class="hub-col-left">
           
           <!-- Botón 1: FARO Inventario -->
           <button id="cardLaunchFaro" type="button" class="hub-nav-button group text-left">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-blue-50 text-slate-700 group-hover:text-blue-600 flex flex-col items-center justify-center shrink-0 border border-slate-200 group-hover:border-blue-200 transition-colors">
+              <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex flex-col items-center justify-center shrink-0 border border-blue-100 transition-colors">
                 <i data-lucide="radio" class="w-4 h-4"></i>
                 <span class="text-[7.5px] font-black tracking-tighter leading-none mt-0.5">RFID</span>
               </div>
@@ -215,7 +218,7 @@
           <!-- Botón 2: Creador de Horarios -->
           <button id="cardLaunchSchedules" type="button" class="hub-nav-button group text-left">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-600 flex items-center justify-center shrink-0 border border-slate-200 group-hover:border-purple-200 transition-colors">
+              <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100 transition-colors">
                 <i data-lucide="calendar" class="w-4 h-4"></i>
               </div>
               <div>
@@ -229,7 +232,7 @@
           <!-- Botón 3: Tareas y Recordatorios -->
           <button id="cardLaunchTasks" type="button" class="hub-nav-button group text-left">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-emerald-50 text-slate-700 group-hover:text-emerald-600 flex items-center justify-center shrink-0 border border-slate-200 group-hover:border-emerald-200 transition-colors">
+              <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 transition-colors">
                 <i data-lucide="clipboard-check" class="w-4 h-4"></i>
               </div>
               <div>
@@ -243,7 +246,7 @@
           <!-- Botón 4: Catálogo de Referencias -->
           <button id="cardLaunchCatalog" type="button" class="hub-nav-button group text-left">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-amber-50 text-slate-700 group-hover:text-amber-600 flex items-center justify-center shrink-0 border border-slate-200 group-hover:border-amber-200 transition-colors">
+              <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100 transition-colors">
                 <i data-lucide="shirt" class="w-4 h-4"></i>
               </div>
               <div>
@@ -276,14 +279,14 @@
         </div>
 
         <!-- =================================================================== -->
-        <!-- COLUMNA 2: CANVAS CENTRAL CON PASTILLAS Y LOGO FARO V2.0 EN MARCA DE AGUA -->
+        <!-- COLUMNA 2 (CENTRO FUNCIONAL): PULSO DE TIENDA, BUSCADOR Y ACCIONES  -->
         <!-- =================================================================== -->
-        <div class="lg:col-span-5 flex flex-col justify-between items-center min-h-[380px] sm:min-h-[440px] py-1 w-full">
+        <div class="hub-col-center">
           
-          <!-- PASTILLAS SUPERIORES (TIENDA, ALERTA CONTEXTUAL, FECHA EN VIVO) -->
-          <div class="flex items-center justify-center gap-2 flex-wrap w-full">
+          <!-- Fila Superior: Pastillas de Estado Flotantes -->
+          <div class="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap w-full">
             <!-- Pastilla 1: Identificador de Tienda -->
-            <div class="px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white text-slate-800 border border-slate-200/90 shadow-2xs flex items-center gap-2 shrink-0">
+            <div class="px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white text-slate-800 border border-slate-200 shadow-2xs flex items-center gap-2 shrink-0">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Seven Seven · Tienda #32</span>
             </div>
@@ -295,52 +298,128 @@
             </div>
 
             <!-- Pastilla 3: Fecha en vivo -->
-            <div id="hubLiveDayBadge" class="px-3.5 py-1.5 rounded-full text-[11px] font-semibold bg-white text-slate-600 border border-slate-200/90 shadow-2xs shrink-0">
+            <div id="hubLiveDayBadge" class="px-3.5 py-1.5 rounded-full text-[11px] font-semibold bg-white text-slate-600 border border-slate-200 shadow-2xs shrink-0">
               Hoy: Sábado - 19/09/2026
             </div>
           </div>
 
-          <!-- MARCA DE AGUA CENTRADA Y ELEGANTE FARO V2.0 (SEGÚN MOCKUP) -->
-          <div class="flex-1 flex items-center justify-center select-none pointer-events-none py-8">
-            <div class="hub-watermark flex items-center gap-3 text-slate-400">
-              <!-- Círculo Faro -->
-              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-slate-300 flex items-center justify-center p-2.5">
-                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M6 18h12"></path>
-                  <path d="M9 18l1.5-11h3l1.5 11"></path>
-                  <path d="M10 7h4"></path>
-                  <path d="M11 4h2"></path>
-                  <path d="M12 2v2"></path>
-                  <path d="M4 10l2 1"></path>
-                  <path d="M20 10l-2 1"></path>
-                  <path d="M4 14l2-1"></path>
-                  <path d="M20 14l-2-1"></path>
-                </svg>
-              </div>
+          <!-- TARJETA FUNCIONAL 1: BUSCADOR RÁPIDO DE PRENDAS Y REFERENCIAS -->
+          <div class="hub-center-card">
+            <div class="flex items-center justify-between gap-2 mb-2">
               <div class="flex items-center gap-2">
-                <span class="text-3xl sm:text-4xl font-extrabold tracking-wider text-slate-400">FARO</span>
-                <span class="px-2 py-0.5 rounded-full border border-slate-300 text-xs font-bold text-slate-400">v2.0</span>
+                <div class="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">
+                  <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Buscador Rápido de Prenda o Referencia</h3>
               </div>
+              <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">Escribe código o descripción</span>
+            </div>
+
+            <form id="hubFastSearchForm" class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:bg-white transition-all shadow-inner">
+              <div class="flex items-center gap-2 flex-1 px-2.5">
+                <i data-lucide="barcode" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                <input type="text" id="hubFastSearchInput" placeholder="Ej. 0337095, Jean Straight, Camisa Lino..." class="bg-transparent text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none w-full placeholder:text-slate-400">
+              </div>
+              <button type="submit" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer shrink-0">
+                Buscar
+              </button>
+            </form>
+
+            <!-- Chips de acceso directo -->
+            <div class="flex items-center gap-1.5 flex-wrap pt-2 text-[11px]">
+              <span class="text-slate-400 font-medium">Búsquedas frecuentes:</span>
+              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Jean">Jean</button>
+              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Camisa">Camisa</button>
+              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Pantalón">Pantalón</button>
+              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Vestido">Vestido</button>
+              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Chaqueta">Chaqueta</button>
             </div>
           </div>
 
-          <!-- Espaciador inferior para centrado visual armónico -->
-          <div class="h-4"></div>
+          <!-- TARJETA FUNCIONAL 2: PULSO OPERATIVO DEL DÍA (3 INDICADORES EN TIEMPO REAL) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full">
+            
+            <!-- Indicador 1: FARO Inventario -->
+            <div id="hubCenterCardAudit" class="hub-stat-card group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Inventario RFID</span>
+                <i data-lucide="radio" class="w-3.5 h-3.5 text-blue-500"></i>
+              </div>
+              <div id="hubCenterAuditCount" class="text-lg font-black text-slate-900 leading-tight">271 prendas</div>
+              <div id="hubCenterAuditDiff" class="text-[11px] text-rose-600 font-bold mt-0.5">Diferencias pendientes</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-1 group-hover:text-blue-600 transition-colors">Ver auditoría →</div>
+            </div>
+
+            <!-- Indicador 2: Horarios del Día -->
+            <div id="hubCenterCardSchedule" class="hub-stat-card group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Equipo en Turno</span>
+                <i data-lucide="users" class="w-3.5 h-3.5 text-purple-500"></i>
+              </div>
+              <div id="hubCenterSchedCount" class="text-lg font-black text-slate-900 leading-tight">4 Asesores</div>
+              <div id="hubCenterSchedSub" class="text-[11px] text-emerald-600 font-bold mt-0.5">Cobertura activa hoy</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-1 group-hover:text-purple-600 transition-colors">Ver horario semanal →</div>
+            </div>
+
+            <!-- Indicador 3: Checklist Diario -->
+            <div id="hubCenterCardTasks" class="hub-stat-card group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Tareas de Hoy</span>
+                <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+              </div>
+              <div id="hubCenterTasksCount" class="text-lg font-black text-slate-900 leading-tight">3 Pendientes</div>
+              <div id="hubCenterTasksSub" class="text-[11px] text-amber-700 font-bold mt-0.5">Rutinas de operación</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-1 group-hover:text-emerald-600 transition-colors">Revisar checklist →</div>
+            </div>
+
+          </div>
+
+          <!-- TARJETA FUNCIONAL 3: ACCIONES RÁPIDAS DE TIENDA EN 1 TOQUE -->
+          <div class="hub-center-card flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+              </div>
+              <div>
+                <span class="text-xs font-bold text-slate-900 block leading-tight">Acciones Rápidas</span>
+                <span class="text-[10px] text-slate-400 font-medium block">Atajos frecuentes para la tienda</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <button id="hubActionFaroUpload" type="button" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5">
+                <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+                <span>Subir Excel FARO</span>
+              </button>
+
+              <button id="hubActionWhatsapp" type="button" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>Horario WhatsApp</span>
+              </button>
+
+              <button id="hubActionEmail" type="button" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5">
+                <i data-lucide="mail" class="w-3.5 h-3.5 text-slate-600"></i>
+                <span>Para Correo</span>
+              </button>
+            </div>
+          </div>
 
         </div>
 
         <!-- =================================================================== -->
-        <!-- COLUMNA 3: WIDGETS OPERATIVOS EN VIVO (DERECHA)                     -->
+        <!-- COLUMNA 3 (DERECHA): RECORDATORIOS Y HORARIOS DEL DÍA EN ESPECÍFICO -->
         <!-- =================================================================== -->
-        <div class="lg:col-span-4 flex flex-col gap-4 w-full">
+        <div class="hub-col-right">
 
-          <!-- WIDGET 1: NOTIFICACIONES DE TAREAS Y RECORDATORIOS -->
+          <!-- WIDGET 1: NOTIFICACIONES DE TAREAS Y RECORDATORIOS DEL DÍA -->
           <div class="hub-widget-card p-4 sm:p-5 flex flex-col justify-between">
             <!-- Cabecera del Widget -->
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 class="font-bold text-slate-900 text-xs sm:text-sm leading-tight">
-                Notificaciones de Tareas y Recordatorios
-              </h3>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-slate-900 text-xs sm:text-sm leading-tight">
+                  Recordatorios y Tareas
+                </h3>
+              </div>
               <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 shadow-2xs">
                 <i data-lucide="bell" class="w-3.5 h-3.5"></i>
               </div>
@@ -358,19 +437,22 @@
                 3 Tareas Pendientes
               </span>
               <button id="btnHubReviewTasks" type="button" class="font-bold text-slate-900 hover:text-blue-600 active:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer">
-                <span>Revisar</span>
+                <span>Revisar todas</span>
                 <span>→</span>
               </button>
             </div>
           </div>
 
-          <!-- WIDGET 2: HORARIOS DEL DÍA -->
+          <!-- WIDGET 2: HORARIOS DEL DÍA EN ESPECÍFICO -->
           <div class="hub-widget-card p-4 sm:p-5 flex flex-col">
             <!-- Cabecera del Widget -->
             <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
-              <h3 class="font-bold text-slate-900 text-xs sm:text-sm">
-                Horarios del Día
-              </h3>
+              <div>
+                <h3 class="font-bold text-slate-900 text-xs sm:text-sm">
+                  Horarios del Día (Hoy)
+                </h3>
+                <span id="hubScheduleSubHeader" class="text-[10px] text-slate-400 font-medium block">Personal en turno</span>
+              </div>
               <button id="btnHubGoToSchedules" type="button" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 active:text-blue-800 transition-colors flex items-center gap-0.5 cursor-pointer">
                 <span>Ver semana</span>
                 <span>→</span>
@@ -1696,6 +1778,6 @@
     <span id="toastMessage" class="flex-1">Mensaje</span>
   </div>
 
-  <script src="app.js?v=4.1"></script>
+  <script src="app.js?v=4.2"></script>
 </body>
 </html>
