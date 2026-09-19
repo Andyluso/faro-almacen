@@ -226,40 +226,47 @@ svg.lucide, [data-lucide] {
 /* ========================================================================= */
 /* ESTILOS DEL DASHBOARD EJECUTIVO SEVEN SEVEN (3 COLUMNAS REALES)           */
 /* ========================================================================= */
+.hub-wrapper {
+  max-width: 1240px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .hub-3col-layout {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   width: 100%;
 }
 
 @media (min-width: 1024px) {
   .hub-3col-layout {
     display: grid !important;
-    grid-template-columns: 275px minmax(0, 1fr) 340px !important;
-    gap: 1.5rem !important;
+    grid-template-columns: 280px minmax(0, 1fr) 350px !important;
+    gap: 2rem !important;
     align-items: start !important;
   }
 }
 
 @media (min-width: 1280px) {
   .hub-3col-layout {
-    grid-template-columns: 295px minmax(0, 1fr) 370px !important;
-    gap: 1.75rem !important;
+    grid-template-columns: 295px minmax(0, 1fr) 375px !important;
+    gap: 2.35rem !important;
   }
 }
 
 .hub-col-left {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.95rem;
   width: 100%;
 }
 
 .hub-col-center {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 1.35rem;
   width: 100%;
   min-width: 0;
 }
@@ -267,7 +274,7 @@ svg.lucide, [data-lucide] {
 .hub-col-right {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 1.35rem;
   width: 100%;
 }
 
@@ -275,15 +282,15 @@ svg.lucide, [data-lucide] {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 1.25rem;
-  padding: 1.25rem;
-  box-shadow: 0 3px 12px -2px rgba(15, 23, 42, 0.04);
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.04);
 }
 
 .hub-stat-card {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 0.95rem;
-  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  padding: 1rem 1.15rem;
   transition: all 0.2s ease;
   cursor: pointer;
 }
@@ -291,15 +298,15 @@ svg.lucide, [data-lucide] {
 .hub-stat-card:hover {
   background-color: #ffffff;
   border-color: #cbd5e1;
-  box-shadow: 0 6px 16px -3px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 22px -4px rgba(15, 23, 42, 0.08);
   transform: translateY(-2px);
 }
 
 .hub-nav-button {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 0.95rem;
-  padding: 0.85rem 1.1rem;
+  border-radius: 1rem;
+  padding: 0.95rem 1.2rem;
   box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
@@ -312,7 +319,7 @@ svg.lucide, [data-lucide] {
 
 .hub-nav-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 22px -4px rgba(15, 23, 42, 0.08);
   border-color: #cbd5e1;
 }
 
@@ -323,8 +330,8 @@ svg.lucide, [data-lucide] {
 .hub-nav-button-disabled {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 0.95rem;
-  padding: 0.85rem 1.1rem;
+  border-radius: 1rem;
+  padding: 0.95rem 1.2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -338,6 +345,7 @@ svg.lucide, [data-lucide] {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 1.25rem;
+  padding: 1.35rem 1.5rem;
   box-shadow: 0 4px 18px -3px rgba(15, 23, 42, 0.05);
 }
 
