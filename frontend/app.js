@@ -3887,6 +3887,12 @@ async function initHubAndRouter() {
   if (quickSchedule) quickSchedule.addEventListener('click', () => switchPortalView('schedules'));
   if (quickTasks) quickTasks.addEventListener('click', () => switchPortalView('tasks'));
 
+  const btnReviewTasks = document.getElementById('btnHubReviewTasks');
+  if (btnReviewTasks) btnReviewTasks.addEventListener('click', () => switchPortalView('tasks'));
+
+  const btnGoToSched = document.getElementById('btnHubGoToSchedules');
+  if (btnGoToSched) btnGoToSched.addEventListener('click', () => switchPortalView('schedules'));
+
   // Eventos de Horarios
   const btnPrevWeek = document.getElementById('btnPrevWeek');
   const btnCurrentWeek = document.getElementById('btnCurrentWeek');
@@ -4088,50 +4094,146 @@ async function loadHubSummary() {
       }
     }
 
-    // Info Tarjeta FARO (Pastilla: '271 prendas')
+    // Info Tarjeta FARO (Pastilla de navegación)
     const auditInfo = document.getElementById('hubCardAuditInfo');
     if (auditInfo) {
       if (hubSummaryData.latest_audit) {
         const la = hubSummaryData.latest_audit;
-        auditInfo.textContent = `${la.total_items} prendas`;
-        auditInfo.title = `Última auditoría: ${la.total_items} prendas (${la.total_faltantes} faltantes, ${la.total_sobrantes} sobrantes)`;
+        auditInfo.textContent = `${la.total_items} prendas · ${la.total_faltantes} faltantes`;
       } else {
-        auditInfo.textContent = '0 prendas';
+        auditInfo.textContent = 'Auditoría y diferencias';
       }
     }
 
-    // Info Tarjeta Horarios (Pastilla: 'Asignación Completa')
+    // Info Tarjeta Horarios (Pastilla de navegación)
     const schedInfo = document.getElementById('hubCardScheduleInfo');
     if (schedInfo) {
       const sc = hubSummaryData.schedules_summary;
       if (sc && sc.has_schedule && sc.total_hours > 0) {
-        schedInfo.textContent = 'Asignación Completa';
+        schedInfo.textContent = `${sc.total_hours} hrs · ${sc.active_employees} colaboradores`;
       } else {
-        schedInfo.textContent = `${sc?.active_employees || 0} colaboradores`;
+        schedInfo.textContent = 'Programación semanal';
       }
-      if (sc) schedInfo.title = `${sc.active_employees} colaboradores · ${sc.total_hours || 0} hrs asignadas`;
     }
 
-    // Info Tarjeta Tareas (Pastilla: '4 Pendientes Hoy')
+    // Info Tarjeta Tareas (Pastilla de navegación)
     const tasksInfo = document.getElementById('hubCardTasksInfo');
-    const quickTasksCount = document.getElementById('hubQuickTasksCount');
     if (tasksInfo) {
       const ts = hubSummaryData.tasks_summary;
       const pCount = ts?.today_pending ?? 0;
-      tasksInfo.textContent = `${pCount} Pendientes Hoy`;
-      tasksInfo.title = `${pCount} pendientes para hoy (${ts?.pending || 0} en total)`;
-    }
-    if (quickTasksCount) {
-      quickTasksCount.textContent = hubSummaryData.tasks_summary?.today_pending || 0;
+      tasksInfo.textContent = `${pCount} ${pCount === 1 ? 'pendiente hoy' : 'pendientes hoy'}`;
     }
 
-    // Info Tarjeta Catálogo (Pastilla: '277 modelos')
+    // Info Tarjeta Catálogo (Pastilla de navegación)
     const catInfo = document.getElementById('hubCardCatalogInfo');
     if (catInfo) {
       const cs = hubSummaryData.catalog_summary;
       catInfo.textContent = `${cs?.total_models || 0} modelos`;
-      catInfo.title = `${cs?.total_models || 0} modelos (${cs?.total_photos || 0} fotos HD)`;
     }
+
+    // WIDGET 1: Renderizado de Lista de Tareas para Hoy
+    const tasksListEl = document.getElementById('hubTodayTasksList');
+    const tasksCountEl = document.getElementById('hubTasksPendingCount');
+    if (tasksListEl) {
+      const tasks = hubSummaryData.today_tasks || [];
+      if (tasks.length === 0) {
+        tasksListEl.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-6 text-slate-400 gap-1.5">
+            <span class="text-sm">🎉</span>
+            <span class="text-xs font-semibold">Todas las tareas de hoy están al día</span>
+          </div>
+        `;
+      } else {
+        tasksListEl.innerHTML = tasks.map(t => {
+          let badgeClass = 'bg-slate-100 text-slate-600 border-slate-200';
+          let badgeText = 'Normal';
+          if (t.is_completed) {
+            badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            badgeText = 'Listo ✓';
+          } else if (t.priority === 'alta') {
+            badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+            badgeText = 'Revisar';
+          } else if (t.priority === 'media') {
+            badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
+            badgeText = 'Normal';
+          }
+
+          return `
+            <div class="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+              <div class="flex items-center gap-2 min-w-0 flex-1">
+                <button type="button" data-toggle-hub-task="${t.id}" class="w-4 h-4 rounded border ${t.is_completed ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-transparent hover:border-slate-400'} flex items-center justify-center text-[10px] shrink-0 transition-colors cursor-pointer" title="Marcar como realizada">
+                  ✓
+                </button>
+                <span class="text-xs ${t.is_completed ? 'line-through text-slate-400' : 'text-slate-800 font-medium'} truncate" title="${t.title}">
+                  ${t.title}
+                </span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${badgeClass}">
+                ${badgeText}
+              </span>
+            </div>
+          `;
+        }).join('');
+
+        // Event listeners para marcar o desmarcar tareas desde el widget
+        tasksListEl.querySelectorAll('[data-toggle-hub-task]').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const taskId = btn.getAttribute('data-toggle-hub-task');
+            try {
+              const res = await fetch(`/api/tasks/${taskId}/toggle`, { method: 'POST' });
+              if (res.ok) {
+                await loadHubSummary();
+              }
+            } catch (err) {
+              console.warn(err);
+            }
+          });
+        });
+      }
+    }
+
+    if (tasksCountEl) {
+      const pCount = hubSummaryData.tasks_summary?.today_pending ?? 0;
+      tasksCountEl.textContent = `${pCount} ${pCount === 1 ? 'Tarea Pendiente' : 'Tareas Pendientes'}`;
+    }
+
+    // WIDGET 2: Renderizado de Horarios del Día
+    const shiftsListEl = document.getElementById('hubTodayShiftsList');
+    if (shiftsListEl) {
+      const shifts = hubSummaryData.today_shifts || [];
+      if (shifts.length === 0) {
+        shiftsListEl.innerHTML = `
+          <div class="py-6 text-center text-slate-400 text-xs">
+            No hay turnos registrados para hoy.
+          </div>
+        `;
+      } else {
+        shiftsListEl.innerHTML = shifts.map(sh => {
+          // Formatear nombre: Ej. "Adriana Gómez" -> "A. Gómez"
+          const parts = (sh.employee_name || '').trim().split(/\s+/);
+          const shortName = parts.length > 1 ? `${parts[0][0]}. ${parts.slice(1).join(' ')}` : sh.employee_name;
+          
+          const isDescanso = ['Libre', 'Vacaciones', 'Incapacidad'].includes(sh.shift_type);
+          const timeSlot = sh.start_time || (sh.shift_type.includes('-') ? sh.shift_type.split('-')[0].trim() : '--:--');
+          const timeDisplay = isDescanso ? 'Descanso' : (sh.shift_type.includes('-') ? sh.shift_type : `${sh.start_time || ''} - ${sh.end_time || ''}`);
+
+          return `
+            <div class="py-1.5 px-1 flex items-center justify-between text-xs hover:bg-slate-50/80 transition-colors">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="font-mono text-[11px] font-bold text-slate-500 w-11 shrink-0">${timeSlot}</span>
+                <span class="font-bold text-slate-800 truncate text-xs">${shortName}</span>
+              </div>
+              <span class="font-mono text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-md border shrink-0 ${isDescanso ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200/80'}">
+                ${timeDisplay}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    initIcons();
 
   } catch (err) {
     console.warn('[Hub Summary Error]', err);

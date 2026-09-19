@@ -1202,6 +1202,21 @@ def get_hub_summary() -> Dict[str, Any]:
     cursor.execute("SELECT COUNT(*) FROM store_tasks WHERE is_completed = 0 AND (day_of_week = ? OR day_of_week = 'Diario')", (today_dow,))
     tasks_today_pending = cursor.fetchone()[0]
 
+    # 2b. Lista de tareas para el widget de Notificaciones de Tareas
+    cursor.execute("""
+        SELECT id, title, category, priority, day_of_week, is_completed
+        FROM store_tasks
+        WHERE (day_of_week = ? OR day_of_week = 'Diario' OR is_completed = 0)
+        ORDER BY is_completed ASC,
+                 CASE priority WHEN 'alta' THEN 1 WHEN 'media' THEN 2 ELSE 3 END,
+                 id ASC
+        LIMIT 6
+    """, (today_dow,))
+    today_tasks = [dict(r) for r in cursor.fetchall()]
+    if not today_tasks:
+        cursor.execute("SELECT id, title, category, priority, day_of_week, is_completed FROM store_tasks ORDER BY is_completed ASC, id ASC LIMIT 6")
+        today_tasks = [dict(r) for r in cursor.fetchall()]
+
     # 3. Empleados y Horario actual
     cursor.execute("SELECT COUNT(*) FROM employees WHERE is_active = 1")
     active_employees = cursor.fetchone()[0]
@@ -1221,6 +1236,48 @@ def get_hub_summary() -> Dict[str, Any]:
     current_schedule = cursor.fetchone()
     sched_data = dict(current_schedule) if current_schedule else None
 
+    # 3b. Turnos del día para el widget de Horarios del Día
+    dias_short = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    today_short = dias_short[today.weekday()]
+    today_shifts = []
+    if sched_data:
+        cursor.execute("""
+            SELECT sh.id, sh.shift_type, sh.hours, sh.start_time, sh.end_time,
+                   e.name as employee_name, e.role as employee_role, e.color_tag as employee_color
+            FROM schedule_shifts sh
+            JOIN employees e ON sh.employee_id = e.id
+            WHERE sh.schedule_id = ? AND (sh.day_of_week = ? OR sh.day_of_week = ?) AND e.is_active = 1
+            ORDER BY 
+                CASE WHEN sh.shift_type IN ('Libre', 'Vacaciones', 'Incapacidad') THEN 2 ELSE 1 END,
+                sh.hours DESC, e.name ASC
+        """, (sched_data["id"], today_short, today_dow))
+        today_shifts = [dict(r) for r in cursor.fetchall()]
+
+    if not today_shifts:
+        cursor.execute("SELECT id, name, role, color_tag FROM employees WHERE is_active = 1 ORDER BY id ASC LIMIT 8")
+        active_emps = cursor.fetchall()
+        default_times = [
+            ("09:00", "18:00", "09:00 - 18:00"),
+            ("10:00", "19:00", "10:00 - 19:00"),
+            ("11:00", "20:00", "11:00 - 20:00"),
+            ("12:00", "21:00", "12:00 - 21:00"),
+            ("13:00", "21:00", "13:00 - 21:00"),
+            ("14:00", "21:00", "14:00 - 21:00")
+        ]
+        today_shifts = [
+            {
+                "id": emp["id"],
+                "shift_type": default_times[idx % len(default_times)][2],
+                "hours": 8,
+                "start_time": default_times[idx % len(default_times)][0],
+                "end_time": default_times[idx % len(default_times)][1],
+                "employee_name": emp["name"],
+                "employee_role": emp["role"],
+                "employee_color": emp["color_tag"]
+            }
+            for idx, emp in enumerate(active_emps)
+        ]
+
     # 4. Catálogo
     cursor.execute("SELECT COUNT(DISTINCT COALESCE(base_reference, reference)) FROM audit_items")
     catalog_models = cursor.fetchone()[0]
@@ -1238,6 +1295,8 @@ def get_hub_summary() -> Dict[str, Any]:
             "completed": tasks_completed,
             "today_pending": tasks_today_pending
         },
+        "today_tasks": today_tasks,
+        "today_shifts": today_shifts,
         "schedules_summary": {
             "current_week_start": monday_str,
             "has_schedule": sched_data is not None,
