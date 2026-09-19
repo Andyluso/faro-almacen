@@ -4601,7 +4601,7 @@ function generateWhatsappText() {
 
   let text = `🗓️ *HORARIO SEMANAL SEVEN SEVEN*\n`;
   text += `📅 *Semana:* ${sd}/${sm} al ${ed}/${em}/${ey}\n`;
-  text += `🏪 *Tienda Seven Seven*\n`;
+  text += `🏪 *Tienda Seven Seven (Sev333)*\n`;
   text += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   employeesList.forEach(emp => {

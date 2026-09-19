@@ -226,11 +226,19 @@ svg.lucide, [data-lucide] {
 /* ========================================================================= */
 /* ESTILOS DEL DASHBOARD EJECUTIVO SEVEN SEVEN (3 COLUMNAS REALES)           */
 /* ========================================================================= */
-.hub-wrapper {
-  max-width: 1240px;
+#viewHub {
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+}
+
+@media (min-width: 1024px) {
+  #viewHub:not(.hidden) {
+    min-height: calc(100vh - 5.5rem);
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+  }
 }
 
 .hub-3col-layout {
@@ -251,8 +259,15 @@ svg.lucide, [data-lucide] {
 
 @media (min-width: 1280px) {
   .hub-3col-layout {
-    grid-template-columns: 295px minmax(0, 1fr) 375px !important;
-    gap: 2.35rem !important;
+    grid-template-columns: 300px minmax(0, 1fr) 380px !important;
+    gap: 2.5rem !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  .hub-3col-layout {
+    grid-template-columns: 320px minmax(0, 1fr) 410px !important;
+    gap: 3rem !important;
   }
 }
 
