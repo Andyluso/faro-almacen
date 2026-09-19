@@ -241,56 +241,56 @@ svg.lucide, [data-lucide] {
   }
 }
 
-/* Encabezado Hero: Título imponente en la parte superior y gran separación */
+/* Encabezado Hero: Título proporcional en la parte superior y buena separación */
 .hub-header-hero {
   text-align: center;
   width: 100%;
-  margin-top: 1rem;
-  margin-bottom: 3.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 2.5rem;
 }
 
 @media (min-width: 768px) {
   .hub-header-hero {
-    margin-top: 1.5rem;
-    margin-bottom: 4.5rem;
+    margin-top: 1.25rem;
+    margin-bottom: 3.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .hub-header-hero {
-    margin-top: 2rem;
-    margin-bottom: 5.5rem; /* ~88px separación real con el buscador */
+    margin-top: 1.5rem;
+    margin-bottom: 4.25rem; /* ~68px de separación elegante con el buscador */
   }
 }
 
 .hub-hero-title {
-  font-size: 2.5rem;
-  line-height: 1.1;
-  font-weight: 900;
+  font-size: 1.85rem;
+  line-height: 1.15;
+  font-weight: 800;
   color: #0f172a;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @media (min-width: 640px) {
   .hub-hero-title {
-    font-size: 3.25rem;
-    line-height: 1.08;
+    font-size: 2.25rem;
+    line-height: 1.12;
   }
 }
 
 @media (min-width: 1024px) {
   .hub-hero-title {
-    font-size: 4rem; /* 64px */
-    line-height: 1.05;
+    font-size: 2.75rem; /* ~44px */
+    line-height: 1.1;
   }
 }
 
 @media (min-width: 1280px) {
   .hub-hero-title {
-    font-size: 4.5rem; /* 72px */
-    line-height: 1.02;
+    font-size: 3.15rem; /* ~50px */
+    line-height: 1.08;
   }
 }
 
