@@ -19,7 +19,7 @@
   
   <!-- Tailwind CSS Compilado Estático (Carga instantánea en celulares, ultrarrápido 33KB) -->
   <link rel="stylesheet" href="tailwind.min.css?v=2.8">
-  <link rel="stylesheet" href="styles.css?v=4.5">
+  <link rel="stylesheet" href="styles.css?v=4.6">
 
   <!-- Librerías Locales (100% autónomo, no depende de CDNs externos en móviles) -->
   <script src="lucide.min.js"></script>
@@ -178,36 +178,14 @@
     <!-- ======================================================================= -->
     <div id="viewHub" class="w-full flex flex-col justify-center flex-1 my-auto">
       
-      <!-- ESQUINAS SUPERIORES: SEVEN SEVEN SEV333 (IZQ) Y FECHA EN VIVO (DER) -->
-      <div class="flex items-center justify-between gap-3 w-full mb-1 sm:mb-2">
-        <!-- Esquina Superior Izquierda: Seven Seven · Tienda Sev333 -->
-        <div class="px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider bg-white text-slate-800 border border-slate-200/90 shadow-2xs flex items-center gap-2 shrink-0">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Seven Seven · Tienda Sev333</span>
-        </div>
-
-        <!-- Esquina Superior Derecha: Fecha en Vivo -->
-        <div id="hubLiveDayBadge" class="px-4 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200/90 shadow-2xs shrink-0">
-          Hoy: Sábado - 19/09/2026
-        </div>
-      </div>
-
-      <!-- BLOQUE CENTRAL: TÍTULO MÁS GRANDE, SUBTÍTULO Y CAMPANITA EN EL CENTRO -->
-      <div class="text-center mt-2 sm:mt-3 mb-7 sm:mb-9 lg:mb-11">
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight font-sans">
+      <!-- TÍTULO PRINCIPAL EN LA PARTE SUPERIOR: GRANDE, ELEGANTE Y CON GENEROSA SEPARACIÓN -->
+      <div class="text-center pt-2 sm:pt-4 mb-8 sm:mb-12 lg:mb-16">
+        <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight font-sans">
           Gestión Operativa de Tienda
         </h2>
-        <p class="text-xs sm:text-sm lg:text-base text-slate-500 font-medium mt-2 sm:mt-2.5 max-w-2xl mx-auto">
+        <p class="text-xs sm:text-base lg:text-lg text-slate-500 font-medium mt-2.5 sm:mt-3.5 max-w-2xl mx-auto">
           Centro de control integral y herramientas diarias para el equipo de tienda Seven Seven
         </p>
-
-        <!-- Notificación de la Campanita: Centrada debajo de los textos con buena separación -->
-        <div class="flex justify-center mt-3.5 sm:mt-4">
-          <div id="hubDayAlertBanner" class="px-4 py-1.5 rounded-full text-xs font-bold bg-[#fbe7ce] text-[#8a4e12] border border-[#f8cf9c] shadow-2xs inline-flex items-center gap-2 cursor-default transition-transform hover:scale-[1.02]">
-            <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
-            <span id="hubDayAlertText">Fin de Semana de Tráfico Alto.</span>
-          </div>
-        </div>
       </div>
 
       <!-- DASHBOARD EN 3 COLUMNAS REALES (CSS GRID FORZADO): BOTONES IZQ | CENTRO FUNCIONAL | WIDGETS DER -->
@@ -1776,6 +1754,6 @@
     <span id="toastMessage" class="flex-1">Mensaje</span>
   </div>
 
-  <script src="app.js?v=4.5"></script>
+  <script src="app.js?v=4.6"></script>
 </body>
 </html>
