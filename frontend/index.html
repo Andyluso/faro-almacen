@@ -75,9 +75,9 @@
           </button>
 
           <!-- Botón Descargar Excel -->
-          <button id="btnDownloadExcel" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors touch-target sm:min-w-0" title="Descargar Excel con validaciones">
+          <button id="btnDownloadExcel" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors touch-target sm:min-w-0" title="Descargar la plantilla Excel original modificada con las observaciones para responder al correo">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-            <span class="hidden xl:inline">Exportar</span>
+            <span class="hidden xl:inline">Exportar Excel</span>
           </button>
 
           <!-- Botón Instalar App PWA (Visible cuando esté disponible para instalar) -->
@@ -942,10 +942,16 @@
           </select>
         </div>
 
-        <button id="btnCopyEmailTable" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all touch-target">
-          <i data-lucide="copy" class="w-4 h-4"></i>
-          Copiar Tabla al Portapapeles (Ctrl + V)
-        </button>
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <button id="btnDownloadModifiedExcelFromEmailModal" type="button" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black text-xs px-3.5 py-2 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all touch-target cursor-pointer" title="Descargar la plantilla Excel original modificada con las observaciones">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-300"></i>
+            <span>Descargar Excel para Adjuntar</span>
+          </button>
+          <button id="btnCopyEmailTable" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs px-3.5 py-2 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all touch-target cursor-pointer" title="Copiar tabla formateada para pegar en Outlook o Gmail">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>Copiar Tabla (Ctrl + V)</span>
+          </button>
+        </div>
       </div>
 
       <!-- Vista previa de la tabla con scroll horizontal -->

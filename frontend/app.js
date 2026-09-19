@@ -2824,6 +2824,10 @@ window.selectGenderFilter = function(val) {
   document.getElementById('btnCloseEmailModal').addEventListener('click', () => emailModal.classList.add('hidden'));
   document.getElementById('emailScopeSelector').addEventListener('change', renderEmailPreview);
   document.getElementById('btnCopyEmailTable').addEventListener('click', copyEmailTableToClipboard);
+  const btnDownloadEmailModal = document.getElementById('btnDownloadModifiedExcelFromEmailModal');
+  if (btnDownloadEmailModal) {
+    btnDownloadEmailModal.addEventListener('click', downloadValidatedExcel);
+  }
 
   // Descargar Excel
   document.getElementById('btnDownloadExcel').addEventListener('click', downloadValidatedExcel);

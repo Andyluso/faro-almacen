@@ -31,7 +31,7 @@ try:
         get_catalog_stats
     )
     from .excel_parser import parse_excel_file
-    from .excel_exporter import generate_validation_excel, generate_email_table_html
+    from .excel_exporter import generate_validation_excel, generate_email_table_html, modify_original_excel
     from .cloud_adapter import is_supabase_enabled
 except ImportError:
     from database import (
@@ -51,7 +51,7 @@ except ImportError:
         get_catalog_stats
     )
     from excel_parser import parse_excel_file
-    from excel_exporter import generate_validation_excel, generate_email_table_html
+    from excel_exporter import generate_validation_excel, generate_email_table_html, modify_original_excel
     try:
         from cloud_adapter import is_supabase_enabled
     except ImportError:
@@ -283,6 +283,22 @@ async def api_upload_audit(
         permanent_excel_path = os.path.join(EXCELS_DIR, f"audit_{audit_id}_{safe_fname}")
         shutil.copyfile(tmp_path, permanent_excel_path)
 
+        # 1.1 Sincronizar archivo original con Supabase Storage para persistencia 24/7 en la nube
+        if is_supabase_enabled():
+            try:
+                try:
+                    from .cloud_adapter import get_client, get_storage_bucket
+                except Exception:
+                    from cloud_adapter import get_client, get_storage_bucket
+                client = get_client()
+                if client:
+                    bucket = get_storage_bucket()
+                    storage_path = f"excels/audit_{audit_id}_{safe_fname}"
+                    with open(permanent_excel_path, "rb") as ef:
+                        client.storage.from_(bucket).upload(storage_path, ef.read(), file_options={"upsert": "true"})
+            except Exception as st_err:
+                print(f"[Supabase Storage] Error respaldando Excel original en la nube: {st_err}")
+
         # 2. Comparación automática histórica: calcular cuántas prendas de este nuevo archivo ya se repetían en auditorías pasadas
         conn = get_connection()
         cursor = conn.cursor()
@@ -447,18 +463,65 @@ def api_delete_reference_photo(reference: str):
 
 @app.get("/api/export/{audit_id}/excel")
 def api_export_audit_excel(audit_id: int):
-    """Genera y descarga el archivo Excel completo enriquecido con las validaciones."""
+    """
+    Descarga el archivo Excel original modificado con los hallazgos de validación,
+    dictámenes, observaciones y conteo físico en sus columnas correspondientes
+    para responder directamente al correo oficial de la central.
+    """
     audit = get_audit(audit_id)
     if not audit:
         raise HTTPException(status_code=404, detail="Auditoría no encontrada")
         
     items = get_audit_items_with_history(audit_id)
     
-    clean_name = "".join(c for c in audit["name"] if c.isalnum() or c in (" ", "-", "_")).strip()
-    out_filename = f"Revision_{clean_name}_{audit_id}.xlsx"
-    out_path = os.path.join(tempfile.gettempdir(), out_filename)
+    filename = audit.get("filename", "inventario.xlsx")
+    safe_fname = re.sub(r'[^a-zA-Z0-9_.-]', '_', filename)
+    target_path = os.path.join(EXCELS_DIR, f"audit_{audit_id}_{safe_fname}")
+    
+    # 1. Buscar en disco local
+    if not os.path.exists(target_path):
+        candidates = [f for f in os.listdir(EXCELS_DIR) if f.startswith(f"audit_{audit_id}_")]
+        if candidates:
+            target_path = os.path.join(EXCELS_DIR, candidates[0])
+            
+    # 2. Si no está en disco local (ej. reinicio de contenedor en Render), recuperar de Supabase Storage
+    if not os.path.exists(target_path) and is_supabase_enabled():
+        try:
+            try:
+                from .cloud_adapter import get_client, get_storage_bucket
+            except Exception:
+                from cloud_adapter import get_client, get_storage_bucket
+            client = get_client()
+            if client:
+                bucket = get_storage_bucket()
+                storage_path = f"excels/audit_{audit_id}_{safe_fname}"
+                content = client.storage.from_(bucket).download(storage_path)
+                if content:
+                    with open(target_path, "wb") as f:
+                        f.write(content)
+        except Exception as e:
+            print(f"[Supabase Storage] No se pudo recuperar copia del Excel en la nube: {e}")
 
-    generate_validation_excel(audit, items, out_path)
+    # Nombre de salida conservando el nombre original
+    base, ext = os.path.splitext(filename)
+    if not ext:
+        ext = ".xlsx"
+    out_filename = f"{base}_REVISADO{ext}"
+    out_path = os.path.join(tempfile.gettempdir(), f"audit_{audit_id}_{out_filename}")
+
+    # 3. Intentar modificar el archivo original exacto
+    success = False
+    if os.path.exists(target_path):
+        try:
+            success = modify_original_excel(target_path, audit, items, out_path)
+        except Exception as e:
+            print(f"[Excel Export] Error al modificar plantilla original: {e}")
+            success = False
+
+    # 4. Fallback si no había plantilla original disponible
+    if not success or not os.path.exists(out_path):
+        generate_validation_excel(audit, items, out_path)
+
     return FileResponse(
         out_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

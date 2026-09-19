@@ -1,8 +1,197 @@
 import os
-from typing import List, Dict, Any
+import re
+from datetime import datetime
+from typing import List, Dict, Any, Optional
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+
+def clean_barcode(val: Any) -> str:
+    if val is None:
+        return ""
+    s = str(val).strip()
+    if s.endswith(".0"):
+        s = s[:-2]
+    return s
+
+def clean_ref_code(val: Any) -> str:
+    if val is None:
+        return ""
+    s = str(val).strip()
+    if s.endswith(".0"):
+        s = s[:-2]
+    digits = re.sub(r'\D', '', s)
+    if len(digits) >= 11:
+        return digits[:8]
+    elif len(s) > 8 and s.isdigit():
+        return s[:8]
+    return s
+
+def modify_original_excel(
+    original_excel_path: str,
+    audit_info: Dict[str, Any],
+    items: List[Dict[str, Any]],
+    output_path: str
+) -> bool:
+    """
+    Toma el archivo Excel EXACTO que el usuario subió (respetando sus columnas,
+    diseño, encabezados, fórmulas y estructura original) y completa las columnas
+    de 'CANTIDAD FISICA ENCONTRADA', 'OBSERVACION' (dictamen y notas de validación)
+    y 'FECHA' para que pueda ser enviado por correo directamente a la central.
+    """
+    if not os.path.exists(original_excel_path):
+        return False
+
+    try:
+        wb = openpyxl.load_workbook(original_excel_path)
+        ws = wb.active
+
+        # 1. Detectar fila de encabezados
+        header_row_idx = None
+        for r in range(1, min(15, ws.max_row + 1)):
+            row_vals = [str(ws.cell(r, c).value or '').strip() for c in range(1, ws.max_column + 1)]
+            text_cells = [c.lower() for c in row_vals if c]
+            if any(k in text_cells for k in ['material', 'referencia', 'ref', 'ean', 'diferencia', 'descripcion']):
+                header_row_idx = r
+                break
+
+        if header_row_idx is None:
+            header_row_idx = 1
+
+        headers = [str(ws.cell(header_row_idx, c).value or '').strip() for c in range(1, ws.max_column + 1)]
+
+        col_obs = None
+        col_fisico = None
+        col_fecha = None
+        col_verdict = None
+        col_estado = None
+        col_ean = None
+        col_ref = None
+        col_talla = None
+        col_color = None
+
+        for idx, h in enumerate(headers, start=1):
+            hn = h.upper()
+            if any(k in hn for k in ['OBSERVACION', 'OBSERVACIONES', 'MOTIVO', 'JUSTIFICACION']):
+                col_obs = idx
+            elif any(k in hn for k in ['CANTIDAD FISICA ENCONTRADA', 'FISICO ENCONTRADO', 'CANTIDAD ENCONTRADA', 'FISICO HALLADO']):
+                col_fisico = idx
+            elif 'FECHA' in hn and 'CREACION' not in hn and 'CARGA' not in hn:
+                col_fecha = idx
+            elif any(k in hn for k in ['DICTAMEN', 'VEREDICTO']):
+                col_verdict = idx
+            elif 'ESTADO' in hn:
+                col_estado = idx
+            elif any(k in hn for k in ['EAN', 'CODIGO_BARRAS', 'COD_BARRAS', 'BARCODE']):
+                col_ean = idx
+            elif any(k in hn for k in ['MATERIAL', 'REFERENCIA', 'COD_MATERIAL', 'ITEM']):
+                col_ref = idx
+            elif any(k in hn for k in ['TALLA', 'SIZE']):
+                col_talla = idx
+            elif any(k in hn for k in ['COLOR', 'COL']):
+                col_color = idx
+
+        # Si el Excel original no traía columna de observación, agregarla al final respetando el estilo
+        if col_obs is None:
+            col_obs = ws.max_column + 1
+            cell = ws.cell(header_row_idx, col_obs, value="OBSERVACION")
+            ref_cell = ws.cell(header_row_idx, col_obs - 1)
+            cell.font = ref_cell.font.copy() if ref_cell.font else None
+            cell.fill = ref_cell.fill.copy() if ref_cell.fill else None
+            cell.alignment = ref_cell.alignment.copy() if ref_cell.alignment else None
+            cell.border = ref_cell.border.copy() if ref_cell.border else None
+
+        # 2. Indexar items de la base de datos para emparejamiento 100% exacto
+        items_by_ean = {}
+        items_by_ref_size = {}
+        for it in items:
+            b = clean_barcode(it.get("barcode"))
+            if b and b not in ("-", "0"):
+                items_by_ean[b] = it
+
+            r = clean_ref_code(it.get("reference"))
+            s = str(it.get("size") or "").strip().upper()
+            c = str(it.get("color") or "").strip().upper()
+            items_by_ref_size[(r, s, c)] = it
+            items_by_ref_size[(r, s)] = it
+
+        # Fecha a estampar
+        raw_date = audit_info.get("audit_date") or datetime.now().strftime("%Y-%m-%d")
+        if "-" in str(raw_date) and len(str(raw_date)) >= 10:
+            parts = str(raw_date)[:10].split("-")
+            date_disp = f"{parts[2]}/{parts[1]}/{parts[0]}"
+        else:
+            date_disp = str(raw_date)
+
+        # 3. Recorrer las filas del Excel original y actualizar los campos
+        for r in range(header_row_idx + 1, ws.max_row + 1):
+            idx_item = r - header_row_idx - 1
+            matched = None
+
+            row_ean = clean_barcode(ws.cell(r, col_ean).value) if col_ean else ""
+            row_ref = clean_ref_code(ws.cell(r, col_ref).value) if col_ref else ""
+            row_talla = str(ws.cell(r, col_talla).value or "").strip().upper() if col_talla else ""
+            row_color = str(ws.cell(r, col_color).value or "").strip().upper() if col_color else ""
+
+            # Prioridad 1: Coincidencia por EAN/código de barras
+            if row_ean and row_ean in items_by_ean:
+                matched = items_by_ean[row_ean]
+            # Prioridad 2: Coincidencia por Referencia + Talla + Color
+            elif (row_ref, row_talla, row_color) in items_by_ref_size:
+                matched = items_by_ref_size[(row_ref, row_talla, row_color)]
+            # Prioridad 3: Coincidencia por Referencia + Talla
+            elif (row_ref, row_talla) in items_by_ref_size:
+                matched = items_by_ref_size[(row_ref, row_talla)]
+            # Prioridad 4: Índice secuencial exacto
+            elif 0 <= idx_item < len(items):
+                matched = items[idx_item]
+
+            if not matched:
+                continue
+
+            # A. Actualizar columna de Observación / Motivo
+            verdict = str(matched.get("validation_verdict") or "").strip()
+            notes = str(matched.get("validation_notes") or "").strip()
+            if verdict and notes:
+                val_text = f"{verdict} - {notes}"
+            elif verdict:
+                val_text = verdict
+            elif notes:
+                val_text = notes
+            else:
+                val_text = ""
+
+            if val_text and col_obs:
+                ws.cell(r, col_obs, value=val_text)
+
+            # B. Actualizar columna de Cantidad Física Encontrada
+            if col_fisico:
+                phys = (matched.get("store_count") or 0) + (matched.get("warehouse_count") or 0)
+                ws.cell(r, col_fisico, value=phys)
+
+            # C. Actualizar columna de Fecha
+            if col_fecha:
+                item_date = matched.get("validated_at")
+                if item_date:
+                    try:
+                        dt = datetime.fromisoformat(str(item_date).replace("Z", "+00:00"))
+                        ws.cell(r, col_fecha, value=dt.strftime("%d/%m/%Y"))
+                    except Exception:
+                        ws.cell(r, col_fecha, value=date_disp)
+                else:
+                    ws.cell(r, col_fecha, value=date_disp)
+
+            # D. Columnas auxiliares si existieran explícitamente en la plantilla
+            if col_verdict and verdict:
+                ws.cell(r, col_verdict, value=verdict)
+            if col_estado:
+                ws.cell(r, col_estado, value=matched.get("status", "pendiente").capitalize())
+
+        wb.save(output_path)
+        return True
+    except Exception as e:
+        print(f"[modify_original_excel] Error procesando archivo original: {e}")
+        return False
 
 def generate_validation_excel(audit_info: Dict[str, Any], items: List[Dict[str, Any]], output_path: str) -> str:
     """
