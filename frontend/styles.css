@@ -478,5 +478,56 @@ svg.lucide, [data-lucide] {
   border: 1px solid rgba(203, 213, 225, 0.8);
 }
 
+/* ========================================================================= */
+/* ESTILOS DE HORARIOS SEVEN SEVEN (Sev333)                                 */
+/* ========================================================================= */
+.shift-selector {
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 0.6rem;
+  padding: 0.4rem 0.35rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #1e293b;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  outline: none;
+  max-width: 130px;
+}
 
+.shift-selector:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
+.shift-selector:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+}
+
+.shift-selector optgroup {
+  font-weight: 800;
+  color: #0f172a;
+  background-color: #f8fafc;
+  padding: 4px 2px;
+}
+
+.shift-selector option {
+  font-weight: 600;
+  color: #334155;
+  background-color: #ffffff;
+  padding: 3px 6px;
+}
+
+/* Insignias de reducción y horas */
+.badge-reduction-ok {
+  background-color: #ccfbf1;
+  color: #0f766e;
+  border: 1px solid #5eead4;
+}
+
+.badge-reduction-pending {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}

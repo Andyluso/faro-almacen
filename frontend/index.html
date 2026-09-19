@@ -19,7 +19,7 @@
   
   <!-- Tailwind CSS Compilado Estático (Carga instantánea en celulares, ultrarrápido 33KB) -->
   <link rel="stylesheet" href="tailwind.min.css?v=2.8">
-  <link rel="stylesheet" href="styles.css?v=5.0">
+  <link rel="stylesheet" href="styles.css?v=5.2">
 
   <!-- Librerías Locales (100% autónomo, no depende de CDNs externos en móviles) -->
   <script src="lucide.min.js"></script>
@@ -883,26 +883,27 @@
               Semana: Cargando...
             </h3>
             <p id="scheduleWeekSubtitle" class="text-[11px] text-slate-500 font-medium">
-              4 colaboradores activos · 47 horas semanales reglamentarias
+              4 colaboradores activos · Tienda Seven Seven (Sev333)
             </p>
           </div>
         </div>
 
-        <!-- Botones de Acción (Guardar, WhatsApp, Empleados, Imprimir) -->
+        <!-- Botones de Acción (Descargar Imagen QR, WhatsApp, Imprimir, Guardar) -->
         <div class="flex items-center gap-2 flex-wrap">
-          <button id="btnManageEmployees" type="button" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer" title="Gestionar colaboradores de la tienda">
-            <i data-lucide="users" class="w-4 h-4 text-slate-600"></i>
-            <span>Equipo</span>
+          <!-- Botón Destacado: Descargar Imagen con QR -->
+          <button id="btnDownloadScheduleImg" type="button" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 active:from-sky-700 active:to-blue-700 text-white font-black text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer" title="Descargar imagen oficial del horario con código QR integrado para compartir">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            <span>Descargar Imagen (con QR)</span>
           </button>
           
+          <button id="btnCopyWhatsapp" type="button" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer" title="Generar y copiar texto formateado para WhatsApp">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>WhatsApp</span>
+          </button>
+
           <button id="btnPrintSchedule" type="button" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer" title="Imprimir horario para el tablón de la tienda">
             <i data-lucide="printer" class="w-4 h-4 text-slate-600"></i>
             <span>Imprimir</span>
-          </button>
-
-          <button id="btnCopyWhatsapp" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer" title="Generar y copiar texto formateado para WhatsApp">
-            <i data-lucide="message-circle" class="w-4 h-4"></i>
-            <span>Copiar para WhatsApp</span>
           </button>
 
           <button id="btnSaveSchedule" type="button" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-black text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer">
@@ -913,16 +914,90 @@
 
       </div>
 
-      <!-- Barra de Ayuda y Tipos de Turnos (Leyenda Rápida) -->
-      <div class="bg-purple-50/70 border border-purple-100 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap text-xs no-print">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-bold text-purple-900 text-[11px] uppercase tracking-wider">Turnos:</span>
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-bold text-[11px]">🌅 Apertura (09:00 - 18:00 · 8h)</span>
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-bold text-[11px]">🌙 Cierre (12:00 - 21:00 · 8h)</span>
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[11px]">☀️ Intermedio (10:00 - 19:00 · 8h)</span>
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[11px]">🌴 Libre (0h)</span>
+      <!-- Barra Rápida de Gestión de Equipo (Colaboradores Sev333) -->
+      <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col gap-3 no-print">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="schedTeamCountBadge" class="text-xs sm:text-sm font-black text-slate-900">
+              Equipo Seven Seven (Sev333): 4 Colaboradores
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold hidden sm:inline">
+              Jornada 42h ordinarias + 1h extra dominical
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnToggleQuickAddEmp" type="button" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer" title="Agregar un colaborador rápidamente a la tienda">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              <span>➕ Agregar Persona</span>
+            </button>
+            <button id="btnManageEmployees" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer" title="Gestionar y editar lista completa del equipo">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-slate-600"></i>
+              <span>Gestionar Equipo</span>
+            </button>
+          </div>
         </div>
-        <span class="text-[11px] text-purple-700 font-medium">💡 Haz clic sobre cualquier celda para cambiar el turno del colaborador</span>
+
+        <!-- Formulario Rápido Inline para Agregar Colaborador en 1 Clic -->
+        <div id="quickAddEmpContainer" class="hidden bg-slate-50 p-3 rounded-xl border border-slate-200/90 animate-fade-in">
+          <form id="formQuickAddEmployee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div class="flex-1">
+              <input type="text" id="quickEmpName" required placeholder="Nombre completo del colaborador (ej. Carolina Gómez)..." class="w-full bg-white text-xs sm:text-sm font-semibold rounded-lg px-3 py-2 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            </div>
+            <select id="quickEmpRole" class="bg-white text-xs font-bold rounded-lg px-2.5 py-2 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none shrink-0">
+              <option value="Asesor Comercial" selected>Asesor Comercial</option>
+              <option value="Líder / Encargada">Líder / Encargada</option>
+              <option value="Auxiliar de Bodega">Auxiliar de Bodega</option>
+              <option value="Cajero">Cajero</option>
+            </select>
+            <select id="quickEmpColor" class="bg-white text-xs font-bold rounded-lg px-2.5 py-2 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none shrink-0">
+              <option value="blue">🔵 Color Azul</option>
+              <option value="purple">🟣 Color Púrpura</option>
+              <option value="emerald">🟢 Color Verde</option>
+              <option value="amber">🟠 Color Ámbar</option>
+              <option value="rose">🔴 Color Rosa</option>
+            </select>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-xs transition-colors cursor-pointer">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                <span>Registrar</span>
+              </button>
+              <button id="btnCancelQuickAddEmp" type="button" class="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-colors cursor-pointer">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Barra de Ayuda y Tipos de Turnos Seven Seven (Leyenda de Tienda Sev333) -->
+      <div class="bg-purple-50/70 border border-purple-100 rounded-xl p-3 flex flex-col gap-2 text-xs no-print">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <span class="font-black text-purple-950 text-[11px] uppercase tracking-wider flex items-center gap-1">
+            <span>⚡ Reglas de Horarios Seven Seven (Tienda Sev333):</span>
+          </span>
+          <span class="text-[11px] text-purple-700 font-medium">💡 Sábados son de 8h, domingos 7h+1h extra y cada asesor tiene 1 día de reducción (6h) semanal.</span>
+        </div>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 text-blue-900 font-bold text-[11px] border border-blue-200">
+            🌅 Regular (7h + 1h almuerzo)
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-100 text-teal-900 font-bold text-[11px] border border-teal-200">
+            📉 Reducción (6h + 1h almuerzo · 1 vez/sem)
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 font-bold text-[11px] border border-purple-200">
+            ⚡ Sábado (8h + 1h almuerzo)
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[11px] border border-amber-300">
+            🌟 Dom / Festivo (7h + 1h extra paga + 1h almuerzo)
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-bold text-[11px] border border-emerald-200">
+            🌴 Compensatorio (0h)
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-bold text-[11px] border border-emerald-300" title="Si descansa domingo, la siguiente semana no tiene compensatorio">
+            🏖️ Descanso Dom (0h · sin comp próx sem)
+          </span>
+        </div>
       </div>
 
       <!-- Contenedor Imprimible del Horario (Schedule Table) -->
@@ -936,8 +1011,8 @@
               <p id="printScheduleSubtitle" class="text-xs text-slate-600">Semana...</p>
             </div>
             <div class="text-right text-xs">
-              <p class="font-bold">Tienda Seven Seven</p>
-              <p>Horario legal: 47 horas / semana</p>
+              <p class="font-bold">Tienda Seven Seven (Sev333)</p>
+              <p>Jornada legal: 42 horas ordinarias / semana</p>
             </div>
           </div>
         </div>
@@ -946,15 +1021,16 @@
           <table class="w-full text-left text-xs border-collapse">
             <thead class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[10px] sm:text-[11px]">
               <tr>
-                <th class="py-3 px-3 sm:px-4 min-w-[170px] sticky left-0 bg-slate-900 z-10">Colaborador / Cargo</th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Lun <span id="colDateLun" class="text-slate-400 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Mar <span id="colDateMar" class="text-slate-400 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Mié <span id="colDateMie" class="text-slate-400 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Jue <span id="colDateJue" class="text-slate-400 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Vie <span id="colDateVie" class="text-slate-400 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px] bg-slate-800">Sáb <span id="colDateSab" class="text-slate-300 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px] bg-slate-800">Dom <span id="colDateDom" class="text-slate-300 font-normal block text-[9px]"></span></th>
-                <th class="py-3 px-3 text-center min-w-[90px] bg-purple-950 text-purple-200">Total Horas</th>
+                <th class="py-3 px-3 sm:px-4 min-w-[190px] sticky left-0 bg-slate-900 z-10">Colaborador / Cargo</th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px]">Lun <span id="colDateLun" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px]">Mar <span id="colDateMar" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px]">Mié <span id="colDateMie" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px]">Jue <span id="colDateJue" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px]">Vie <span id="colDateVie" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px] bg-slate-800">Sáb <span id="colDateSab" class="text-slate-300 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[110px] bg-slate-800">Dom <span id="colDateDom" class="text-slate-300 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 text-center min-w-[95px] bg-teal-950 text-teal-200">Reducción (6h)</th>
+                <th class="py-3 px-3 text-center min-w-[105px] bg-purple-950 text-purple-200">Total Horas</th>
               </tr>
             </thead>
             <tbody id="scheduleTableBody" class="divide-y divide-slate-200">
@@ -972,6 +1048,7 @@
                 <td id="coverageVie" class="py-2.5 px-2 text-center text-xs">0 pers</td>
                 <td id="coverageSab" class="py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50">0 pers</td>
                 <td id="coverageDom" class="py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50">0 pers</td>
+                <td id="coverageReduction" class="py-2.5 px-2 text-center text-xs font-bold text-teal-900 bg-teal-50">0/0</td>
                 <td id="coverageTotalHours" class="py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-100">0 h</td>
               </tr>
             </tfoot>
@@ -1721,6 +1798,6 @@
     <span id="toastMessage" class="flex-1">Mensaje</span>
   </div>
 
-  <script src="app.js?v=5.0"></script>
+  <script src="app.js?v=5.2"></script>
 </body>
 </html>

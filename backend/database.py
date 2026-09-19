@@ -1248,7 +1248,7 @@ def get_hub_summary() -> Dict[str, Any]:
             JOIN employees e ON sh.employee_id = e.id
             WHERE sh.schedule_id = ? AND (sh.day_of_week = ? OR sh.day_of_week = ?) AND e.is_active = 1
             ORDER BY 
-                CASE WHEN sh.shift_type IN ('Libre', 'Vacaciones', 'Incapacidad') THEN 2 ELSE 1 END,
+                CASE WHEN sh.shift_type IN ('Libre', 'Descanso Domingo', 'Vacaciones', 'Incapacidad') THEN 2 ELSE 1 END,
                 sh.hours DESC, e.name ASC
         """, (sched_data["id"], today_short, today_dow))
         today_shifts = [dict(r) for r in cursor.fetchall()]

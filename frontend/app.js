@@ -3826,14 +3826,229 @@ let tasksList = [];
 let currentTasksFilter = 'today';
 
 const STORE_SHIFT_TYPES = {
-  'Apertura': { label: 'Apertura', time: '09:00 - 18:00', hours: 8, icon: '🌅', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  'Cierre': { label: 'Cierre', time: '12:00 - 21:00', hours: 8, icon: '🌙', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  'Intermedio': { label: 'Intermedio', time: '10:00 - 19:00', hours: 8, icon: '☀️', color: 'bg-amber-50 text-amber-800 border-amber-200' },
-  'FDS / Pico': { label: 'FDS / Pico', time: '11:00 - 20:00', hours: 8, icon: '⚡', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  'Libre': { label: 'Libre', time: 'Descanso', hours: 0, icon: '🌴', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  'Vacaciones': { label: 'Vacaciones', time: 'Vacaciones', hours: 0, icon: '✈️', color: 'bg-slate-100 text-slate-700 border-slate-200' },
-  'Incapacidad': { label: 'Incapacidad', time: 'Médica', hours: 0, icon: '🏥', color: 'bg-rose-50 text-rose-700 border-rose-200' }
+  // Regulares (7h trabajo + 1h almuerzo = 8h en tienda)
+  'Regular Apertura (09-17)': {
+    label: 'Apertura (7h)',
+    time: '09:00 - 17:00',
+    hours: 7,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'regular',
+    icon: '🌅',
+    color: 'bg-blue-50 text-blue-800 border-blue-200'
+  },
+  'Regular Intermedio (11-19)': {
+    label: 'Intermedio (7h)',
+    time: '11:00 - 19:00',
+    hours: 7,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'regular',
+    icon: '☀️',
+    color: 'bg-sky-50 text-sky-800 border-sky-200'
+  },
+  'Regular Cierre (13-21)': {
+    label: 'Cierre (7h)',
+    time: '13:00 - 21:00',
+    hours: 7,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'regular',
+    icon: '🌙',
+    color: 'bg-indigo-50 text-indigo-800 border-indigo-200'
+  },
+
+  // Reducción Semanal (6h trabajo + 1h almuerzo = 7h en tienda · 1 vez/semana)
+  'Reducción Apertura (09-16)': {
+    label: 'Reducción Mañana (6h)',
+    time: '09:00 - 16:00',
+    hours: 6,
+    extra_hours: 0,
+    is_reduction: true,
+    category: 'reduction',
+    icon: '📉',
+    color: 'bg-teal-50 text-teal-800 border-teal-200'
+  },
+  'Reducción Intermedio (11-18)': {
+    label: 'Reducción Medio (6h)',
+    time: '11:00 - 18:00',
+    hours: 6,
+    extra_hours: 0,
+    is_reduction: true,
+    category: 'reduction',
+    icon: '📉',
+    color: 'bg-teal-50 text-teal-800 border-teal-200'
+  },
+  'Reducción Cierre (14-21)': {
+    label: 'Reducción Tarde (6h)',
+    time: '14:00 - 21:00',
+    hours: 6,
+    extra_hours: 0,
+    is_reduction: true,
+    category: 'reduction',
+    icon: '📉',
+    color: 'bg-teal-50 text-teal-800 border-teal-200'
+  },
+
+  // Sábados (8h trabajo + 1h almuerzo = 9h en tienda)
+  'Sábado Apertura (09-18)': {
+    label: 'Sáb Apertura (8h)',
+    time: '09:00 - 18:00',
+    hours: 8,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'saturday',
+    icon: '⚡',
+    color: 'bg-purple-50 text-purple-800 border-purple-200'
+  },
+  'Sábado Intermedio (11-20)': {
+    label: 'Sáb Intermedio (8h)',
+    time: '11:00 - 20:00',
+    hours: 8,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'saturday',
+    icon: '⚡',
+    color: 'bg-purple-50 text-purple-800 border-purple-200'
+  },
+  'Sábado Cierre (12-21)': {
+    label: 'Sáb Cierre (8h)',
+    time: '12:00 - 21:00',
+    hours: 8,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'saturday',
+    icon: '⚡',
+    color: 'bg-purple-50 text-purple-800 border-purple-200'
+  },
+
+  // Domingo y Festivos (7h trabajo ordinario + 1h extra dominical paga + 1h almuerzo = 9h en tienda, 8h computadas)
+  'Domingo Apertura (10-19)': {
+    label: 'Dom Apertura (7h+1h)',
+    time: '10:00 - 19:00',
+    hours: 7,
+    extra_hours: 1,
+    is_reduction: false,
+    category: 'sunday',
+    icon: '🌟',
+    color: 'bg-amber-50 text-amber-900 border-amber-300'
+  },
+  'Domingo Cierre (11-20)': {
+    label: 'Dom Cierre (7h+1h)',
+    time: '11:00 - 20:00',
+    hours: 7,
+    extra_hours: 1,
+    is_reduction: false,
+    category: 'sunday',
+    icon: '🌟',
+    color: 'bg-amber-50 text-amber-900 border-amber-300'
+  },
+
+  // Descansos y Novedades
+  'Libre': {
+    label: 'Compensatorio Semanal',
+    time: 'Descanso semanal',
+    hours: 0,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'rest',
+    icon: '🌴',
+    color: 'bg-emerald-50 text-emerald-800 border-emerald-200'
+  },
+  'Descanso Domingo': {
+    label: 'Descanso Domingo',
+    time: 'Descanso (sin comp próx sem)',
+    hours: 0,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'rest',
+    icon: '🏖️',
+    color: 'bg-emerald-50 text-emerald-800 border-emerald-300'
+  },
+  'Vacaciones': {
+    label: 'Vacaciones',
+    time: 'Vacaciones',
+    hours: 0,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'leave',
+    icon: '✈️',
+    color: 'bg-slate-100 text-slate-700 border-slate-200'
+  },
+  'Incapacidad': {
+    label: 'Incapacidad',
+    time: 'Médica',
+    hours: 0,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'leave',
+    icon: '🏥',
+    color: 'bg-rose-50 text-rose-700 border-rose-200'
+  }
 };
+
+function getShiftInfo(shiftType) {
+  if (STORE_SHIFT_TYPES[shiftType]) return STORE_SHIFT_TYPES[shiftType];
+  // Normalizaciones para turnos previos guardados:
+  if (shiftType === 'Apertura') return STORE_SHIFT_TYPES['Regular Apertura (09-17)'];
+  if (shiftType === 'Intermedio') return STORE_SHIFT_TYPES['Regular Intermedio (11-19)'];
+  if (shiftType === 'Cierre') return STORE_SHIFT_TYPES['Regular Cierre (13-21)'];
+  if (shiftType === 'FDS / Pico') return STORE_SHIFT_TYPES['Sábado Apertura (09-18)'];
+  if (shiftType === 'Libre') return STORE_SHIFT_TYPES['Libre'];
+  if (shiftType === 'Descanso Domingo') return STORE_SHIFT_TYPES['Descanso Domingo'];
+  if (shiftType === 'Vacaciones') return STORE_SHIFT_TYPES['Vacaciones'];
+  if (shiftType === 'Incapacidad') return STORE_SHIFT_TYPES['Incapacidad'];
+
+  return {
+    label: shiftType || 'Turno',
+    time: '',
+    hours: 7,
+    extra_hours: 0,
+    is_reduction: false,
+    category: 'regular',
+    icon: '📅',
+    color: 'bg-slate-100 text-slate-800 border-slate-200'
+  };
+}
+
+function renderShiftOptionsHtml(selectedType, dayIndex) {
+  const groups = [
+    {
+      label: '⏰ Regulares (7h + 1h alm = 8h)',
+      keys: ['Regular Apertura (09-17)', 'Regular Intermedio (11-19)', 'Regular Cierre (13-21)']
+    },
+    {
+      label: '📉 Reducción Semanal (6h + 1h alm = 7h · 1 vez/sem)',
+      keys: ['Reducción Apertura (09-16)', 'Reducción Intermedio (11-18)', 'Reducción Cierre (14-21)']
+    },
+    {
+      label: '⚡ Sábados (8h + 1h alm = 9h)',
+      keys: ['Sábado Apertura (09-18)', 'Sábado Intermedio (11-20)', 'Sábado Cierre (12-21)']
+    },
+    {
+      label: '🌟 Dom / Festivos (7h + 1h extra paga = 8h)',
+      keys: ['Domingo Apertura (10-19)', 'Domingo Cierre (11-20)']
+    },
+    {
+      label: '🌴 Descanso y Novedades',
+      keys: ['Libre', 'Descanso Domingo', 'Vacaciones', 'Incapacidad']
+    }
+  ];
+
+  return groups.map(g => `
+    <optgroup label="${g.label}">
+      ${g.keys.map(k => {
+        const s = STORE_SHIFT_TYPES[k];
+        const isSelected = (k === selectedType) ||
+          (selectedType === 'Apertura' && k === 'Regular Apertura (09-17)') ||
+          (selectedType === 'Cierre' && k === 'Regular Cierre (13-21)') ||
+          (selectedType === 'Intermedio' && k === 'Regular Intermedio (11-19)') ||
+          (selectedType === 'FDS / Pico' && k === 'Sábado Apertura (09-18)');
+        return `<option value="${k}" ${isSelected ? 'selected' : ''}>${s.icon} ${s.label} (${s.time})</option>`;
+      }).join('')}
+    </optgroup>
+  `).join('');
+}
 
 const STORE_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const STORE_DAYS_FULL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -3947,6 +4162,7 @@ async function initHubAndRouter() {
   const btnCopyWp = document.getElementById('btnCopyWhatsapp');
   const btnPrintSched = document.getElementById('btnPrintSchedule');
   const btnManageEmp = document.getElementById('btnManageEmployees');
+  const btnDownloadImg = document.getElementById('btnDownloadScheduleImg');
 
   if (btnPrevWeek) btnPrevWeek.addEventListener('click', () => {
     currentScheduleWeek = shiftMonday(currentScheduleWeek, -7);
@@ -3964,6 +4180,30 @@ async function initHubAndRouter() {
   if (btnCopyWp) btnCopyWp.addEventListener('click', openWhatsappModal);
   if (btnPrintSched) btnPrintSched.addEventListener('click', () => window.print());
   if (btnManageEmp) btnManageEmp.addEventListener('click', openEmployeeModal);
+  if (btnDownloadImg) btnDownloadImg.addEventListener('click', downloadScheduleImageWithQR);
+
+  // Gestión Rápida de Personal Inline
+  const btnToggleQuickAdd = document.getElementById('btnToggleQuickAddEmp');
+  const quickAddContainer = document.getElementById('quickAddEmpContainer');
+  const btnCancelQuickAdd = document.getElementById('btnCancelQuickAddEmp');
+  const formQuickAdd = document.getElementById('formQuickAddEmployee');
+
+  if (btnToggleQuickAdd && quickAddContainer) {
+    btnToggleQuickAdd.addEventListener('click', () => {
+      quickAddContainer.classList.toggle('hidden');
+      if (!quickAddContainer.classList.contains('hidden')) {
+        document.getElementById('quickEmpName')?.focus();
+      }
+    });
+  }
+  if (btnCancelQuickAdd && quickAddContainer) {
+    btnCancelQuickAdd.addEventListener('click', () => {
+      quickAddContainer.classList.add('hidden');
+    });
+  }
+  if (formQuickAdd) {
+    formQuickAdd.addEventListener('submit', handleQuickAddEmployee);
+  }
 
   // Modal de WhatsApp
   const btnCloseWp = document.getElementById('btnCloseWhatsappModal');
@@ -4295,7 +4535,7 @@ async function loadHubSummary() {
           const parts = (sh.employee_name || '').trim().split(/\s+/);
           const shortName = parts.length > 1 ? `${parts[0][0]}. ${parts.slice(1).join(' ')}` : sh.employee_name;
           
-          const isDescanso = ['Libre', 'Vacaciones', 'Incapacidad'].includes(sh.shift_type);
+          const isDescanso = ['Libre', 'Descanso Domingo', 'Vacaciones', 'Incapacidad'].includes(sh.shift_type);
           const timeSlot = sh.start_time || (sh.shift_type.includes('-') ? sh.shift_type.split('-')[0].trim() : '--:--');
           const timeDisplay = isDescanso ? 'Descanso' : (sh.shift_type.includes('-') ? sh.shift_type : `${sh.start_time || ''} - ${sh.end_time || ''}`);
 
@@ -4361,11 +4601,15 @@ function renderScheduleGrid() {
   const titleEl = document.getElementById('scheduleWeekTitle');
   const printSub = document.getElementById('printScheduleSubtitle');
   const subEl = document.getElementById('scheduleWeekSubtitle');
+  const teamCountBadge = document.getElementById('schedTeamCountBadge');
 
   const titleText = `Semana: Lunes ${String(sd).padStart(2,'0')}/${String(sm).padStart(2,'0')} al Domingo ${String(ed).padStart(2,'0')}/${String(em).padStart(2,'0')}/${ey}`;
   if (titleEl) titleEl.textContent = titleText;
   if (printSub) printSub.textContent = titleText;
-  if (subEl) subEl.textContent = `${employeesList.length} colaboradores activos · 47 horas reglamentarias por semana`;
+  if (subEl) subEl.textContent = `${employeesList.length} colaboradores activos · Tienda Seven Seven (Sev333)`;
+  if (teamCountBadge) {
+    teamCountBadge.textContent = `Equipo Seven Seven (Sev333): ${employeesList.length} Colaborador${employeesList.length === 1 ? '' : 'es'}`;
+  }
 
   const notesInput = document.getElementById('scheduleNotesInput');
   if (notesInput) notesInput.value = scheduleData.notes || '';
@@ -4386,26 +4630,31 @@ function renderScheduleGrid() {
   if (employeesList.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" class="p-8 text-center text-slate-400">
-          No hay colaboradores registrados en la tienda. Haz clic en <strong>Equipo</strong> para registrar al personal.
+        <td colspan="10" class="p-8 text-center text-slate-400">
+          No hay colaboradores registrados en la tienda. Haz clic en <strong>➕ Agregar Persona</strong> o en <strong>Gestionar Equipo</strong> para registrar al personal.
         </td>
       </tr>
     `;
     return;
   }
 
-  employeesList.forEach(emp => {
+  employeesList.forEach((emp, empIdx) => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-slate-50/70 transition-colors';
 
     let rowHtml = `
       <td class="py-2.5 px-3 sm:px-4 sticky left-0 bg-white z-10 border-r border-slate-100">
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full ${emp.color_tag === 'purple' ? 'bg-purple-500' : emp.color_tag === 'emerald' ? 'bg-emerald-500' : emp.color_tag === 'amber' ? 'bg-amber-500' : emp.color_tag === 'rose' ? 'bg-rose-500' : 'bg-blue-500'} shrink-0"></div>
-          <div class="min-w-0">
-            <span class="font-black text-slate-900 block truncate text-xs sm:text-sm">${emp.name}</span>
-            <span class="text-[10px] text-slate-400 font-medium block truncate">${emp.role}</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-2.5 h-2.5 rounded-full ${emp.color_tag === 'purple' ? 'bg-purple-500' : emp.color_tag === 'emerald' ? 'bg-emerald-500' : emp.color_tag === 'amber' ? 'bg-amber-500' : emp.color_tag === 'rose' ? 'bg-rose-500' : 'bg-blue-500'} shrink-0"></div>
+            <div class="min-w-0">
+              <span class="font-black text-slate-900 block truncate text-xs sm:text-sm" title="${emp.name}">${emp.name}</span>
+              <span class="text-[10px] text-slate-400 font-medium block truncate">${emp.role}</span>
+            </div>
           </div>
+          <button type="button" data-delete-emp-quick="${emp.id}" class="p-1 rounded text-slate-300 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0" title="Eliminar colaborador">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
       </td>
     `;
@@ -4413,26 +4662,42 @@ function renderScheduleGrid() {
     // Celdas de turnos (Lun .. Dom)
     STORE_DAYS.forEach((day, dIdx) => {
       const shift = (scheduleData.shifts || []).find(s => s.employee_id === emp.id && s.day_of_week === day);
-      const selectedType = shift ? shift.shift_type : (dIdx === 6 ? 'Libre' : 'Apertura');
 
+      // Default inteligente adaptado a Seven Seven:
+      let defaultType = 'Regular Apertura (09-17)';
+      if (dIdx === 5) {
+        // Sábado: 8h
+        defaultType = 'Sábado Apertura (09-18)';
+      } else if (dIdx === 6) {
+        // Domingo: compensatorio o turno dom
+        defaultType = empIdx % 2 === 0 ? 'Domingo Apertura (10-19)' : 'Libre';
+      }
+
+      const selectedType = shift ? shift.shift_type : defaultType;
       const isWeekend = dIdx >= 5;
+
       rowHtml += `
         <td class="p-1 sm:p-1.5 text-center ${isWeekend ? 'bg-slate-50/50' : ''}">
           <select data-emp-id="${emp.id}" data-day="${day}" class="shift-selector w-full bg-white text-[11px] font-bold rounded-lg px-1.5 py-1.5 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all cursor-pointer truncate">
-            ${Object.entries(STORE_SHIFT_TYPES).map(([stKey, stVal]) => `
-              <option value="${stKey}" ${stKey === selectedType ? 'selected' : ''}>
-                ${stVal.icon} ${stVal.label} (${stVal.hours}h)
-              </option>
-            `).join('')}
+            ${renderShiftOptionsHtml(selectedType, dIdx)}
           </select>
         </td>
       `;
     });
 
-    // Celda Total Horas
+    // Celda Indicador Reducción Semanal (6h)
     rowHtml += `
-      <td class="py-2.5 px-2 sm:px-3 text-center bg-slate-50/70 border-l border-slate-100">
-        <span id="empHours_${emp.id}" class="badge-pill px-2.5 py-1 rounded-full text-xs font-black">
+      <td class="py-2.5 px-1.5 text-center bg-teal-50/40 border-l border-slate-100">
+        <span id="empReduction_${emp.id}" class="badge-pill px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-300">
+          ⚠️ Pendiente
+        </span>
+      </td>
+    `;
+
+    // Celda Total Horas (Ordinarias + Extras)
+    rowHtml += `
+      <td class="py-2.5 px-2 text-center bg-slate-50/70 border-l border-slate-100">
+        <span id="empHours_${emp.id}" class="badge-pill px-2 py-1 rounded-full text-xs font-black inline-block text-center min-w-[55px]">
           0h
         </span>
       </td>
@@ -4442,13 +4707,13 @@ function renderScheduleGrid() {
     tbody.appendChild(tr);
   });
 
-  // Listeners para selects
+  // Listeners para selects de turno
   document.querySelectorAll('.shift-selector').forEach(sel => {
     sel.addEventListener('change', (e) => {
       const empId = parseInt(e.target.getAttribute('data-emp-id'), 10);
       const day = e.target.getAttribute('data-day');
       const shiftType = e.target.value;
-      const shiftInfo = STORE_SHIFT_TYPES[shiftType] || { time: '', hours: 0 };
+      const shiftInfo = getShiftInfo(shiftType);
 
       if (!scheduleData.shifts) scheduleData.shifts = [];
       const existingIdx = scheduleData.shifts.findIndex(s => s.employee_id === empId && s.day_of_week === day);
@@ -4474,39 +4739,105 @@ function renderScheduleGrid() {
     });
   });
 
+  // Listeners para eliminación rápida de colaboradores desde la tabla
+  document.querySelectorAll('[data-delete-emp-quick]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const empId = btn.getAttribute('data-delete-emp-quick');
+      const emp = employeesList.find(x => String(x.id) === String(empId));
+      const empName = emp ? emp.name : 'este colaborador';
+      if (!confirm(`¿Deseas eliminar a ${empName} de la tienda Seven Seven?`)) return;
+      try {
+        const res = await fetch(`/api/employees/${empId}`, { method: 'DELETE' });
+        if (res.ok) {
+          showToast(`${empName} eliminado del equipo`, 'info');
+          await loadEmployees();
+          renderScheduleGrid();
+          loadHubSummary();
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('No se pudo eliminar el colaborador', 'error');
+      }
+    });
+  });
+
   calculateScheduleMetrics();
+  initIcons();
 }
 
 function calculateScheduleMetrics() {
   if (!scheduleData || !employeesList.length) return;
 
   const dayCoverage = { 'Lun': 0, 'Mar': 0, 'Mié': 0, 'Jue': 0, 'Vie': 0, 'Sáb': 0, 'Dom': 0 };
-  let grandTotalHours = 0;
+  let grandTotalRegular = 0;
+  let grandTotalExtra = 0;
+  let totalWithReduction = 0;
 
   employeesList.forEach(emp => {
-    let empHours = 0;
+    let empRegHours = 0;
+    let empExtHours = 0;
+    let reductionDays = [];
+
     STORE_DAYS.forEach(day => {
       const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
       const shiftType = sel ? sel.value : 'Libre';
-      const info = STORE_SHIFT_TYPES[shiftType] || { hours: 0 };
-      empHours += info.hours;
+      const info = getShiftInfo(shiftType);
 
-      if (shiftType !== 'Libre' && shiftType !== 'Vacaciones' && shiftType !== 'Incapacidad') {
+      empRegHours += info.hours;
+      empExtHours += (info.extra_hours || 0);
+
+      if (info.is_reduction) {
+        reductionDays.push(day);
+      }
+
+      const isRest = ['Libre', 'Descanso Domingo', 'Vacaciones', 'Incapacidad'].includes(shiftType);
+      if (!isRest) {
         dayCoverage[day] = (dayCoverage[day] || 0) + 1;
       }
     });
 
-    grandTotalHours += empHours;
+    grandTotalRegular += empRegHours;
+    grandTotalExtra += empExtHours;
 
+    // Actualizar indicador de reducción de 6h semanal
+    const redPill = document.getElementById(`empReduction_${emp.id}`);
+    if (redPill) {
+      if (reductionDays.length > 0) {
+        totalWithReduction++;
+        redPill.textContent = `✓ ${reductionDays.join(', ')}`;
+        redPill.className = 'badge-pill px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800 border border-teal-300';
+        redPill.title = `Tiene programada su reducción de 6h el día: ${reductionDays.join(', ')}`;
+      } else {
+        redPill.textContent = '⚠️ Pendiente';
+        redPill.className = 'badge-pill px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-300';
+        redPill.title = 'Falta programarle su día de reducción de jornada de 6h en esta semana';
+      }
+    }
+
+    // Actualizar celda de Total Horas
     const pill = document.getElementById(`empHours_${emp.id}`);
     if (pill) {
-      pill.textContent = `${empHours}h`;
-      if (empHours >= 47 && empHours <= 48) {
-        pill.className = 'badge-pill px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
-      } else if (empHours > 48) {
-        pill.className = 'badge-pill px-2.5 py-1 rounded-full text-xs font-black bg-red-100 text-red-800 border border-red-300';
+      const computedTotal = empRegHours + empExtHours;
+      if (empExtHours > 0) {
+        pill.innerHTML = `
+          <span class="block leading-tight text-xs font-black">${computedTotal}h</span>
+          <span class="block text-[8.5px] text-amber-700 font-bold leading-none mt-0.5">${empRegHours}h + ${empExtHours}h dom</span>
+        `;
       } else {
-        pill.className = 'badge-pill px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300';
+        pill.innerHTML = `
+          <span class="block leading-tight text-xs font-black">${computedTotal}h</span>
+          <span class="block text-[8.5px] text-slate-400 font-semibold leading-none mt-0.5">ordinarias</span>
+        `;
+      }
+
+      // Estilo según total de horas regulares legales (meta Seven Seven: 42h)
+      if (empRegHours === 42) {
+        pill.className = 'badge-pill px-2 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+      } else if (empRegHours > 42) {
+        pill.className = 'badge-pill px-2 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300';
+      } else {
+        pill.className = 'badge-pill px-2 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300';
       }
     }
   });
@@ -4521,13 +4852,32 @@ function calculateScheduleMetrics() {
       if (count === 0) {
         el.className = 'py-2.5 px-2 text-center text-xs font-black text-red-600 bg-red-50';
       } else {
-        el.className = idx >= 5 ? 'py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50' : 'py-2.5 px-2 text-center text-xs';
+        el.className = idx >= 5 ? 'py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50' : 'py-2.5 px-2 text-center text-xs font-bold text-slate-700';
       }
     }
   });
 
+  // Footer: Resumen de reducciones
+  const covRed = document.getElementById('coverageReduction');
+  if (covRed) {
+    covRed.textContent = `${totalWithReduction}/${employeesList.length} al día`;
+    if (totalWithReduction === employeesList.length && employeesList.length > 0) {
+      covRed.className = 'py-2.5 px-2 text-center text-xs font-black text-teal-800 bg-teal-100/80';
+    } else {
+      covRed.className = 'py-2.5 px-2 text-center text-xs font-bold text-amber-800 bg-amber-50';
+    }
+  }
+
+  // Footer: Total horas
   const totEl = document.getElementById('coverageTotalHours');
-  if (totEl) totEl.textContent = `${grandTotalHours} h`;
+  if (totEl) {
+    const grandTotal = grandTotalRegular + grandTotalExtra;
+    if (grandTotalExtra > 0) {
+      totEl.innerHTML = `<span class="block leading-tight">${grandTotal} h</span><span class="block text-[8px] font-normal leading-none opacity-80">+${grandTotalExtra}h dom</span>`;
+    } else {
+      totEl.textContent = `${grandTotal} h`;
+    }
+  }
 }
 
 async function saveScheduleShifts() {
@@ -4546,7 +4896,7 @@ async function saveScheduleShifts() {
     STORE_DAYS.forEach(day => {
       const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
       const shiftType = sel ? sel.value : 'Libre';
-      const info = STORE_SHIFT_TYPES[shiftType] || { time: '', hours: 0 };
+      const info = getShiftInfo(shiftType);
       shiftsToSave.push({
         employee_id: emp.id,
         day_of_week: day,
@@ -4573,7 +4923,7 @@ async function saveScheduleShifts() {
 
     showToast('¡Horario semanal guardado exitosamente!', 'success');
     if (window.confetti) {
-      window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
+      window.confetti({ particleCount: 40, spread: 65, origin: { y: 0.8 } });
     }
     await loadHubSummary();
   } catch (err) {
@@ -4605,33 +4955,50 @@ function generateWhatsappText() {
   const [sy, sm, sd] = start.split('-');
   const [ey, em, ed] = end.split('-');
 
-  let text = `🗓️ *HORARIO SEMANAL SEVEN SEVEN*\n`;
+  let text = `🗓️ *PROGRAMACIÓN SEMANAL SEVEN SEVEN*\n`;
   text += `📅 *Semana:* ${sd}/${sm} al ${ed}/${em}/${ey}\n`;
   text += `🏪 *Tienda Seven Seven (Sev333)*\n`;
+  text += `⚖️ *Jornada:* 42h ordinarias + 1h extra dominical\n`;
   text += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   employeesList.forEach(emp => {
-    text += `👤 *${emp.name.toUpperCase()}* (${emp.role})\n`;
-    let empHours = 0;
+    text += `👤 *${emp.name.toUpperCase()}* · ${emp.role}\n`;
+    let empRegHours = 0;
+    let empExtHours = 0;
+    let redDay = '';
 
-    STORE_DAYS.forEach((day, idx) => {
+    STORE_DAYS.forEach((day) => {
       const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
       const shiftType = sel ? sel.value : 'Libre';
-      const info = STORE_SHIFT_TYPES[shiftType] || { hours: 0, time: shiftType, icon: '•' };
-      empHours += info.hours;
+      const info = getShiftInfo(shiftType);
+      empRegHours += info.hours;
+      empExtHours += (info.extra_hours || 0);
+
+      if (info.is_reduction) redDay = day;
 
       if (shiftType === 'Libre') {
-        text += `  • ${day}: 🌴 LIBRE\n`;
+        text += `  • ${day}: 🌴 COMPENSATORIO SEMANAL\n`;
+      } else if (shiftType === 'Descanso Domingo') {
+        text += `  • ${day}: 🏖️ DESCANSO DOMINGO (Sin compensatorio próx. semana)\n`;
       } else if (shiftType === 'Vacaciones') {
         text += `  • ${day}: ✈️ VACACIONES\n`;
       } else if (shiftType === 'Incapacidad') {
-        text += `  • ${day}: 🏥 INCAPACIDAD\n`;
+        text += `  • ${day}: 🏥 INCAPACIDAD MÉDICA\n`;
+      } else if (info.is_reduction) {
+        text += `  • ${day}: 📉 REDUCCIÓN (${info.time} · 6h)\n`;
+      } else if (info.extra_hours > 0) {
+        text += `  • ${day}: 🌟 ${info.label} (${info.time} · 7h + 1h extra)\n`;
       } else {
-        text += `  • ${day}: ${info.icon} ${shiftType} (${info.time})\n`;
+        text += `  • ${day}: ${info.icon} ${info.label} (${info.time} · ${info.hours}h)\n`;
       }
     });
 
-    text += `⏱️ *Total:* ${empHours} hrs\n\n`;
+    const totalComputed = empRegHours + empExtHours;
+    text += `⏱️ *Total:* ${totalComputed} hrs (${empRegHours}h ordinarias${empExtHours > 0 ? ` + ${empExtHours}h extra dom.` : ''})\n`;
+    if (redDay) {
+      text += `📉 *Reducción de 6h semanal:* Tomada el ${redDay}\n`;
+    }
+    text += `\n`;
   });
 
   const notes = document.getElementById('scheduleNotesInput')?.value?.trim();
@@ -4640,29 +5007,50 @@ function generateWhatsappText() {
   }
 
   text += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  text += `✨ *¡Excelente semana de ventas equipo Seven Seven!* ✨`;
+  text += `✨ *¡Excelente semana de cumplimiento y ventas Seven Seven!* ✨`;
   return text;
 }
 
-async function doCopyWhatsappText() {
-  const textarea = document.getElementById('whatsappTextarea');
-  if (!textarea) return;
+// ----------------------------------------------------------------------------
+// GESTION RAPIDA Y MODAL DE COLABORADORES
+// ----------------------------------------------------------------------------
+async function handleQuickAddEmployee(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('quickEmpName');
+  const roleSelect = document.getElementById('quickEmpRole');
+  const colorSelect = document.getElementById('quickEmpColor');
+
+  const name = nameInput ? nameInput.value.trim() : '';
+  const role = roleSelect ? roleSelect.value : 'Asesor Comercial';
+  const color = colorSelect ? colorSelect.value : 'blue';
+
+  if (!name) return;
+
   try {
-    await navigator.clipboard.writeText(textarea.value);
-    showToast('¡Texto copiado para WhatsApp! Pégalo en tu grupo.', 'success');
-    if (window.confetti) {
-      window.confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+    const res = await fetch('/api/employees', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, role, color_tag: color })
+    });
+    if (res.ok) {
+      if (nameInput) nameInput.value = '';
+      document.getElementById('quickAddEmpContainer')?.classList.add('hidden');
+      showToast(`¡Colaborador ${name} registrado en la tienda!`, 'success');
+      if (window.confetti) {
+        window.confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 } });
+      }
+      await loadEmployees();
+      renderScheduleGrid();
+      await loadHubSummary();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Error al registrar colaborador', 'error');
     }
   } catch (err) {
-    textarea.select();
-    document.execCommand('copy');
-    showToast('¡Texto copiado!', 'success');
+    showToast('Error de conexión al agregar colaborador', 'error');
   }
 }
 
-// ----------------------------------------------------------------------------
-// GESTION DE COLABORADORES
-// ----------------------------------------------------------------------------
 function openEmployeeModal() {
   const modal = document.getElementById('employeeModal');
   if (modal) modal.classList.remove('hidden');
@@ -4676,7 +5064,7 @@ function renderEmployeesList() {
   cont.innerHTML = '';
 
   if (employeesList.length === 0) {
-    cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No hay colaboradores registrados.</p>`;
+    cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No hay colaboradores registrados en la tienda.</p>`;
     return;
   }
 
@@ -4701,7 +5089,9 @@ function renderEmployeesList() {
   cont.querySelectorAll('[data-delete-emp]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const empId = btn.getAttribute('data-delete-emp');
-      if (!confirm('¿Eliminar a este colaborador de la tienda?')) return;
+      const emp = employeesList.find(x => String(x.id) === String(empId));
+      const empName = emp ? emp.name : 'este colaborador';
+      if (!confirm(`¿Eliminar a ${empName} de la tienda Seven Seven?`)) return;
       try {
         const res = await fetch(`/api/employees/${empId}`, { method: 'DELETE' });
         if (res.ok) {
@@ -4713,6 +5103,7 @@ function renderEmployeesList() {
         }
       } catch (err) {
         console.error(err);
+        showToast('Error al eliminar colaborador', 'error');
       }
     });
   });
@@ -4740,7 +5131,7 @@ async function handleAddEmployee(e) {
     });
     if (res.ok) {
       nameInput.value = '';
-      showToast('Colaborador agregado correctamente', 'success');
+      showToast('Colaborador registrado correctamente', 'success');
       await loadEmployees();
       renderEmployeesList();
       renderScheduleGrid();
@@ -4748,6 +5139,512 @@ async function handleAddEmployee(e) {
     }
   } catch (err) {
     showToast('Error al agregar colaborador', 'error');
+  }
+}
+
+// ----------------------------------------------------------------------------
+// EXPORTACION DE HORARIO EN IMAGEN DE ALTA DEFINICION CON CODIGO QR INTEGRADO
+// ----------------------------------------------------------------------------
+async function downloadScheduleImageWithQR() {
+  if (!scheduleData || employeesList.length === 0) {
+    showToast('No hay datos ni colaboradores para generar la imagen', 'warning');
+    return;
+  }
+
+  const btnDownload = document.getElementById('btnDownloadScheduleImg');
+  const originalHtml = btnDownload ? btnDownload.innerHTML : '';
+  if (btnDownload) {
+    btnDownload.disabled = true;
+    btnDownload.innerHTML = `<span class="animate-spin mr-1.5">⌛</span><span>Generando Imagen con QR...</span>`;
+  }
+
+  try {
+    // 1. Generar código QR para la URL activa del horario
+    const targetUrl = window.location.origin + window.location.pathname + '#horarios';
+    const tempQrDiv = document.createElement('div');
+    tempQrDiv.style.position = 'fixed';
+    tempQrDiv.style.left = '-9999px';
+    tempQrDiv.style.top = '-9999px';
+    document.body.appendChild(tempQrDiv);
+
+    if (window.QRCode) {
+      new QRCode(tempQrDiv, {
+        text: targetUrl,
+        width: 150,
+        height: 150,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // Esperar a que el motor QR termine de pintar el canvas/imagen
+    await new Promise(r => setTimeout(r, 100));
+    const qrElement = tempQrDiv.querySelector('canvas') || tempQrDiv.querySelector('img');
+
+    // 2. Calcular dimensiones del Canvas
+    const canvasWidth = 1920;
+    const notesText = document.getElementById('scheduleNotesInput')?.value?.trim() || scheduleData.notes || '';
+    const hasNotes = !!notesText;
+
+    const headerHeight = 170;
+    const tableHeaderHeight = 52;
+    const rowHeight = 76;
+    const tableRowsHeight = employeesList.length * rowHeight;
+    const coverageHeight = 52;
+    const notesHeight = hasNotes ? 65 : 0;
+    const legendAndQrHeight = 220;
+    const bottomPadding = 40;
+
+    const totalHeight = headerHeight + tableHeaderHeight + tableRowsHeight + coverageHeight + notesHeight + legendAndQrHeight + bottomPadding;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasWidth;
+    canvas.height = totalHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Función auxiliar para esquinas redondeadas
+    const drawRoundRect = (x, y, w, h, r, fill = true, stroke = false) => {
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, w, h, r);
+      } else {
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+      }
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    };
+
+    // Fondo General
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(0, 0, canvasWidth, totalHeight);
+
+    // Tarjeta Contenedora Principal Blanca
+    const cardX = 30;
+    const cardY = 25;
+    const cardW = canvasWidth - 60;
+    const cardH = totalHeight - 50;
+
+    ctx.fillStyle = '#ffffff';
+    drawRoundRect(cardX, cardY, cardW, cardH, 20, true, false);
+
+    // =========================================================================
+    // ENCABEZADO PRINCIPAL (NAVY SEVEN SEVEN)
+    // =========================================================================
+    ctx.save();
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(cardX, cardY, cardW, headerHeight, [20, 20, 0, 0]);
+    } else {
+      ctx.rect(cardX, cardY, cardW, headerHeight);
+    }
+    ctx.clip();
+
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(cardX, cardY, cardW, headerHeight);
+
+    // Logo / Nombre SEVEN SEVEN
+    ctx.fillStyle = '#ffffff';
+    ctx.font = "900 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('SEVEN SEVEN', cardX + 35, cardY + 60);
+
+    // Badge Tienda Sev333
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('TIENDA SEV333 · FARO OPERATIVO', cardX + 295, cardY + 58);
+
+    // Subtítulo
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('PROGRAMACIÓN SEMANAL DE HORARIOS Y TURNOS DE TIENDA', cardX + 35, cardY + 100);
+
+    // Rango de fechas
+    const startParts = scheduleData.week_start_date.split('-');
+    const endParts = scheduleData.week_end_date.split('-');
+    const dateRangeStr = `Semana: Lunes ${startParts[2]}/${startParts[1]} al Domingo ${endParts[2]}/${endParts[1]}/${endParts[0]}`;
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText(dateRangeStr, cardX + 35, cardY + 135);
+
+    // Badges en esquina derecha del Header
+    ctx.fillStyle = '#818cf8';
+    ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.textAlign = 'right';
+    ctx.fillText('JORNADA LEGAL: 42H ORDINARIAS + 1H EXTRA DOMINICAL', cardX + cardW - 35, cardY + 60);
+
+    ctx.fillStyle = '#34d399';
+    ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText(`👥 ${employeesList.length} COLABORADORES ACTIVOS`, cardX + cardW - 35, cardY + 98);
+
+    ctx.restore();
+
+    // =========================================================================
+    // ENCABEZADOS DE LA TABLA (THEAD)
+    // =========================================================================
+    const tableY = cardY + headerHeight;
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(cardX, tableY, cardW, tableHeaderHeight);
+
+    // Columnas calculadas
+    const colNameX = cardX + 15;
+    const colNameW = 320;
+
+    const dayColW = 160;
+    const dayStartX = cardX + colNameW + 15;
+
+    const colRedW = 160;
+    const colRedX = dayStartX + (7 * dayColW);
+
+    const colHoursW = 160;
+    const colHoursX = colRedX + colRedW;
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('COLABORADOR / CARGO', colNameX + 15, tableY + 32);
+
+    const [sy2, sm2, sd2] = scheduleData.week_start_date.split('-').map(Number);
+    STORE_DAYS.forEach((day, dIdx) => {
+      const curD = new Date(sy2, sm2 - 1, sd2 + dIdx);
+      const dStr = `${String(curD.getDate()).padStart(2, '0')}/${String(curD.getMonth() + 1).padStart(2, '0')}`;
+      const dx = dayStartX + (dIdx * dayColW);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = dIdx >= 5 ? '#a5b4fc' : '#ffffff';
+      ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(day.toUpperCase(), dx + (dayColW / 2), tableY + 23);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = "normal 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(dStr, dx + (dayColW / 2), tableY + 41);
+    });
+
+    // Columna Reducción
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#5eead4';
+    ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('REDUCCIÓN (6H)', colRedX + (colRedW / 2), tableY + 32);
+
+    // Columna Total Horas
+    ctx.fillStyle = '#c084fc';
+    ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('TOTAL HORAS', colHoursX + (colHoursW / 2), tableY + 32);
+
+    // =========================================================================
+    // FILAS DE COLABORADORES
+    // =========================================================================
+    const dayCoverageCount = { 'Lun': 0, 'Mar': 0, 'Mié': 0, 'Jue': 0, 'Vie': 0, 'Sáb': 0, 'Dom': 0 };
+    let grandReg = 0;
+    let grandExt = 0;
+    let totalRedCount = 0;
+
+    employeesList.forEach((emp, rIdx) => {
+      const rowY = tableY + tableHeaderHeight + (rIdx * rowHeight);
+
+      // Fondo alterno
+      ctx.fillStyle = rIdx % 2 === 0 ? '#ffffff' : '#f8fafc';
+      ctx.fillRect(cardX, rowY, cardW, rowHeight);
+
+      // Línea divisoria
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cardX, rowY + rowHeight);
+      ctx.lineTo(cardX + cardW, rowY + rowHeight);
+      ctx.stroke();
+
+      // Colaborador y Cargo
+      const dotColor = emp.color_tag === 'purple' ? '#a855f7' : emp.color_tag === 'emerald' ? '#10b981' : emp.color_tag === 'amber' ? '#f59e0b' : emp.color_tag === 'rose' ? '#f43f5e' : '#3b82f6';
+      ctx.fillStyle = dotColor;
+      ctx.beginPath();
+      ctx.arc(colNameX + 15, rowY + 38, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0f172a';
+      ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(emp.name, colNameX + 32, rowY + 32);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(emp.role, colNameX + 32, rowY + 52);
+
+      // Turnos de cada día
+      let empReg = 0;
+      let empExt = 0;
+      let redDays = [];
+
+      STORE_DAYS.forEach((day, dIdx) => {
+        const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
+        const shiftType = sel ? sel.value : 'Libre';
+        const info = getShiftInfo(shiftType);
+
+        empReg += info.hours;
+        empExt += (info.extra_hours || 0);
+        if (info.is_reduction) redDays.push(day);
+
+        const isRest = ['Libre', 'Descanso Domingo', 'Vacaciones', 'Incapacidad'].includes(shiftType);
+        if (!isRest) dayCoverageCount[day] = (dayCoverageCount[day] || 0) + 1;
+
+        const cellX = dayStartX + (dIdx * dayColW) + 5;
+        const cellY = rowY + 8;
+        const cellW = dayColW - 10;
+        const cellH = rowHeight - 16;
+
+        // Tarjeta de turno estilizada según categoría
+        let boxBg = '#eff6ff';
+        let boxBorder = '#bfdbfe';
+        let textColor = '#1e40af';
+        let labelText = info.label;
+
+        if (info.is_reduction) {
+          boxBg = '#f0fdfa';
+          boxBorder = '#99f6e4';
+          textColor = '#115e59';
+          labelText = 'Reducción (6h)';
+        } else if (info.category === 'saturday') {
+          boxBg = '#faf5ff';
+          boxBorder = '#e9d5ff';
+          textColor = '#6b21a8';
+        } else if (info.category === 'sunday' || info.extra_hours > 0) {
+          boxBg = '#fffbeb';
+          boxBorder = '#fde68a';
+          textColor = '#78350f';
+          labelText = 'Dom (7h+1h)';
+        } else if (shiftType === 'Libre') {
+          boxBg = '#f0fdf4';
+          boxBorder = '#bbf7d0';
+          textColor = '#166534';
+          labelText = 'Compensatorio';
+        } else if (shiftType === 'Descanso Domingo') {
+          boxBg = '#ecfdf5';
+          boxBorder = '#a7f3d0';
+          textColor = '#065f46';
+          labelText = 'Descanso Dom';
+        } else if (info.category === 'leave') {
+          boxBg = '#f1f5f9';
+          boxBorder = '#e2e8f0';
+          textColor = '#475569';
+        }
+
+        ctx.fillStyle = boxBg;
+        ctx.strokeStyle = boxBorder;
+        drawRoundRect(cellX, cellY, cellW, cellH, 8, true, true);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = textColor;
+        ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillText(labelText, cellX + (cellW / 2), cellY + 22);
+
+        ctx.fillStyle = '#475569';
+        ctx.font = "normal 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        const timeText = isRest ? (shiftType === 'Descanso Domingo' ? 'Sin comp próx sem' : 'Descanso') : (info.time || `${info.hours}h`);
+        ctx.fillText(timeText, cellX + (cellW / 2), cellY + 41);
+      });
+
+      grandReg += empReg;
+      grandExt += empExt;
+
+      // Columna Reducción Semanal
+      const redX = colRedX + 15;
+      const redY = rowY + 22;
+      const redW = colRedW - 30;
+      const redH = 32;
+
+      ctx.textAlign = 'center';
+      if (redDays.length > 0) {
+        totalRedCount++;
+        ctx.fillStyle = '#ccfbf1';
+        ctx.strokeStyle = '#5eead4';
+        drawRoundRect(redX, redY, redW, redH, 16, true, true);
+
+        ctx.fillStyle = '#115e59';
+        ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillText(`✓ ${redDays.join(', ')}`, redX + (redW / 2), redY + 20);
+      } else {
+        ctx.fillStyle = '#fef3c7';
+        ctx.strokeStyle = '#fcd34d';
+        drawRoundRect(redX, redY, redW, redH, 16, true, true);
+
+        ctx.fillStyle = '#92400e';
+        ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillText('⚠️ Pendiente', redX + (redW / 2), redY + 20);
+      }
+
+      // Columna Total Horas
+      const hX = colHoursX + 15;
+      const hY = rowY + 16;
+      const hW = colHoursW - 30;
+      const hH = 44;
+
+      const totalH = empReg + empExt;
+      const isOkHours = empReg === 42;
+      ctx.fillStyle = isOkHours ? '#dcfce7' : (empReg > 42 ? '#ffe4e6' : '#fef3c7');
+      ctx.strokeStyle = isOkHours ? '#86efac' : (empReg > 42 ? '#fca5a5' : '#fde68a');
+      drawRoundRect(hX, hY, hW, hH, 14, true, true);
+
+      ctx.fillStyle = isOkHours ? '#166534' : (empReg > 42 ? '#9f1239' : '#92400e');
+      ctx.font = "900 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(`${totalH}h`, hX + (hW / 2), hY + 23);
+
+      ctx.font = "bold 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      const hSubText = empExt > 0 ? `${empReg}h + ${empExt}h dom` : 'ordinarias';
+      ctx.fillText(hSubText, hX + (hW / 2), hY + 37);
+    });
+
+    // =========================================================================
+    // FILA DE COBERTURA DE TIENDA (FOOTER TABLA)
+    // =========================================================================
+    const covY = tableY + tableHeaderHeight + tableRowsHeight;
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(cardX, covY, cardW, coverageHeight);
+
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cardX, covY);
+    ctx.lineTo(cardX + cardW, covY);
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#475569';
+    ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('👥 COBERTURA TIENDA:', colNameX + 15, covY + 32);
+
+    STORE_DAYS.forEach((day, dIdx) => {
+      const count = dayCoverageCount[day] || 0;
+      const dx = dayStartX + (dIdx * dayColW);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = count === 0 ? '#ef4444' : (dIdx >= 5 ? '#6b21a8' : '#1e293b');
+      ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(`${count} pers`, dx + (dayColW / 2), covY + 32);
+    });
+
+    // Cobertura Reducción
+    ctx.textAlign = 'center';
+    ctx.fillStyle = totalRedCount === employeesList.length ? '#0f766e' : '#92400e';
+    ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText(`${totalRedCount}/${employeesList.length} al día`, colRedX + (colRedW / 2), covY + 32);
+
+    // Total General Horas
+    const grandTot = grandReg + grandExt;
+    ctx.fillStyle = '#581c87';
+    ctx.font = "900 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText(`${grandTot} h`, colHoursX + (colHoursW / 2), covY + 32);
+
+    // =========================================================================
+    // AVISOS / NOTAS DE LA SEMANA (SI EXISTEN)
+    // =========================================================================
+    let currentBottomY = covY + coverageHeight;
+    if (hasNotes) {
+      const noteBoxY = currentBottomY + 12;
+      ctx.fillStyle = '#fffbeb';
+      ctx.strokeStyle = '#fde68a';
+      drawRoundRect(cardX + 20, noteBoxY, cardW - 40, notesHeight - 15, 12, true, true);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#92400e';
+      ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText(`📝 Avisos de la semana: "${notesText}"`, cardX + 35, noteBoxY + 32);
+      currentBottomY += notesHeight;
+    }
+
+    // =========================================================================
+    // PIE DE AFICHE: REGLAS SEVEN SEVEN Y CÓDIGO QR INTEGRADO
+    // =========================================================================
+    const bottomY = currentBottomY + 18;
+    const rulesW = cardW - 320;
+
+    // Caja de Reglas Laborales
+    ctx.fillStyle = '#f8fafc';
+    ctx.strokeStyle = '#e2e8f0';
+    drawRoundRect(cardX + 20, bottomY, rulesW, 175, 16, true, true);
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = "900 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('⚡ REGLAS DE HORARIOS SEVEN SEVEN (TIENDA SEV333):', cardX + 40, bottomY + 32);
+
+    ctx.fillStyle = '#334155';
+    ctx.font = "normal 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    const rulesBullets = [
+      '• Regular: 7h trabajo + 1h almuerzo (8h en tienda, 7h computadas)',
+      '• Reducción Semanal: 6h trabajo + 1h almuerzo (1 día a la semana por cada colaborador)',
+      '• Sábados: 8h trabajo + 1h almuerzo (9h en tienda, 8h computadas)',
+      '• Domingos y Festivos: 7h ordinarias + 1h extra paga + 1h almuerzo (8h pagas en total)',
+      '• Descansos: 1 día compensatorio a la semana. Si descansa domingo, la semana siguiente no tiene compensatorio.'
+    ];
+
+    rulesBullets.forEach((bullet, bIdx) => {
+      ctx.fillText(bullet, cardX + 40, bottomY + 58 + (bIdx * 22));
+    });
+
+    // Tarjeta del Código QR Integrado
+    const qrCardX = cardX + rulesW + 40;
+    const qrCardW = 240;
+    const qrCardH = 175;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#cbd5e1';
+    drawRoundRect(qrCardX, bottomY, qrCardW, qrCardH, 16, true, true);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = "900 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('📱 ESCANEA PARA VER', qrCardX + (qrCardW / 2), bottomY + 22);
+
+    // Dibujar Código QR
+    if (qrElement) {
+      const qrDrawSize = 108;
+      const qrDrawX = qrCardX + (qrCardW - qrDrawSize) / 2;
+      const qrDrawY = bottomY + 28;
+      ctx.drawImage(qrElement, qrDrawX, qrDrawY, qrDrawSize, qrDrawSize);
+    }
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = "bold 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText('Horario en Vivo · Sev333', qrCardX + (qrCardW / 2), bottomY + 158);
+
+    // Limpiar elemento temporal QR
+    tempQrDiv.remove();
+
+    // 3. Exportar Canvas a Blob PNG y descargar
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        showToast('Error al compilar la imagen del horario', 'error');
+        return;
+      }
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      const fileNameDate = scheduleData.week_start_date || 'act';
+      a.download = `Horario_Seven_Seven_Sev333_Semana_${fileNameDate}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+
+      showToast('📸 ¡Horario descargado en imagen con código QR!', 'success');
+      if (window.confetti) {
+        window.confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+      }
+    }, 'image/png');
+
+  } catch (err) {
+    console.error('Error al descargar imagen del horario:', err);
+    showToast('No se pudo generar la imagen del horario', 'error');
+  } finally {
+    if (btnDownload) {
+      btnDownload.disabled = false;
+      btnDownload.innerHTML = originalHtml || `<i data-lucide="camera" class="w-4 h-4"></i><span>Descargar Imagen (con QR)</span>`;
+      initIcons();
+    }
   }
 }
 
