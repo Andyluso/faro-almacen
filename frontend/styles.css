@@ -163,15 +163,6 @@ svg.lucide, [data-lucide] {
   user-select: none;
 }
 
-/* Dictámenes y botones de acción con texto centrado y márgenes de confort */
-.verdict-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  user-select: none;
-}
-
 /* Centrado exacto de pastillas, badges e insignias numéricas */
 .badge-pill {
   display: inline-flex;
@@ -181,3 +172,53 @@ svg.lucide, [data-lucide] {
   text-align: center;
 }
 
+/* Turnos de Horario: Selector rápido e interacción */
+.shift-select-cell {
+  transition: all 0.15s ease;
+}
+.shift-select-cell:hover {
+  background-color: #f8fafc;
+}
+
+/* Estilos de Impresión Limpia (Para el tablón de la tienda) */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  header, #btnBackToHub, #offlineBanner, .no-print, #toast, #detailModal, #historyModal, #employeeModal, #whatsappModal {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  #viewHub, #viewFaro, #viewTasks {
+    display: none !important;
+  }
+  #viewSchedules {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .schedule-table-container {
+    box-shadow: none !important;
+    border: 1px solid #94a3b8 !important;
+    border-radius: 0 !important;
+  }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  th, td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 6px !important;
+  }
+  thead {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

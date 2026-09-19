@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import re
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import List, Dict, Any, Optional
 
 try:
@@ -171,34 +171,103 @@ def init_db():
     )
     """)
 
-    # Sincronización automática de fotos existentes para que sean universales por modelo y nombre
-    cursor.execute("SELECT reference, photo_url FROM catalog_photos")
-    existing_photos = cursor.fetchall()
-    for p in existing_photos:
-        ref = p["reference"]
-        p_url = p["photo_url"]
-        b_ref = extract_base_reference(ref)
-        if b_ref and b_ref != ref:
+    # Tabla de empleados / colaboradores de la tienda
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS employees (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        role TEXT DEFAULT 'Asesor Comercial',
+        phone TEXT DEFAULT '',
+        color_tag TEXT DEFAULT 'blue',
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Tabla de programaciones semanales de horarios
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS schedules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        week_start_date TEXT NOT NULL UNIQUE,
+        week_end_date TEXT NOT NULL,
+        title TEXT DEFAULT '',
+        notes TEXT DEFAULT '',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Tabla de turnos asignados en la programación
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS schedule_shifts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        schedule_id INTEGER NOT NULL,
+        employee_id INTEGER NOT NULL,
+        day_of_week TEXT NOT NULL,
+        shift_type TEXT NOT NULL,
+        start_time TEXT DEFAULT '',
+        end_time TEXT DEFAULT '',
+        hours REAL DEFAULT 0,
+        notes TEXT DEFAULT '',
+        FOREIGN KEY (schedule_id) REFERENCES schedules (id) ON DELETE CASCADE,
+        FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE CASCADE
+    )
+    """)
+
+    # Tabla de tareas y recordatorios operativos de la tienda
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS store_tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        category TEXT DEFAULT 'General',
+        day_of_week TEXT DEFAULT '',
+        due_date TEXT DEFAULT '',
+        due_time TEXT DEFAULT '',
+        priority TEXT DEFAULT 'Media',
+        is_completed INTEGER DEFAULT 0,
+        assigned_to TEXT DEFAULT '',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Sembrar colaboradores por defecto si la tabla está vacía
+    cursor.execute("SELECT COUNT(*) FROM employees")
+    if cursor.fetchone()[0] == 0:
+        default_team = [
+            ("Encargada de Tienda", "Líder / Encargada", "purple"),
+            ("Asesor Comercial 1", "Asesor Comercial", "blue"),
+            ("Asesor Comercial 2", "Asesor Comercial", "emerald"),
+            ("Asesor Bodega", "Auxiliar de Bodega", "amber")
+        ]
+        for name, role, color in default_team:
+            cursor.execute("INSERT INTO employees (name, role, color_tag) VALUES (?, ?, ?)", (name, role, color))
+
+    # Sembrar rutinas y recordatorios de tienda por defecto si está vacía
+    cursor.execute("SELECT COUNT(*) FROM store_tasks")
+    if cursor.fetchone()[0] == 0:
+        default_tasks = [
+            ("Toma y subida de inventario de diferencias (FARO)", "Realizar conteo físico con pistola RFID y subir archivo Excel", "Inventario", "Lunes", "Alta"),
+            ("Revisión de alarmas y sensores RFID en prendas", "Verificar que las prendas en piso tengan sensor activo", "Seguridad", "Lunes", "Media"),
+            ("Segunda lectura semanal de inventario (FARO)", "Verificar trocadas y resolver prendas pendientes", "Inventario", "Miércoles", "Alta"),
+            ("Envío de informe de diferencias a coordinación", "Descargar Excel modificado de FARO y remitir por correo", "Inventario", "Miércoles", "Alta"),
+            ("Rutina de Apertura: Luces, música, sistema y caja", "Encender tienda y verificar fondos de apertura", "Operación", "Diario", "Alta"),
+            ("Reposición de tallas faltantes en piso de venta", "Chequear prendas agotadas en percheros y surtir desde bodega", "Piso de Venta", "Diario", "Media"),
+            ("Rutina de Cierre: Arqueo de caja y entrega de valores", "Cuadre final de datáfonos, efectivo y cierre de persiana", "Operación", "Diario", "Alta")
+        ]
+        for title, desc, cat, dow, prio in default_tasks:
             cursor.execute("""
-            INSERT INTO catalog_photos (reference, photo_url, updated_at)
-            VALUES (?, ?, CURRENT_TIMESTAMP)
-            ON CONFLICT(reference) DO UPDATE SET photo_url = excluded.photo_url
-            """, (b_ref, p_url))
-        
-        cursor.execute("SELECT name FROM audit_items WHERE reference = ? OR base_reference = ? LIMIT 1", (ref, b_ref))
-        name_row = cursor.fetchone()
-        if name_row and name_row["name"]:
-            cursor.execute("""
-            INSERT INTO catalog_photos (reference, photo_url, updated_at)
-            VALUES (?, ?, CURRENT_TIMESTAMP)
-            ON CONFLICT(reference) DO UPDATE SET photo_url = excluded.photo_url
-            """, (name_row["name"].strip(), p_url))
+            INSERT INTO store_tasks (title, description, category, day_of_week, priority)
+            VALUES (?, ?, ?, ?, ?)
+            """, (title, desc, cat, dow, prio))
 
     # Índices para consultas rápidas
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_audit ON audit_items(audit_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_ref ON audit_items(reference)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_baseref ON audit_items(base_reference)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_barcode ON audit_items(barcode)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_schedule_week ON schedules(week_start_date)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_shifts_sched ON schedule_shifts(schedule_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_tasks_due ON store_tasks(due_date)")
 
     conn.commit()
     conn.close()
@@ -895,4 +964,291 @@ def get_catalog_stats() -> Dict[str, Any]:
         "caballero_count": caballero_count,
         "garment_types": garment_types
     }
+
+
+# -------------------------------------------------------------
+# GESTIÓN DE COLABORADORES / EMPLEADOS
+# -------------------------------------------------------------
+
+def list_employees(active_only: bool = True) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    if active_only:
+        cursor.execute("SELECT * FROM employees WHERE is_active = 1 ORDER BY id ASC")
+    else:
+        cursor.execute("SELECT * FROM employees ORDER BY is_active DESC, id ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_employee(name: str, role: str = "Asesor Comercial", phone: str = "", color_tag: str = "blue") -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO employees (name, role, phone, color_tag, is_active)
+    VALUES (?, ?, ?, ?, 1)
+    """, (name.strip(), role.strip(), phone.strip(), color_tag.strip()))
+    emp_id = cursor.lastrowid
+    conn.commit()
+    cursor.execute("SELECT * FROM employees WHERE id = ?", (emp_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row)
+
+def update_employee(emp_id: int, name: str, role: str, phone: str = "", color_tag: str = "blue", is_active: int = 1) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE employees 
+    SET name = ?, role = ?, phone = ?, color_tag = ?, is_active = ?
+    WHERE id = ?
+    """, (name.strip(), role.strip(), phone.strip(), color_tag.strip(), is_active, emp_id))
+    conn.commit()
+    cursor.execute("SELECT * FROM employees WHERE id = ?", (emp_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_employee(emp_id: int) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM employees WHERE id = ?", (emp_id,))
+    affected = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return affected
+
+# -------------------------------------------------------------
+# HORARIOS Y TURNOS SEMANALES
+# -------------------------------------------------------------
+
+def get_or_create_weekly_schedule(week_start_date: str) -> Dict[str, Any]:
+    """Obtiene o inicializa una programación semanal para la semana que inicia en week_start_date (YYYY-MM-DD)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Calcular week_end_date (6 días después)
+    start_dt = datetime.strptime(week_start_date, "%Y-%m-%d").date()
+    end_dt = start_dt + timedelta(days=6)
+    week_end_date = end_dt.strftime("%Y-%m-%d")
+
+    cursor.execute("SELECT * FROM schedules WHERE week_start_date = ?", (week_start_date,))
+    schedule = cursor.fetchone()
+
+    if not schedule:
+        title = f"Semana {start_dt.strftime('%d/%m')} al {end_dt.strftime('%d/%m/%Y')}"
+        cursor.execute("""
+        INSERT INTO schedules (week_start_date, week_end_date, title, notes)
+        VALUES (?, ?, ?, '')
+        """, (week_start_date, week_end_date, title))
+        schedule_id = cursor.lastrowid
+        conn.commit()
+        cursor.execute("SELECT * FROM schedules WHERE id = ?", (schedule_id,))
+        schedule = cursor.fetchone()
+    else:
+        schedule_id = schedule["id"]
+
+    # Obtener turnos asociados
+    cursor.execute("""
+    SELECT s.*, e.name as employee_name, e.role as employee_role, e.color_tag as employee_color
+    FROM schedule_shifts s
+    JOIN employees e ON s.employee_id = e.id
+    WHERE s.schedule_id = ?
+    ORDER BY e.id ASC, s.id ASC
+    """, (schedule_id,))
+    shifts = [dict(r) for r in cursor.fetchall()]
+
+    schedule_dict = dict(schedule)
+    schedule_dict["shifts"] = shifts
+
+    conn.close()
+    return schedule_dict
+
+def save_schedule_shifts(schedule_id: int, shifts_data: List[Dict[str, Any]], notes: Optional[str] = None) -> bool:
+    """Reemplaza y guarda todos los turnos de la semana especificada."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    if notes is not None:
+        cursor.execute("UPDATE schedules SET notes = ? WHERE id = ?", (notes, schedule_id))
+
+    # Borrar turnos existentes de esa programación
+    cursor.execute("DELETE FROM schedule_shifts WHERE schedule_id = ?", (schedule_id,))
+
+    # Insertar los nuevos turnos
+    for shift in shifts_data:
+        emp_id = shift.get("employee_id")
+        dow = shift.get("day_of_week", "")
+        shift_type = shift.get("shift_type", "Libre")
+        start_t = shift.get("start_time", "")
+        end_t = shift.get("end_time", "")
+        hours = float(shift.get("hours", 0))
+        sh_notes = shift.get("notes", "")
+
+        cursor.execute("""
+        INSERT INTO schedule_shifts (schedule_id, employee_id, day_of_week, shift_type, start_time, end_time, hours, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (schedule_id, emp_id, dow, shift_type, start_t, end_t, hours, sh_notes))
+
+    conn.commit()
+    conn.close()
+    return True
+
+def list_schedules() -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT s.*, COUNT(sh.id) as total_shifts, SUM(sh.hours) as total_hours
+    FROM schedules s
+    LEFT JOIN schedule_shifts sh ON s.id = sh.schedule_id
+    GROUP BY s.id
+    ORDER BY s.week_start_date DESC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+# -------------------------------------------------------------
+# TAREAS Y RECORDATORIOS OPERATIVOS
+# -------------------------------------------------------------
+
+def list_store_tasks(day_of_week: Optional[str] = None, due_date: Optional[str] = None, is_completed: Optional[int] = None) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM store_tasks WHERE 1=1"
+    params = []
+
+    if day_of_week:
+        query += " AND (day_of_week = ? OR day_of_week = 'Diario')"
+        params.append(day_of_week)
+    if due_date:
+        query += " AND due_date = ?"
+        params.append(due_date)
+    if is_completed is not None:
+        query += " AND is_completed = ?"
+        params.append(is_completed)
+
+    query += " ORDER BY is_completed ASC, CASE priority WHEN 'Alta' THEN 1 WHEN 'Media' THEN 2 WHEN 'Baja' THEN 3 ELSE 4 END, id ASC"
+
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_store_task(title: str, description: str = "", category: str = "General", day_of_week: str = "", due_date: str = "", due_time: str = "", priority: str = "Media", assigned_to: str = "") -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO store_tasks (title, description, category, day_of_week, due_date, due_time, priority, assigned_to, is_completed)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+    """, (title.strip(), description.strip(), category.strip(), day_of_week.strip(), due_date.strip(), due_time.strip(), priority.strip(), assigned_to.strip()))
+    task_id = cursor.lastrowid
+    conn.commit()
+    cursor.execute("SELECT * FROM store_tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row)
+
+def toggle_store_task(task_id: int) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT is_completed FROM store_tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return None
+    new_status = 0 if row["is_completed"] == 1 else 1
+    cursor.execute("UPDATE store_tasks SET is_completed = ? WHERE id = ?", (new_status, task_id))
+    conn.commit()
+    cursor.execute("SELECT * FROM store_tasks WHERE id = ?", (task_id,))
+    updated_row = cursor.fetchone()
+    conn.close()
+    return dict(updated_row)
+
+def delete_store_task(task_id: int) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM store_tasks WHERE id = ?", (task_id,))
+    affected = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return affected
+
+# -------------------------------------------------------------
+# RESUMEN GENERAL DEL HUB OPERATIVO
+# -------------------------------------------------------------
+
+def get_hub_summary() -> Dict[str, Any]:
+    """Retorna métricas clave para las tarjetas del menú principal."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # 1. Auditoría más reciente
+    cursor.execute("SELECT id, name, audit_date, total_items, total_faltantes, total_sobrantes, total_validados, uploaded_at FROM audits ORDER BY id DESC LIMIT 1")
+    latest_audit = cursor.fetchone()
+    audit_data = dict(latest_audit) if latest_audit else None
+
+    # 2. Resumen de tareas
+    cursor.execute("SELECT COUNT(*) FROM store_tasks WHERE is_completed = 0")
+    tasks_pending = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM store_tasks WHERE is_completed = 1")
+    tasks_completed = cursor.fetchone()[0]
+
+    # Tareas prioritarias de hoy
+    dias_esp = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    today_dow = dias_esp[datetime.today().weekday()]
+    cursor.execute("SELECT COUNT(*) FROM store_tasks WHERE is_completed = 0 AND (day_of_week = ? OR day_of_week = 'Diario')", (today_dow,))
+    tasks_today_pending = cursor.fetchone()[0]
+
+    # 3. Empleados y Horario actual
+    cursor.execute("SELECT COUNT(*) FROM employees WHERE is_active = 1")
+    active_employees = cursor.fetchone()[0]
+
+    # Calcular lunes de la semana en curso
+    today = date.today()
+    monday_current = today - timedelta(days=today.weekday())
+    monday_str = monday_current.strftime("%Y-%m-%d")
+
+    cursor.execute("""
+    SELECT s.id, s.week_start_date, s.week_end_date, COUNT(sh.id) as assigned_shifts, SUM(sh.hours) as total_hours
+    FROM schedules s
+    LEFT JOIN schedule_shifts sh ON s.id = sh.schedule_id
+    WHERE s.week_start_date = ?
+    GROUP BY s.id
+    """, (monday_str,))
+    current_schedule = cursor.fetchone()
+    sched_data = dict(current_schedule) if current_schedule else None
+
+    # 4. Catálogo
+    cursor.execute("SELECT COUNT(DISTINCT COALESCE(base_reference, reference)) FROM audit_items")
+    catalog_models = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(DISTINCT reference) FROM catalog_photos WHERE photo_url IS NOT NULL AND photo_url != ''")
+    catalog_photos = cursor.fetchone()[0]
+
+    conn.close()
+
+    return {
+        "today_day_name": today_dow,
+        "today_date": today.strftime("%d/%m/%Y"),
+        "latest_audit": audit_data,
+        "tasks_summary": {
+            "pending": tasks_pending,
+            "completed": tasks_completed,
+            "today_pending": tasks_today_pending
+        },
+        "schedules_summary": {
+            "current_week_start": monday_str,
+            "has_schedule": sched_data is not None,
+            "assigned_shifts": sched_data["assigned_shifts"] if sched_data else 0,
+            "total_hours": sched_data["total_hours"] if sched_data and sched_data["total_hours"] else 0,
+            "active_employees": active_employees
+        },
+        "catalog_summary": {
+            "total_models": catalog_models,
+            "total_photos": catalog_photos
+        }
+    }
+
 

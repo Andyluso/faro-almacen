@@ -19,7 +19,7 @@
   
   <!-- Tailwind CSS Compilado Estático (Carga instantánea en celulares, ultrarrápido 33KB) -->
   <link rel="stylesheet" href="tailwind.min.css?v=2.8">
-  <link rel="stylesheet" href="styles.css?v=3.4">
+  <link rel="stylesheet" href="styles.css?v=3.3">
 
   <!-- Librerías Locales (100% autónomo, no depende de CDNs externos en móviles) -->
   <script src="lucide.min.js"></script>
@@ -39,55 +39,66 @@
       <!-- Fila Superior: Logo + Acciones Rápidas (Adaptado para Móviles) -->
       <div class="flex items-center justify-between py-2 sm:py-2.5 gap-1.5 sm:gap-2">
         
-        <!-- Logo & Brand FARO -->
         <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0">
-          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 border border-slate-700/80 p-0.5 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
-            <img src="faro_icon.svg" alt="Faro Logo" class="w-full h-full object-contain">
-          </div>
-          <div class="min-w-0 truncate">
-            <h1 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2 truncate leading-none">
-              <span>FARO</span>
-              <span class="hidden sm:inline-block text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30 tracking-normal badge-pill">
-                v2.0
-              </span>
-              <span id="dbStatusBadge" class="hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded tracking-normal items-center gap-1 cursor-default transition-all" title="Estado de Base de Datos">
-                <span id="dbStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="dbStatusText">Cloud</span>
-              </span>
-            </h1>
-            <p class="text-[9px] sm:text-[10px] font-semibold text-sky-400 truncate leading-tight mt-1 hidden xs:block">Flujo de Almacén y Reorden Operativo</p>
+          <!-- Botón Volver al Menú Principal (Hub) -->
+          <button id="btnBackToHub" type="button" class="hidden bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border border-slate-700 font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs shrink-0" title="Volver al Menú Principal">
+            <i data-lucide="arrow-left" class="w-4 h-4 text-sky-400"></i>
+            <span class="hidden xs:inline">Inicio</span>
+          </button>
+
+          <!-- Logo & Brand FARO / SEVEN SEVEN -->
+          <div id="brandHeader" class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0 cursor-pointer" title="Ir al Menú Principal">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 border border-slate-700/80 p-0.5 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+              <img src="faro_icon.svg" alt="Faro Logo" class="w-full h-full object-contain">
+            </div>
+            <div class="min-w-0 truncate">
+              <h1 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2 truncate leading-none">
+                <span id="headerTitle">FARO</span>
+                <span id="headerBadge" class="hidden sm:inline-block text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30 tracking-normal badge-pill">
+                  v2.0
+                </span>
+                <span id="dbStatusBadge" class="hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded tracking-normal items-center gap-1 cursor-default transition-all" title="Estado de Base de Datos">
+                  <span id="dbStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span id="dbStatusText">Cloud</span>
+                </span>
+              </h1>
+              <p id="headerSubtitle" class="text-[9px] sm:text-[10px] font-semibold text-sky-400 truncate leading-tight mt-1 hidden xs:block">Flujo de Almacén y Reorden Operativo</p>
+            </div>
           </div>
         </div>
 
-        <!-- Acciones en Cabecera (Separadas, Centradas y con Márgenes de Confort) -->
-        <div class="flex items-center gap-2 sm:gap-2.5 md:gap-3 shrink-0">
+        <!-- Acciones en Cabecera (Adaptables según vista activa) -->
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
           
-          <!-- Botón Subir Excel -->
-          <button id="btnOpenUpload" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs whitespace-nowrap touch-target cursor-pointer" title="Subir archivo Excel de lectura">
-            <i data-lucide="upload-cloud" class="w-4 h-4 shrink-0"></i>
-            <span class="hidden sm:inline">Subir Excel</span>
-          </button>
+          <!-- Acciones específicas de FARO Inventarios -->
+          <div id="faroHeaderActions" class="flex items-center gap-1 sm:gap-2">
+            <!-- Botón Subir Excel -->
+            <button id="btnOpenUpload" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap touch-target sm:min-w-0" title="Subir archivo Excel de lectura">
+              <i data-lucide="upload-cloud" class="w-4 h-4 shrink-0"></i>
+              <span class="hidden sm:inline">Subir Excel</span>
+            </button>
 
-          <!-- Botón Copiar Correo -->
-          <button id="btnOpenEmailModal" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs whitespace-nowrap touch-target cursor-pointer" title="Copiar informe para correo de respuesta">
-            <i data-lucide="mail-check" class="w-4 h-4 shrink-0"></i>
-            <span class="hidden md:inline">Para Correo</span>
-          </button>
+            <!-- Botón Copiar Correo -->
+            <button id="btnOpenEmailModal" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap touch-target sm:min-w-0" title="Copiar informe para correo de respuesta">
+              <i data-lucide="mail-check" class="w-4 h-4 shrink-0"></i>
+              <span class="hidden md:inline">Para Correo</span>
+            </button>
 
-          <!-- Botón Descargar Excel -->
-          <button id="btnDownloadExcel" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl inline-flex items-center justify-center gap-2 transition-colors touch-target cursor-pointer" title="Descargar la plantilla Excel original modificada con las observaciones para responder al correo">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-            <span class="hidden xl:inline">Exportar Excel</span>
-          </button>
+            <!-- Botón Descargar Excel -->
+            <button id="btnDownloadExcel" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors touch-target sm:min-w-0" title="Descargar la plantilla Excel original modificada con las observaciones para responder al correo">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+              <span class="hidden xl:inline">Exportar Excel</span>
+            </button>
+          </div>
 
-          <!-- Botón Instalar App PWA (Visible cuando esté disponible para instalar) -->
-          <button id="btnInstallPWA" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl inline-flex items-center justify-center gap-2 transition-all shadow-md whitespace-nowrap touch-target cursor-pointer" title="Instalar FARO en tu celular o computador">
+          <!-- Botón Instalar App PWA -->
+          <button id="btnInstallPWA" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-all shadow-md whitespace-nowrap touch-target sm:min-w-0 cursor-pointer" title="Instalar FARO en tu celular o computador">
             <i data-lucide="download" class="w-4 h-4 shrink-0"></i>
             <span class="hidden sm:inline">Instalar App</span>
           </button>
 
-          <!-- Botón Celular / Wi-Fi QR (Oculto en celulares ya que se usa el propio dispositivo) -->
-          <button id="btnOpenMobileQR" class="hidden sm:inline-flex bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs p-2.5 rounded-xl items-center justify-center transition-colors touch-target cursor-pointer" title="Abrir en celular con cámara">
+          <!-- Botón Celular / Wi-Fi QR -->
+          <button id="btnOpenMobileQR" class="hidden sm:inline-flex bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs p-2 rounded-lg items-center justify-center transition-colors touch-target" title="Abrir en celular con cámara">
             <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i>
           </button>
 
@@ -95,56 +106,56 @@
 
       </div>
 
-      <!-- Fila Inferior de Cabecera: Selector de Auditoría y Filtro por Fecha (100% Adaptable en Móviles) -->
-      <div id="auditSelectorBar" class="pb-2 pt-0.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 w-full transition-all">
+      <!-- Fila Inferior de Cabecera: Selector de Auditoría y Filtro por Fecha (Solo visible en FARO) -->
+      <div id="auditSelectorBar" class="pb-2 pt-0.5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full transition-all">
         <!-- Selector desplegable de inventario (ocupa el ancho completo en celular para leerlo cómodo) -->
         <div class="relative flex-1 min-w-0 w-full">
-          <select id="auditSelector" class="w-full bg-slate-800/90 text-slate-100 text-xs sm:text-sm font-semibold rounded-xl pl-3 pr-8 py-2.5 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer truncate shadow-inner">
+          <select id="auditSelector" class="w-full bg-slate-800/90 text-slate-100 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer truncate shadow-inner">
             <option value="" disabled selected>Cargando inventarios...</option>
           </select>
-          <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+          <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
             <i data-lucide="chevron-down" class="w-4 h-4"></i>
           </div>
         </div>
 
         <!-- Fila de Fecha e Historial (se ajusta fluidamente) -->
-        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+        <div class="flex items-center gap-1.5 w-full sm:w-auto shrink-0">
           <!-- Filtro rápido por fecha -->
-          <div class="relative flex-1 sm:flex-initial flex items-center gap-1.5 min-w-0">
-            <input type="date" id="auditDateFilter" class="w-full sm:w-auto bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl px-3 py-2 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-inner" title="Filtrar inventarios por fecha exacta">
-            <button id="btnClearDateFilter" class="hidden text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80 border border-slate-700 transition-colors shrink-0 cursor-pointer" title="Limpiar filtro de fecha">
+          <div class="relative flex-1 sm:flex-initial flex items-center gap-1 min-w-0">
+            <input type="date" id="auditDateFilter" class="w-full sm:w-auto bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-inner" title="Filtrar inventarios por fecha exacta">
+            <button id="btnClearDateFilter" class="hidden text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800/80 border border-slate-700 transition-colors shrink-0" title="Limpiar filtro de fecha">
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
           </div>
 
           <!-- Botón Ver Historial Completo -->
-          <button id="btnOpenAuditHistory" class="shrink-0 flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors touch-target shadow-xs cursor-pointer" title="Explorar todo el historial de inventarios">
+          <button id="btnOpenAuditHistory" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors touch-target shadow-xs" title="Explorar todo el historial de inventarios">
             <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
             <span>Historial</span>
           </button>
         </div>
       </div>
 
-      <!-- Fila 3: Barra de Navegación por Pestañas (Auditoría / Catálogo / Archivos) -->
-      <div class="flex items-center gap-2 sm:gap-2.5 pb-2 pt-1.5 overflow-x-auto no-scrollbar border-t border-slate-800/80">
+      <!-- Fila 3: Barra de Navegación por Pestañas FARO (Auditoría / Catálogo / Archivos) -->
+      <div id="faroTabsBar" class="flex items-center gap-1 sm:gap-2 pb-2 pt-1 overflow-x-auto no-scrollbar border-t border-slate-800/80">
         <!-- Pestaña 1: Auditoría -->
-        <button id="tabBtnAudit" type="button" class="tab-nav-btn active py-2 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shrink-0 bg-blue-600 text-white shadow-xs cursor-pointer">
+        <button id="tabBtnAudit" type="button" class="tab-nav-btn active py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 bg-blue-600 text-white shadow-xs">
           <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
           <span>Auditoría</span>
         </button>
 
         <!-- Pestaña 2: Catálogo de Referencias (Buscador) -->
-        <button id="tabBtnCatalog" type="button" class="tab-nav-btn py-2 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer">
+        <button id="tabBtnCatalog" type="button" class="tab-nav-btn py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800">
           <i data-lucide="search" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>Catálogo de Referencias</span>
-          <span id="tabCatalogBadge" class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/30 badge-pill">...</span>
+          <span id="tabCatalogBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/30 badge-pill">...</span>
         </button>
 
         <!-- Pestaña 3: Archivos Excel -->
-        <button id="tabBtnFiles" type="button" class="tab-nav-btn py-2 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer">
+        <button id="tabBtnFiles" type="button" class="tab-nav-btn py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800">
           <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-400"></i>
           <span>Archivos Excel</span>
-          <span id="tabFilesBadge" class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 badge-pill">...</span>
+          <span id="tabFilesBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 badge-pill">...</span>
         </button>
       </div>
 
@@ -161,6 +172,207 @@
   <!-- CONTENIDO PRINCIPAL FLUIDO (SE ADAPTA A MÓVILES Y MONITORES ANCHOS) -->
   <!-- ========================================================================= -->
   <main class="flex-1 max-w-7xl 2xl:max-w-screen-2xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-5 flex flex-col gap-3.5 sm:gap-4 overflow-y-auto safe-paddings">
+
+    <!-- ======================================================================= -->
+    <!-- VISTA 1: MENÚ PRINCIPAL / HUB DE OPERACIONES SEVEN SEVEN               -->
+    <!-- ======================================================================= -->
+    <div id="viewHub" class="flex flex-col gap-4 sm:gap-5 flex-1 pb-8">
+      
+      <!-- HERO BANNER BIENVENIDA -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-700/70 p-5 sm:p-7 shadow-lg text-white">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                Seven Seven · Portal Tienda
+              </span>
+              <span id="hubLiveDayBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                Cargando fecha...
+              </span>
+            </div>
+            <h2 class="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white">
+              Gestión Operativa de Tienda
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+              Plataforma unificada para conciliación de inventarios FARO, creación de horarios semanales y control de tareas diarias.
+            </p>
+          </div>
+
+          <!-- Acciones Rápidas del Banner -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="hubQuickFaro" type="button" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer">
+              <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+              <span>Abrir FARO</span>
+            </button>
+            <button id="hubQuickSchedule" type="button" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+              <span>Horarios</span>
+            </button>
+            <button id="hubQuickTasks" type="button" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer">
+              <i data-lucide="check-square" class="w-4 h-4"></i>
+              <span>Tareas (<span id="hubQuickTasksCount">0</span>)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Alerta Contextual del Día -->
+        <div id="hubDayAlertBanner" class="relative z-10 mt-4 pt-3 border-t border-slate-800/80 flex items-center gap-2.5 text-xs text-sky-200">
+          <i data-lucide="sparkles" class="w-4 h-4 text-sky-400 shrink-0"></i>
+          <span id="hubDayAlertText">Cargando avisos del día...</span>
+        </div>
+
+        <!-- Decoración de fondo sutil -->
+        <div class="absolute -right-10 -bottom-10 w-52 h-52 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-1/3 -top-10 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
+
+      <!-- SECCIÓN TARJETAS DE SERVICIOS PRINCIPALES -->
+      <div>
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="text-sm font-black uppercase tracking-wider text-slate-500">Módulos de Trabajo</h3>
+          <span class="text-xs text-slate-400 font-semibold">Selecciona un servicio para comenzar</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <!-- TARJETA 1: FARO INVENTARIOS -->
+          <div id="cardLaunchFaro" class="group bg-white hover:bg-slate-50 rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i data-lucide="clipboard-check" class="w-6 h-6"></i>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/60">
+                  Principal
+                </span>
+              </div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                <span>FARO Inventario</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+              </h4>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Auditor de diferencias físico vs teórico con RFID, catálogo con fotos, reincidentes y exportación en el Excel original modificado para correo.
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span id="hubCardAuditInfo" class="text-slate-500 font-medium">Cargando datos...</span>
+              <span class="font-bold text-blue-600">Abrir ➜</span>
+            </div>
+          </div>
+
+          <!-- TARJETA 2: CREADOR DE HORARIOS SEMANALES -->
+          <div id="cardLaunchSchedules" class="group bg-white hover:bg-slate-50 rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/60">
+                  Operación
+                </span>
+              </div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-purple-600 transition-colors flex items-center gap-2">
+                <span>Creador de Horarios</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+              </h4>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Diseñador semanal para la encargada: asigna turnos (Apertura, Cierre, Intermedio, Libre), calcula las 47 horas y exporta texto listo para WhatsApp.
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span id="hubCardScheduleInfo" class="text-slate-500 font-medium">Semana en curso</span>
+              <span class="font-bold text-purple-600">Programar ➜</span>
+            </div>
+          </div>
+
+          <!-- TARJETA 3: TAREAS Y RECORDATORIOS DIARIOS -->
+          <div id="cardLaunchTasks" class="group bg-white hover:bg-slate-50 rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i data-lucide="check-square" class="w-6 h-6"></i>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                  Routines
+                </span>
+              </div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors flex items-center gap-2">
+                <span>Tareas y Recordatorios</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+              </h4>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Checklist interactivo de tienda: Lunes de inventario, Miércoles de informe, rutinas diarias de apertura, reposición de tallas y arqueo de caja.
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span id="hubCardTasksInfo" class="text-slate-500 font-medium">Pendientes hoy</span>
+              <span class="font-bold text-emerald-600">Revisar ➜</span>
+            </div>
+          </div>
+
+          <!-- TARJETA 4: CATÁLOGO MAESTRO -->
+          <div id="cardLaunchCatalog" class="group bg-white hover:bg-slate-50 rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i data-lucide="search" class="w-6 h-6"></i>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/60">
+                  Prendas
+                </span>
+              </div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors flex items-center gap-2">
+                <span>Catálogo de Referencias</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+              </h4>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Buscador visual y rápido de prendas Seven Seven con fotos universales de alta definición, desglose de colores, tallas y códigos EAN.
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span id="hubCardCatalogInfo" class="text-slate-500 font-medium">277 modelos</span>
+              <span class="font-bold text-amber-600">Buscar ➜</span>
+            </div>
+          </div>
+
+          <!-- TARJETA 5: FUTURO SERVICIO (EXTENSIBILIDAD) -->
+          <div class="bg-slate-50/80 rounded-2xl p-5 border-2 border-dashed border-slate-200/90 flex flex-col justify-between opacity-85">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-200/70 text-slate-400 flex items-center justify-center">
+                  <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-200/80 text-slate-600">
+                  Próximamente
+                </span>
+              </div>
+              <h4 class="text-base sm:text-lg font-black text-slate-700">
+                Averías y Garantías
+              </h4>
+              <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                Módulo en preparación para el registro y trazabilidad de prendas con tara de fábrica, cambios de clientes y envíos de garantías a CEDI.
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-400 font-medium">
+              <span>En desarrollo</span>
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div> <!-- /#viewHub -->
+
+    <!-- ======================================================================= -->
+    <!-- VISTA 2: FARO INVENTARIO Y AUDITORÍA (MÓDULO EXISTENTE)                -->
+    <!-- ======================================================================= -->
+    <div id="viewFaro" class="hidden flex flex-col gap-3.5 sm:gap-4 flex-1">
 
     <!-- SECCIÓN 1: AUDITORÍA DE INVENTARIO (CONCILIACIÓN Y NOVEDADES) -->
     <div id="sectionAudit" class="flex flex-col gap-3.5 sm:gap-4 flex-1">
@@ -261,11 +473,11 @@
           <span class="text-xs font-bold text-slate-800">Menú de Filtros</span>
           <span id="activeFilterDrawerBadge" class="hidden text-[10px] bg-blue-600 text-white font-black px-2 py-0.5 rounded-full">0 activos</span>
         </div>
-        <div class="flex items-center gap-2.5">
-          <button id="btnResetAllFilters" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+        <div class="flex items-center gap-2">
+          <button id="btnResetAllFilters" type="button" class="text-xs font-semibold text-slate-500 hover:text-red-600 transition-colors cursor-pointer">
             Limpiar filtros
           </button>
-          <button id="btnCloseFilterDrawer" type="button" class="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer" title="Cerrar menú (Esc)">
+          <button id="btnCloseFilterDrawer" type="button" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer" title="Cerrar menú (Esc)">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
@@ -354,28 +566,28 @@
     <section class="flex-1 flex flex-col min-h-0">
       
       <!-- BARRA COMPACTA: SOLO ICONO DE LUPA (EXPANDIBLE) Y CONTADOR DE RESULTADOS -->
-      <div class="flex items-center justify-between gap-3 px-1 mb-2.5">
-        <div class="flex items-center gap-2.5 flex-wrap">
+      <div class="flex items-center justify-between gap-2 px-1 mb-2">
+        <div class="flex items-center gap-2">
           <!-- Icono de la Lupa: Clic para expandir/colapsar panel de búsqueda -->
           <button id="btnToggleFilters" 
                   type="button" 
-                  class="relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group gap-2" 
+                  class="relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group" 
                   title="Buscar y filtrar prendas (o presiona Ctrl+F)">
             <i data-lucide="search" class="w-4 h-4 text-slate-600 group-hover:text-blue-600 transition-colors"></i>
-            <span class="hidden sm:inline text-xs font-bold">Buscar</span>
+            <span class="hidden sm:inline text-xs font-bold ml-1.5">Buscar</span>
             <!-- Badge numérico cuando hay filtros aplicados mientras está oculto -->
-            <span id="activeFiltersPill" class="hidden ml-1 px-2 py-0.5 text-[10px] font-black bg-blue-600 text-white rounded-full badge-pill">0</span>
+            <span id="activeFiltersPill" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-black bg-blue-600 text-white rounded-full badge-pill">0</span>
           </button>
 
           <!-- Resumen de etiquetas activas cuando el panel está oculto -->
-          <div id="activeFiltersSummaryBar" class="hidden sm:flex items-center gap-2 flex-wrap text-xs">
+          <div id="activeFiltersSummaryBar" class="hidden sm:flex items-center gap-1.5 flex-wrap text-xs">
             <!-- Chips dinámicos generados desde JavaScript -->
           </div>
         </div>
 
         <!-- Contador de Resultados Visibles y Limpiar Rápido -->
-        <div class="flex items-center gap-2.5 text-xs text-slate-500 font-medium shrink-0">
-          <button id="btnQuickClearFilters" type="button" class="hidden text-xs font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer px-1 py-0.5">
+        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+          <button id="btnQuickClearFilters" type="button" class="hidden text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer">
             Limpiar filtros
           </button>
           <div>
@@ -555,7 +767,7 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <button id="btnFilesUploadNew" type="button" class="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 touch-target cursor-pointer">
+          <button id="btnFilesUploadNew" type="button" class="py-2 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 touch-target">
             <i data-lucide="upload-cloud" class="w-4 h-4"></i>
             <span>Subir Nuevo Excel</span>
           </button>
@@ -563,13 +775,13 @@
       </div>
 
       <!-- Barra de Filtros Rápidos de Archivos -->
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Filtro:</span>
-          <button type="button" data-files-filter="all" class="files-chip active px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-xs cursor-pointer">Todos</button>
-          <button type="button" data-files-filter="lunes" class="files-chip px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Lunes</button>
-          <button type="button" data-files-filter="miercoles" class="files-chip px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Miércoles</button>
-          <button type="button" data-files-filter="this_month" class="files-chip px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Este Mes</button>
+          <button type="button" data-files-filter="all" class="files-chip active px-3 py-1 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-xs">Todos</button>
+          <button type="button" data-files-filter="lunes" class="files-chip px-3 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Lunes</button>
+          <button type="button" data-files-filter="miercoles" class="files-chip px-3 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Miércoles</button>
+          <button type="button" data-files-filter="this_month" class="files-chip px-3 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Este Mes</button>
         </div>
 
         <div class="relative w-full sm:w-64">
@@ -596,6 +808,217 @@
 
     </section>
 
+    </div> <!-- /#viewFaro -->
+
+    <!-- ======================================================================= -->
+    <!-- VISTA 3: CREADOR DE HORARIOS SEMANALES PARA LA ENCARGADA               -->
+    <!-- ======================================================================= -->
+    <div id="viewSchedules" class="hidden flex flex-col gap-4 flex-1 pb-10">
+      
+      <!-- Barra Superior de Control de Semana y Acciones -->
+      <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3 no-print">
+        
+        <!-- Navegación de Semana -->
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+            <button id="btnPrevWeek" type="button" class="p-1.5 sm:p-2 rounded-lg hover:bg-white text-slate-700 transition-all cursor-pointer" title="Semana Anterior">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <button id="btnCurrentWeek" type="button" class="px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-white rounded-lg transition-all cursor-pointer">
+              Esta Semana
+            </button>
+            <button id="btnNextWeek" type="button" class="p-1.5 sm:p-2 rounded-lg hover:bg-white text-slate-700 transition-all cursor-pointer" title="Semana Siguiente">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="min-w-0">
+            <h3 id="scheduleWeekTitle" class="text-sm sm:text-base font-black text-slate-900 truncate">
+              Semana: Cargando...
+            </h3>
+            <p id="scheduleWeekSubtitle" class="text-[11px] text-slate-500 font-medium">
+              4 colaboradores activos · 47 horas semanales reglamentarias
+            </p>
+          </div>
+        </div>
+
+        <!-- Botones de Acción (Guardar, WhatsApp, Empleados, Imprimir) -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnManageEmployees" type="button" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer" title="Gestionar colaboradores de la tienda">
+            <i data-lucide="users" class="w-4 h-4 text-slate-600"></i>
+            <span>Equipo</span>
+          </button>
+          
+          <button id="btnPrintSchedule" type="button" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer" title="Imprimir horario para el tablón de la tienda">
+            <i data-lucide="printer" class="w-4 h-4 text-slate-600"></i>
+            <span>Imprimir</span>
+          </button>
+
+          <button id="btnCopyWhatsapp" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer" title="Generar y copiar texto formateado para WhatsApp">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>Copiar para WhatsApp</span>
+          </button>
+
+          <button id="btnSaveSchedule" type="button" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-black text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Guardar Horario</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Barra de Ayuda y Tipos de Turnos (Leyenda Rápida) -->
+      <div class="bg-purple-50/70 border border-purple-100 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap text-xs no-print">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-bold text-purple-900 text-[11px] uppercase tracking-wider">Turnos:</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-bold text-[11px]">🌅 Apertura (09:00 - 18:00 · 8h)</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-bold text-[11px]">🌙 Cierre (12:00 - 21:00 · 8h)</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[11px]">☀️ Intermedio (10:00 - 19:00 · 8h)</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[11px]">🌴 Libre (0h)</span>
+        </div>
+        <span class="text-[11px] text-purple-700 font-medium">💡 Haz clic sobre cualquier celda para cambiar el turno del colaborador</span>
+      </div>
+
+      <!-- Contenedor Imprimible del Horario (Schedule Table) -->
+      <div class="schedule-table-container bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+        
+        <!-- Cabecera visible en impresión -->
+        <div class="hidden print-only p-4 border-b border-slate-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-lg font-black">SEVEN SEVEN - PROGRAMACIÓN DE TURNOS SEMANAL</h1>
+              <p id="printScheduleSubtitle" class="text-xs text-slate-600">Semana...</p>
+            </div>
+            <div class="text-right text-xs">
+              <p class="font-bold">Tienda Seven Seven</p>
+              <p>Horario legal: 47 horas / semana</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[10px] sm:text-[11px]">
+              <tr>
+                <th class="py-3 px-3 sm:px-4 min-w-[170px] sticky left-0 bg-slate-900 z-10">Colaborador / Cargo</th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Lun <span id="colDateLun" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Mar <span id="colDateMar" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Mié <span id="colDateMie" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Jue <span id="colDateJue" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px]">Vie <span id="colDateVie" class="text-slate-400 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px] bg-slate-800">Sáb <span id="colDateSab" class="text-slate-300 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-2 sm:px-3 text-center min-w-[100px] bg-slate-800">Dom <span id="colDateDom" class="text-slate-300 font-normal block text-[9px]"></span></th>
+                <th class="py-3 px-3 text-center min-w-[90px] bg-purple-950 text-purple-200">Total Horas</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleTableBody" class="divide-y divide-slate-200">
+              <!-- Filas de colaboradores generadas dinámicamente -->
+            </tbody>
+            <tfoot class="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-700 text-xs">
+              <tr id="scheduleCoverageRow">
+                <td class="py-2.5 px-3 sm:px-4 font-black uppercase text-[10px] text-slate-500 sticky left-0 bg-slate-100 z-10">
+                  👥 Cobertura Tienda
+                </td>
+                <td id="coverageLun" class="py-2.5 px-2 text-center text-xs">0 pers</td>
+                <td id="coverageMar" class="py-2.5 px-2 text-center text-xs">0 pers</td>
+                <td id="coverageMie" class="py-2.5 px-2 text-center text-xs">0 pers</td>
+                <td id="coverageJue" class="py-2.5 px-2 text-center text-xs">0 pers</td>
+                <td id="coverageVie" class="py-2.5 px-2 text-center text-xs">0 pers</td>
+                <td id="coverageSab" class="py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50">0 pers</td>
+                <td id="coverageDom" class="py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50">0 pers</td>
+                <td id="coverageTotalHours" class="py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-100">0 h</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Notas de la Semana -->
+        <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center gap-2 text-xs no-print">
+          <label for="scheduleNotesInput" class="font-bold text-slate-600 shrink-0">Notas / Avisos de la semana:</label>
+          <input type="text" id="scheduleNotesInput" placeholder="Ej. El sábado todos con camisa negra por campaña..." class="w-full bg-white text-xs rounded-lg px-3 py-1.5 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+        </div>
+
+      </div>
+
+    </div> <!-- /#viewSchedules -->
+
+    <!-- ======================================================================= -->
+    <!-- VISTA 4: TAREAS Y RECORDATORIOS OPERATIVOS                             -->
+    <!-- ======================================================================= -->
+    <div id="viewTasks" class="hidden flex flex-col gap-4 flex-1 pb-10">
+      
+      <!-- Barra Superior de Tareas: Resumen y Filtros Rápidos -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+            <i data-lucide="check-square" class="w-5 h-5 text-emerald-600"></i>
+            <span>Rutinas y Tareas Operativas</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Control de actividades de apertura, cierre, auditorías FARO y responsabilidades de tienda.</p>
+        </div>
+
+        <!-- Barra de Progreso de Tareas -->
+        <div class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shrink-0">
+          <div class="text-right">
+            <div class="text-xs font-bold text-slate-700">
+              <span id="tasksCompletedCount">0</span> de <span id="tasksTotalCount">0</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-medium">Completadas</span>
+          </div>
+          <div class="w-24 bg-slate-200 h-2.5 rounded-full overflow-hidden">
+            <div id="tasksProgressBar" class="bg-emerald-500 h-full rounded-full transition-all" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros por Día / Categoría -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Ver:</span>
+        <button type="button" data-tasks-filter="today" class="tasks-chip active px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-xs cursor-pointer shrink-0">Hoy</button>
+        <button type="button" data-tasks-filter="Diario" class="tasks-chip px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0">Rutinas Diarias</button>
+        <button type="button" data-tasks-filter="Lunes" class="tasks-chip px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0">Lunes (Inventario FARO)</button>
+        <button type="button" data-tasks-filter="Miercoles" class="tasks-chip px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0">Miércoles (Informe)</button>
+        <button type="button" data-tasks-filter="all" class="tasks-chip px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0">Todas las Tareas</button>
+      </div>
+
+      <!-- Formulario Rápido para Crear Nueva Tarea -->
+      <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs">
+        <form id="formNewTask" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div class="relative flex-1">
+            <input type="text" id="inputNewTaskTitle" required placeholder="Escribe una nueva tarea o recordatorio..." class="w-full bg-slate-50 text-xs sm:text-sm font-semibold rounded-xl px-3.5 py-2.5 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          
+          <select id="selectNewTaskPriority" class="bg-slate-50 text-xs font-bold rounded-xl px-3 py-2.5 border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="Alta">🔴 Prioridad Alta</option>
+            <option value="Media" selected>🟡 Prioridad Media</option>
+            <option value="Baja">🔵 Prioridad Baja</option>
+          </select>
+
+          <select id="selectNewTaskDay" class="bg-slate-50 text-xs font-bold rounded-xl px-3 py-2.5 border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="Diario" selected>📅 Todos los días</option>
+            <option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+            <option value="Sábado">Sábado</option>
+            <option value="Domingo">Domingo</option>
+          </select>
+
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors shrink-0 cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Agregar</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Lista de Tareas -->
+      <div id="tasksListContainer" class="flex flex-col gap-2.5 overflow-y-auto">
+        <!-- Tareas renderizadas dinámicamente -->
+      </div>
+
+    </div> <!-- /#viewTasks -->
+
   </main>
 
   <!-- ========================================================================= -->
@@ -618,20 +1041,20 @@
           </h2>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- Controles de navegación de prendas -->
-          <div class="flex items-center bg-slate-800 rounded-xl p-1 border border-slate-700 gap-1">
-            <button id="btnModalPrev" class="p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors touch-target sm:min-w-0 cursor-pointer" title="Prenda anterior (←)">
+          <div class="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700">
+            <button id="btnModalPrev" class="p-1.5 sm:p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors touch-target sm:min-w-0" title="Prenda anterior (←)">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
             </button>
-            <span id="modalNavCounter" class="text-[11px] sm:text-xs text-slate-300 px-2 font-bold whitespace-nowrap">1/200</span>
-            <button id="btnModalNext" class="p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors touch-target sm:min-w-0 cursor-pointer" title="Prenda siguiente (→)">
+            <span id="modalNavCounter" class="text-[11px] sm:text-xs text-slate-300 px-1.5 sm:px-2 font-bold whitespace-nowrap">1/200</span>
+            <button id="btnModalNext" class="p-1.5 sm:p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors touch-target sm:min-w-0" title="Prenda siguiente (→)">
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
           </div>
 
           <!-- Cerrar modal -->
-          <button id="btnCloseInspector" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors touch-target cursor-pointer" title="Cerrar modal (Esc)">
+          <button id="btnCloseInspector" class="p-1.5 sm:p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors touch-target">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -696,13 +1119,13 @@
               </div>
 
               <!-- Acciones sobre la foto existente (Cambiar y Eliminar) -->
-              <div id="modalPhotoActions" class="hidden absolute bottom-2.5 right-2.5 flex items-center gap-2">
-                <button id="btnTriggerPhotoChange" type="button" class="bg-slate-900/85 hover:bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-xl backdrop-blur-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer" title="Cambiar por otra foto">
-                  <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <div id="modalPhotoActions" class="hidden absolute bottom-2 right-2 flex items-center gap-1.5">
+                <button id="btnTriggerPhotoChange" type="button" class="bg-slate-900/85 hover:bg-slate-900 text-white text-[11px] font-bold px-2 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1 shadow-sm transition-all" title="Cambiar por otra foto">
+                  <i data-lucide="camera" class="w-3 h-3"></i>
                   <span>Cambiar</span>
                 </button>
-                <button id="btnDeletePhoto" type="button" class="bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl backdrop-blur-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer" title="Eliminar foto incorrecta">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <button id="btnDeletePhoto" type="button" class="bg-red-600/90 hover:bg-red-700 text-white text-[11px] font-bold px-2 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer" title="Eliminar foto incorrecta">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
                   <span>Eliminar</span>
                 </button>
               </div>
@@ -711,14 +1134,14 @@
               <input type="file" id="fileInput" accept="image/*" class="hidden">
             </div>
 
-            <!-- Botones directos para Tomar o Subir Foto (Centrados y con márgenes de confort) -->
-            <div class="flex items-center gap-2.5 sm:gap-3">
-              <button id="btnCaptureCamera" type="button" class="flex-1 py-2.5 px-3 sm:px-4 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200 font-bold text-xs flex items-center justify-center gap-2 border border-blue-200/80 transition-colors shadow-2xs touch-target sm:min-w-0 cursor-pointer" title="Tomar foto con la cámara del celular">
-                <i data-lucide="camera" class="w-4 h-4 text-blue-600 shrink-0"></i>
+            <!-- Botones directos para Tomar o Subir Foto (Siempre disponibles y minimalistas) -->
+            <div class="flex items-center gap-2">
+              <button id="btnCaptureCamera" type="button" class="flex-1 py-2 px-2.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-blue-200/80 transition-colors shadow-2xs touch-target sm:min-w-0" title="Tomar foto con la cámara del celular">
+                <i data-lucide="camera" class="w-3.5 h-3.5 text-blue-600"></i>
                 <span>Tomar Foto</span>
               </button>
-              <button id="btnUploadFile" type="button" class="flex-1 py-2.5 px-3 sm:px-4 rounded-xl bg-slate-50 text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 transition-colors shadow-2xs touch-target sm:min-w-0 cursor-pointer" title="Subir imagen desde galería o archivo">
-                <i data-lucide="image-plus" class="w-4 h-4 text-slate-500 shrink-0"></i>
+              <button id="btnUploadFile" type="button" class="flex-1 py-2 px-2.5 rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-medium text-xs flex items-center justify-center gap-1.5 border border-slate-200 transition-colors shadow-2xs touch-target sm:min-w-0" title="Subir imagen desde galería o archivo">
+                <i data-lucide="image-plus" class="w-3.5 h-3.5 text-slate-500"></i>
                 <span>Subir Imagen</span>
               </button>
             </div>
@@ -769,8 +1192,8 @@
               <!-- Banner de trocada compacto -->
               <div id="modalUnifiedSummaryBanner" class="hidden text-[11px] p-2 rounded-lg border font-medium"></div>
 
-              <!-- Chips horizontales de tallas (Separados y Centrados) -->
-              <div id="modalUnifiedDifferencesContainer" class="flex flex-wrap gap-2 sm:gap-2.5 pt-1 pb-1">
+              <!-- Chips horizontales de tallas -->
+              <div id="modalUnifiedDifferencesContainer" class="flex flex-wrap gap-1.5 pt-0.5">
                 <!-- Chips generados dinámicamente -->
               </div>
             </div>
@@ -793,14 +1216,14 @@
               </div>
 
               <!-- Botón Ver Más / Ver Menos (se muestra si son más de 3 inventarios) -->
-              <button id="btnToggleAllRecurrences" type="button" class="hidden w-full text-center text-xs font-bold text-amber-800 hover:text-amber-950 py-2 px-3 rounded-xl bg-amber-100/50 hover:bg-amber-100 border border-amber-200/60 transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-target sm:min-w-0">
+              <button id="btnToggleAllRecurrences" type="button" class="hidden w-full text-center text-xs font-bold text-amber-800 hover:text-amber-950 py-1.5 px-2 rounded-lg bg-amber-100/50 hover:bg-amber-100 border border-amber-200/60 transition-colors flex items-center justify-center gap-1 cursor-pointer touch-target sm:min-w-0">
                 <span id="btnToggleAllRecurrencesText">Ver todas las fechas</span>
                 <i id="btnToggleAllRecurrencesIcon" data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
               </button>
             </div>
 
             <!-- FORMULARIO DE VALIDACIÓN MINIMALISTA -->
-            <div class="bg-white rounded-xl p-2.5 sm:p-3 border border-slate-200/80 shadow-2xs flex flex-col gap-2.5">
+            <div class="bg-white rounded-xl p-2.5 sm:p-3 border border-slate-200/80 shadow-2xs flex flex-col gap-2">
               <div class="flex items-center justify-between">
                 <label id="verdictOptionsLabel" class="text-xs font-bold text-slate-700 block">
                   Motivo de la diferencia:
@@ -810,25 +1233,25 @@
                 </span>
               </div>
 
-              <!-- Dictámenes en botones limpios y holgados (Separados y Centrados) -->
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3" id="verdictOptions">
+              <!-- Dictámenes en botones limpios de 1 sola línea (Pills) -->
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="verdictOptions">
                 <!-- Se genera dinámicamente según si es FALTANTE, SOBRANTE o EXACTO -->
               </div>
 
               <!-- Campo de Observaciones en 1 fila limpia -->
               <div>
                 <input id="validationNotes" type="text" placeholder="Observaciones para el correo (opcional)..."
-                       class="w-full text-xs py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder:text-slate-400">
+                       class="w-full text-xs py-1.5 px-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder:text-slate-400">
               </div>
 
               <!-- Botones de Acción Desktop -->
-              <div class="hidden sm:flex items-center justify-end gap-3 pt-2">
-                <button id="btnSaveValidationOnly" type="button" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors touch-target sm:min-w-0 cursor-pointer">
+              <div class="hidden sm:flex items-center justify-end gap-2 pt-0.5">
+                <button id="btnSaveValidationOnly" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors touch-target sm:min-w-0">
                   Solo Guardar
                 </button>
-                <button id="btnSaveAndNext" type="button" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-black transition-all shadow-md flex items-center justify-center gap-2 touch-target sm:min-w-0 cursor-pointer">
-                  <i data-lucide="check" class="w-4 h-4"></i>
-                  <span>Guardar y Siguiente</span>
+                <button id="btnSaveAndNext" type="button" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-black transition-all shadow-xs flex items-center justify-center gap-1.5 touch-target sm:min-w-0">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  Guardar y Siguiente
                 </button>
               </div>
             </div>
@@ -839,14 +1262,14 @@
 
       </div>
 
-      <!-- BARRA DE ACCIÓN INFERIOR FIJA PARA CELULARES (THUMB-FRIENDLY, SEPARADA Y CÓMODA) -->
-      <div class="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 flex items-center gap-3 shadow-lg safe-bottom z-10">
-        <button id="btnSaveValidationOnlyMobile" type="button" class="flex-1 py-3 px-4 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs active:bg-slate-100 touch-target cursor-pointer text-center">
+      <!-- BARRA DE ACCIÓN INFERIOR FIJA PARA CELULARES (THUMB-FRIENDLY) -->
+      <div class="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2.5 flex items-center gap-2 shadow-lg safe-bottom z-10">
+        <button id="btnSaveValidationOnlyMobile" type="button" class="flex-1 py-2.5 px-3 rounded-lg border border-slate-300 text-slate-700 font-bold text-xs active:bg-slate-100 touch-target">
           Solo Guardar
         </button>
-        <button id="btnSaveAndNextMobile" type="button" class="flex-2 py-3 px-4 rounded-xl bg-blue-600 active:bg-blue-800 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md touch-target cursor-pointer text-center">
-          <i data-lucide="check" class="w-4 h-4 shrink-0"></i>
-          <span>Guardar y Siguiente</span>
+        <button id="btnSaveAndNextMobile" type="button" class="flex-2 py-2.5 px-4 rounded-lg bg-blue-600 active:bg-blue-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md touch-target">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          Guardar y Siguiente
         </button>
       </div>
 
@@ -901,13 +1324,13 @@
 
         <div id="uploadStatusMessage" class="hidden text-xs p-3 rounded-lg"></div>
 
-        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" id="btnCancelUpload" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors touch-target cursor-pointer">
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" id="btnCancelUpload" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors touch-target">
             Cancelar
           </button>
-          <button type="submit" id="btnSubmitUpload" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-black transition-colors flex items-center justify-center gap-2 shadow-md touch-target cursor-pointer">
+          <button type="submit" id="btnSubmitUpload" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition-colors flex items-center gap-1.5 shadow-md touch-target">
             <i data-lucide="upload" class="w-4 h-4"></i>
-            <span>Cargar y Procesar</span>
+            Cargar y Procesar
           </button>
         </div>
       </form>
@@ -942,13 +1365,13 @@
           </select>
         </div>
 
-        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap sm:flex-nowrap">
-          <button id="btnDownloadModifiedExcelFromEmailModal" type="button" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all touch-target cursor-pointer" title="Descargar la plantilla Excel original modificada con las observaciones">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-300 shrink-0"></i>
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <button id="btnDownloadModifiedExcelFromEmailModal" type="button" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black text-xs px-3.5 py-2 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all touch-target cursor-pointer" title="Descargar la plantilla Excel original modificada con las observaciones">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-300"></i>
             <span>Descargar Excel para Adjuntar</span>
           </button>
-          <button id="btnCopyEmailTable" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all touch-target cursor-pointer" title="Copiar tabla formateada para pegar en Outlook o Gmail">
-            <i data-lucide="copy" class="w-4 h-4 shrink-0"></i>
+          <button id="btnCopyEmailTable" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs px-3.5 py-2 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all touch-target cursor-pointer" title="Copiar tabla formateada para pegar en Outlook o Gmail">
+            <i data-lucide="copy" class="w-4 h-4"></i>
             <span>Copiar Tabla (Ctrl + V)</span>
           </button>
         </div>
@@ -1003,12 +1426,12 @@
         </div>
 
         <!-- Chips de acceso rápido (Todos, Lunes, Miércoles, Este Mes) -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5">
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
           <span class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">Rápido:</span>
-          <button type="button" data-history-filter="all" class="history-chip active px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-xs cursor-pointer">Todos</button>
-          <button type="button" data-history-filter="lunes" class="history-chip px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Lunes</button>
-          <button type="button" data-history-filter="miercoles" class="history-chip px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Miércoles</button>
-          <button type="button" data-history-filter="this_month" class="history-chip px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Este Mes</button>
+          <button type="button" data-history-filter="all" class="history-chip active px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-xs">Todos</button>
+          <button type="button" data-history-filter="lunes" class="history-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Lunes</button>
+          <button type="button" data-history-filter="miercoles" class="history-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Miércoles</button>
+          <button type="button" data-history-filter="this_month" class="history-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100">Este Mes</button>
         </div>
       </div>
 
@@ -1020,7 +1443,7 @@
       <!-- Footer modal -->
       <div class="px-4 py-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
         <span id="auditHistoryCount" class="font-medium">Cargando inventarios...</span>
-        <button id="btnCloseAuditHistoryBottom" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-colors cursor-pointer">
+        <button id="btnCloseAuditHistoryBottom" class="px-4 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-colors">
           Cerrar
         </button>
       </div>
@@ -1042,12 +1465,12 @@
       </p>
 
       <!-- Selector de Modo de Conexión (Nube / Wi-Fi) -->
-      <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl w-full mt-3">
-        <button id="btnQRModeCloud" type="button" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+      <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full mt-3">
+        <button id="btnQRModeCloud" type="button" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-xs flex items-center justify-center gap-1">
           <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
           <span>En la Nube (4G/5G)</span>
         </button>
-        <button id="btnQRModeLocal" type="button" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer">
+        <button id="btnQRModeLocal" type="button" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1">
           <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
           <span>Wi-Fi Local</span>
         </button>
@@ -1059,7 +1482,7 @@
       <!-- Enlace directo -->
       <div class="w-full bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2">
         <span id="mobileUrlText" class="font-mono font-bold text-blue-700 truncate text-[11px] sm:text-xs select-all">https://...</span>
-        <button id="btnCopyMobileUrl" class="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-lg transition-colors shrink-0 touch-target cursor-pointer">
+        <button id="btnCopyMobileUrl" class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-lg transition-colors shrink-0 touch-target">
           Copiar
         </button>
       </div>
@@ -1068,7 +1491,7 @@
         💡 <strong class="text-blue-600 font-semibold">En la Nube</strong> funciona con cualquier celular (datos o Wi-Fi) y permite usar la cámara sin bloqueos de seguridad.
       </div>
 
-      <button id="btnCloseMobileQR" class="mt-3.5 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors w-full touch-target cursor-pointer">
+      <button id="btnCloseMobileQR" class="mt-3.5 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors w-full touch-target">
         Entendido / Cerrar
       </button>
     </div>
@@ -1109,11 +1532,11 @@
       </p>
 
       <!-- Botones de Acción -->
-      <div class="grid grid-cols-2 gap-3 w-full">
-        <button id="btnConfirmCancel" type="button" class="py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-bold text-xs transition-colors touch-target cursor-pointer">
+      <div class="grid grid-cols-2 gap-2.5 w-full">
+        <button id="btnConfirmCancel" type="button" class="py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-bold text-xs transition-colors touch-target">
           Cancelar
         </button>
-        <button id="btnConfirmAccept" type="button" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-2 touch-target cursor-pointer">
+        <button id="btnConfirmAccept" type="button" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-1.5 touch-target">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span id="confirmModalAcceptText">Eliminar</span>
         </button>
@@ -1152,12 +1575,106 @@
     </div>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL GESTIÓN DE COLABORADORES DE LA TIENDA                              -->
+  <!-- ========================================================================= -->
+  <div id="employeeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/70 backdrop-blur-xs transition-opacity">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-5 shadow-2xl border border-slate-200 flex flex-col gap-4 max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+            <i data-lucide="users" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-slate-900">Equipo de Tienda Seven Seven</h3>
+            <p class="text-[11px] text-slate-500">Colaboradores activos para la programación semanal de turnos</p>
+          </div>
+        </div>
+        <button id="btnCloseEmployeeModal" type="button" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Formulario para Agregar Colaborador -->
+      <form id="formAddEmployee" class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-2.5">
+        <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Agregar Nuevo Colaborador</span>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input type="text" id="inputEmpName" required placeholder="Nombre completo" class="bg-white text-xs rounded-lg px-2.5 py-1.5 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none sm:col-span-2">
+          <select id="selectEmpRole" class="bg-white text-xs font-semibold rounded-lg px-2 py-1.5 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            <option value="Asesor Comercial">Asesor Comercial</option>
+            <option value="Líder / Encargada">Líder / Encargada</option>
+            <option value="Auxiliar de Bodega">Auxiliar de Bodega</option>
+            <option value="Cajero">Cajero</option>
+          </select>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <select id="selectEmpColor" class="bg-white text-xs font-semibold rounded-lg px-2 py-1.5 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            <option value="blue">Color: Azul</option>
+            <option value="purple">Color: Púrpura</option>
+            <option value="emerald">Color: Verde</option>
+            <option value="amber">Color: Naranja</option>
+            <option value="rose">Color: Rosado</option>
+          </select>
+          <button type="submit" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>Registrar</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Lista de Colaboradores Existentes -->
+      <div class="overflow-y-auto flex-1 max-h-60 divide-y divide-slate-100 pr-1" id="employeesListContainer">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+      <div class="border-t border-slate-100 pt-2 flex justify-end">
+        <button id="btnCloseEmployeeModalBottom" type="button" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl cursor-pointer">
+          Listo / Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL VISTA PREVIA Y COPIAR WHATSAPP                                     -->
+  <!-- ========================================================================= -->
+  <div id="whatsappModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/70 backdrop-blur-xs transition-opacity">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-5 shadow-2xl border border-slate-200 flex flex-col gap-3 max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-slate-900">Horario para WhatsApp</h3>
+            <p class="text-[11px] text-slate-500">Listo para copiar y enviar directamente al grupo de la tienda</p>
+          </div>
+        </div>
+        <button id="btnCloseWhatsappModal" type="button" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="relative">
+        <textarea id="whatsappTextarea" readonly class="w-full h-64 bg-slate-50 text-slate-800 text-xs font-mono p-3 rounded-xl border border-slate-200 focus:outline-none select-all resize-none leading-relaxed"></textarea>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-1">
+        <span class="text-[11px] text-slate-400">💡 Al pulsar copiar, se guardará en tu portapapeles.</span>
+        <button id="btnDoCopyWhatsapp" type="button" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          <span>Copiar al Portapapeles</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICACIONES FLOTANTE RESPONSIVO -->
   <div id="toast" class="fixed bottom-4 sm:bottom-5 inset-x-4 sm:inset-x-auto sm:right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none">
     <span id="toastIcon" class="shrink-0"></span>
     <span id="toastMessage" class="flex-1">Mensaje</span>
   </div>
 
-  <script src="app.js?v=3.5"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 </html>

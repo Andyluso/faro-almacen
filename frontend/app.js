@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadDatabaseStatus();
   await loadAudits();
   await loadCatalogStats();
+  await initHubAndRouter();
 });
 
 function initIcons() {
@@ -742,11 +743,11 @@ function updateActiveFilterBadges() {
     const drawer = document.getElementById('filterDrawer');
     const isOpen = drawer && !drawer.classList.contains('hidden');
     if (isOpen) {
-      btnToggle.className = 'relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-blue-50 border border-blue-500 text-blue-700 shadow-xs transition-all cursor-pointer touch-target group ring-2 ring-blue-500/20 gap-2';
+      btnToggle.className = 'relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-blue-50 border border-blue-500 text-blue-700 shadow-xs transition-all cursor-pointer touch-target group ring-2 ring-blue-500/20';
     } else if (activeCount > 0) {
-      btnToggle.className = 'relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-blue-50/80 border border-blue-400 text-blue-800 shadow-xs transition-all cursor-pointer touch-target group gap-2';
+      btnToggle.className = 'relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-blue-50/80 border border-blue-400 text-blue-800 shadow-xs transition-all cursor-pointer touch-target group';
     } else {
-      btnToggle.className = 'relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group gap-2';
+      btnToggle.className = 'relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group';
     }
   }
 
@@ -757,9 +758,9 @@ function updateActiveFilterBadges() {
 
     if (activeCount > 0 && !isOpen) {
       summaryBar.innerHTML = activeTags.map(tag => `
-        <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 shadow-2xs">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200">
           <span>${tag.label}</span>
-          <button type="button" class="text-slate-400 hover:text-red-500 p-0.5 rounded transition-colors cursor-pointer" onclick="removeSpecificFilter('${tag.type}')" title="Quitar este filtro">
+          <button type="button" class="text-slate-400 hover:text-red-500 ml-0.5" onclick="removeSpecificFilter('${tag.type}')" title="Quitar este filtro">
             ×
           </button>
         </span>
@@ -1568,10 +1569,10 @@ function renderUnifiedDifferences(item) {
     return `
       <button type="button" 
               onclick="jumpToSiblingItem(${sib.id})" 
-              class="px-3.5 py-1.5 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${chipStyle}"
+              class="px-2.5 py-1 rounded-lg text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer ${chipStyle}"
               title="Talla ${sib.size}: Físico ${totalPhys} / Teórico ${sib.theoretical_count}">
         <span>${validatedCheck}Talla ${sib.size}</span>
-        <span class="text-[10px] px-1.5 py-0.5 rounded-md font-black badge-pill ${isCurrent ? 'bg-white/25 text-white' : 'bg-black/5'}">${diffTag}</span>
+        <span class="text-[10px] px-1 py-0.5 rounded font-black badge-pill ${isCurrent ? 'bg-white/25 text-white' : 'bg-black/5'}">${diffTag}</span>
       </button>
     `;
   }).join('');
@@ -1630,16 +1631,16 @@ function renderVerdictOptions(item) {
   container.innerHTML = options.map(opt => {
     const isSelected = (currentSelectedVerdict === opt.id);
     const selectedClass = isSelected
-      ? 'bg-blue-600 text-white font-black shadow-xs ring-2 ring-blue-500/30'
+      ? 'bg-blue-600 text-white font-black shadow-xs ring-1 ring-blue-500'
       : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold';
 
     return `
       <button type="button" 
               data-verdict="${opt.id}" 
-              class="verdict-btn py-2.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-[13px] inline-flex items-center justify-center gap-2 transition-all touch-target sm:min-w-0 cursor-pointer ${selectedClass}"
+              class="verdict-btn py-2 px-2.5 rounded-lg text-xs inline-flex items-center justify-center gap-1.5 transition-all touch-target sm:min-w-0 cursor-pointer ${selectedClass}"
               title="${opt.label}">
-        <span class="text-xs sm:text-sm leading-none shrink-0">${opt.icon}</span>
-        <span class="truncate text-center">${opt.label}</span>
+        <span class="text-xs leading-none shrink-0">${opt.icon}</span>
+        <span class="truncate">${opt.label}</span>
       </button>
     `;
   }).join('');
@@ -1649,9 +1650,9 @@ function selectVerdict(verdict) {
   currentSelectedVerdict = verdict;
   document.querySelectorAll('#verdictOptions .verdict-btn').forEach(b => {
     if (b.dataset.verdict === currentSelectedVerdict) {
-      b.className = 'verdict-btn py-2.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-[13px] inline-flex items-center justify-center gap-2 transition-all touch-target sm:min-w-0 bg-blue-600 text-white font-black shadow-xs ring-2 ring-blue-500/30 cursor-pointer';
+      b.className = 'verdict-btn py-2 px-2.5 rounded-lg text-xs inline-flex items-center justify-center gap-1.5 transition-all touch-target sm:min-w-0 bg-blue-600 text-white font-black shadow-xs ring-1 ring-blue-500 cursor-pointer';
     } else {
-      b.className = 'verdict-btn py-2.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-[13px] inline-flex items-center justify-center gap-2 transition-all touch-target sm:min-w-0 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold cursor-pointer';
+      b.className = 'verdict-btn py-2 px-2.5 rounded-lg text-xs inline-flex items-center justify-center gap-1.5 transition-all touch-target sm:min-w-0 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold cursor-pointer';
     }
   });
 }
@@ -2082,20 +2083,20 @@ function renderAuditHistoryList() {
           </div>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 self-end sm:self-center">
-          <a href="/api/audits/${a.id}/download-original" download class="px-3 py-1.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 transition-colors flex items-center justify-center gap-1.5 text-xs" title="Descargar documento Excel original de este inventario">
+        <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+          <a href="/api/audits/${a.id}/download-original" download class="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 transition-colors flex items-center gap-1 text-xs" title="Descargar documento Excel original de este inventario">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span class="hidden md:inline font-semibold">Excel</span>
           </a>
-          <button type="button" onclick="selectAuditFromHistory(${a.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+          <button type="button" onclick="selectAuditFromHistory(${a.id})" class="px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
             isCurrent
               ? 'bg-blue-600 text-white shadow-xs cursor-default'
-              : 'bg-slate-900 hover:bg-blue-600 active:bg-blue-700 text-white shadow-xs cursor-pointer'
-          } flex items-center justify-center gap-1.5">
+              : 'bg-slate-900 hover:bg-blue-600 active:bg-blue-700 text-white shadow-xs'
+          } flex items-center gap-1.5">
             <i data-lucide="${isCurrent ? 'check' : 'arrow-right'}" class="w-3.5 h-3.5"></i>
-            <span>${isCurrent ? 'Activo' : 'Cargar'}</span>
+            ${isCurrent ? 'Activo' : 'Cargar'}
           </button>
-          <button type="button" onclick="deleteAuditFromHistory(${a.id})" class="px-3 py-1.5 rounded-xl text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-600 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer" title="Eliminar este archivo de inventario">
+          <button type="button" onclick="deleteAuditFromHistory(${a.id})" class="px-2.5 py-1.5 rounded-lg text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-600 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs" title="Eliminar este archivo de inventario">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             <span class="hidden xs:inline">Eliminar</span>
           </button>
@@ -3243,11 +3244,11 @@ function renderCatalogGrid(items) {
     const imageSection = item.photo_url
       ? `<div class="relative w-full h-44 sm:h-48 bg-slate-100 flex items-center justify-center overflow-hidden group cursor-pointer" onclick="zoomCatalogPhoto('${item.photo_url}', '${escapeHtml(item.name)}', '${escapeHtml(item.master_ref)}')">
            <img src="${item.photo_url}" alt="${escapeHtml(item.name)}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200" loading="lazy">
-           <div class="absolute top-2.5 right-2.5 flex items-center gap-2">
-             <button type="button" onclick="event.stopPropagation(); triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}');" class="bg-slate-900/75 hover:bg-slate-900 text-white p-2 rounded-xl shadow-sm backdrop-blur-xs transition-colors cursor-pointer" title="Cambiar foto universal">
+           <div class="absolute top-2 right-2 flex items-center gap-1">
+             <button type="button" onclick="event.stopPropagation(); triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}');" class="bg-slate-900/75 hover:bg-slate-900 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Cambiar foto universal">
                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
              </button>
-             <button type="button" onclick="event.stopPropagation(); deleteReferencePhoto('${escapeHtml(item.master_ref)}');" class="bg-red-600/85 hover:bg-red-700 text-white p-2 rounded-xl shadow-sm backdrop-blur-xs transition-colors cursor-pointer" title="Eliminar foto incorrecta del catálogo">
+             <button type="button" onclick="event.stopPropagation(); deleteReferencePhoto('${escapeHtml(item.master_ref)}');" class="bg-red-600/85 hover:bg-red-700 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Eliminar foto incorrecta del catálogo">
                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
              </button>
            </div>
@@ -3257,7 +3258,7 @@ function renderCatalogGrid(items) {
              <i data-lucide="camera" class="w-5 h-5"></i>
            </div>
            <span class="text-xs font-bold text-slate-600">Sin foto registrada</span>
-           <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}')" class="mt-2.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs inline-flex items-center justify-center gap-2 transition-colors cursor-pointer">
+           <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}')" class="mt-2.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
              <i data-lucide="camera" class="w-3.5 h-3.5 shrink-0"></i>
              <span>Subir Foto</span>
            </button>
@@ -3319,7 +3320,7 @@ function renderCatalogGrid(items) {
 
         <!-- Botón Inferior: Abrir en Auditoría -->
         <div class="p-3 pt-0">
-          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
+          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
             <i data-lucide="clipboard-check" class="w-4 h-4 text-blue-600 shrink-0"></i>
             <span>Consultar en Auditoría</span>
           </button>
@@ -3367,7 +3368,7 @@ function renderCatalogTable(items) {
           </div>
         </td>
         <td class="py-2.5 px-3 align-middle text-center">
-          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
+          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer">
             <i data-lucide="clipboard-check" class="w-3.5 h-3.5 shrink-0"></i>
             <span>Auditar</span>
           </button>
@@ -3531,18 +3532,18 @@ function zoomCatalogPhoto(photoUrl, title, ref) {
       <div class="p-4 bg-slate-100 flex items-center justify-center overflow-auto max-h-[70vh]">
         <img src="${photoUrl}" alt="${escapeHtml(title)}" class="max-h-[65vh] w-auto object-contain rounded-lg shadow-sm">
       </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2.5 sm:gap-3 flex-wrap">
-        <div class="flex items-center gap-2 sm:gap-2.5">
-          <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer">
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
             <i data-lucide="camera" class="w-3.5 h-3.5"></i>
             <span>Cambiar Foto</span>
           </button>
-          <button type="button" onclick="deleteReferencePhoto('${escapeHtml(ref)}');" class="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer" title="Eliminar foto incorrecta">
+          <button type="button" onclick="deleteReferencePhoto('${escapeHtml(ref)}');" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer" title="Eliminar foto incorrecta">
             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-600"></i>
             <span>Eliminar Foto</span>
           </button>
         </div>
-        <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer">
+        <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
           <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
           <span>Buscar en Auditoría</span>
         </button>
@@ -3652,14 +3653,14 @@ function renderFilesSection() {
           </div>
         </div>
 
-        <!-- Acciones Directas del Archivo (Separadas y Centradas) -->
-        <div class="flex items-center gap-2 sm:gap-2.5 pt-2.5 border-t border-slate-100">
-          <a href="/api/audits/${audit.id}/download-original" download class="flex-1 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition-colors inline-flex items-center justify-center gap-2 shadow-2xs whitespace-nowrap" title="Descargar archivo Excel original subido">
+        <!-- Acciones Directas del Archivo -->
+        <div class="flex items-center gap-1.5 pt-2.5 border-t border-slate-100">
+          <a href="/api/audits/${audit.id}/download-original" download class="flex-1 py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap" title="Descargar archivo Excel original subido">
             <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
             <span>Descargar .xlsx</span>
           </a>
 
-          <button type="button" onclick="selectAuditAndSwitchToAuditTab(${audit.id})" class="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-2 shadow-2xs whitespace-nowrap cursor-pointer" title="Abrir y conciliar en pestaña Auditoría">
+          <button type="button" onclick="selectAuditAndSwitchToAuditTab(${audit.id})" class="flex-1 py-2 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap cursor-pointer" title="Abrir y conciliar en pestaña Auditoría">
             <i data-lucide="clipboard-check" class="w-3.5 h-3.5 shrink-0"></i>
             <span>Auditar</span>
           </button>
@@ -3807,4 +3808,926 @@ function initPwaSupport() {
     }
   }
 }
+
+// ============================================================================
+// MODULO: PORTAL / HUB OPERATIVO, HORARIOS Y TAREAS SEVEN SEVEN
+// ============================================================================
+
+let currentPortalView = 'hub'; // 'hub' | 'faro' | 'schedules' | 'tasks' | 'catalog'
+let hubSummaryData = null;
+
+// Colaboradores y Horarios
+let employeesList = [];
+let currentScheduleWeek = ''; // YYYY-MM-DD (lunes)
+let scheduleData = null;
+
+// Tareas
+let tasksList = [];
+let currentTasksFilter = 'today';
+
+const STORE_SHIFT_TYPES = {
+  'Apertura': { label: 'Apertura', time: '09:00 - 18:00', hours: 8, icon: '🌅', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  'Cierre': { label: 'Cierre', time: '12:00 - 21:00', hours: 8, icon: '🌙', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  'Intermedio': { label: 'Intermedio', time: '10:00 - 19:00', hours: 8, icon: '☀️', color: 'bg-amber-50 text-amber-800 border-amber-200' },
+  'FDS / Pico': { label: 'FDS / Pico', time: '11:00 - 20:00', hours: 8, icon: '⚡', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  'Libre': { label: 'Libre', time: 'Descanso', hours: 0, icon: '🌴', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  'Vacaciones': { label: 'Vacaciones', time: 'Vacaciones', hours: 0, icon: '✈️', color: 'bg-slate-100 text-slate-700 border-slate-200' },
+  'Incapacidad': { label: 'Incapacidad', time: 'Médica', hours: 0, icon: '🏥', color: 'bg-rose-50 text-rose-700 border-rose-200' }
+};
+
+const STORE_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const STORE_DAYS_FULL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+function getMondayOfDate(d) {
+  const dateObj = new Date(d);
+  const day = dateObj.getDay();
+  const diff = dateObj.getDate() - day + (day === 0 ? -6 : 1);
+  dateObj.setDate(diff);
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const dateNum = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${dateNum}`;
+}
+
+function shiftMonday(mondayStr, daysOffset) {
+  const [y, m, d] = mondayStr.split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  dateObj.setDate(dateObj.getDate() + daysOffset);
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const dateNum = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${dateNum}`;
+}
+
+async function initHubAndRouter() {
+  currentScheduleWeek = getMondayOfDate(new Date());
+
+  // Listeners de navegación del Hub
+  const btnBack = document.getElementById('btnBackToHub');
+  const brand = document.getElementById('brandHeader');
+  if (btnBack) btnBack.addEventListener('click', () => switchPortalView('hub'));
+  if (brand) brand.addEventListener('click', () => switchPortalView('hub'));
+
+  // Tarjetas del Hub
+  const cardFaro = document.getElementById('cardLaunchFaro');
+  const cardSchedules = document.getElementById('cardLaunchSchedules');
+  const cardTasks = document.getElementById('cardLaunchTasks');
+  const cardCatalog = document.getElementById('cardLaunchCatalog');
+
+  const quickFaro = document.getElementById('hubQuickFaro');
+  const quickSchedule = document.getElementById('hubQuickSchedule');
+  const quickTasks = document.getElementById('hubQuickTasks');
+
+  if (cardFaro) cardFaro.addEventListener('click', () => switchPortalView('faro'));
+  if (cardSchedules) cardSchedules.addEventListener('click', () => switchPortalView('schedules'));
+  if (cardTasks) cardTasks.addEventListener('click', () => switchPortalView('tasks'));
+  if (cardCatalog) cardCatalog.addEventListener('click', () => switchPortalView('catalog'));
+
+  if (quickFaro) quickFaro.addEventListener('click', () => switchPortalView('faro'));
+  if (quickSchedule) quickSchedule.addEventListener('click', () => switchPortalView('schedules'));
+  if (quickTasks) quickTasks.addEventListener('click', () => switchPortalView('tasks'));
+
+  // Eventos de Horarios
+  const btnPrevWeek = document.getElementById('btnPrevWeek');
+  const btnCurrentWeek = document.getElementById('btnCurrentWeek');
+  const btnNextWeek = document.getElementById('btnNextWeek');
+  const btnSaveSched = document.getElementById('btnSaveSchedule');
+  const btnCopyWp = document.getElementById('btnCopyWhatsapp');
+  const btnPrintSched = document.getElementById('btnPrintSchedule');
+  const btnManageEmp = document.getElementById('btnManageEmployees');
+
+  if (btnPrevWeek) btnPrevWeek.addEventListener('click', () => {
+    currentScheduleWeek = shiftMonday(currentScheduleWeek, -7);
+    loadWeeklySchedule(currentScheduleWeek);
+  });
+  if (btnCurrentWeek) btnCurrentWeek.addEventListener('click', () => {
+    currentScheduleWeek = getMondayOfDate(new Date());
+    loadWeeklySchedule(currentScheduleWeek);
+  });
+  if (btnNextWeek) btnNextWeek.addEventListener('click', () => {
+    currentScheduleWeek = shiftMonday(currentScheduleWeek, 7);
+    loadWeeklySchedule(currentScheduleWeek);
+  });
+  if (btnSaveSched) btnSaveSched.addEventListener('click', saveScheduleShifts);
+  if (btnCopyWp) btnCopyWp.addEventListener('click', openWhatsappModal);
+  if (btnPrintSched) btnPrintSched.addEventListener('click', () => window.print());
+  if (btnManageEmp) btnManageEmp.addEventListener('click', openEmployeeModal);
+
+  // Modal de WhatsApp
+  const btnCloseWp = document.getElementById('btnCloseWhatsappModal');
+  const btnDoCopyWp = document.getElementById('btnDoCopyWhatsapp');
+  if (btnCloseWp) btnCloseWp.addEventListener('click', () => {
+    document.getElementById('whatsappModal')?.classList.add('hidden');
+  });
+  if (btnDoCopyWp) btnDoCopyWp.addEventListener('click', doCopyWhatsappText);
+
+  // Modal de Empleados
+  const btnCloseEmp = document.getElementById('btnCloseEmployeeModal');
+  const btnCloseEmpBottom = document.getElementById('btnCloseEmployeeModalBottom');
+  const formAddEmp = document.getElementById('formAddEmployee');
+  if (btnCloseEmp) btnCloseEmp.addEventListener('click', () => {
+    document.getElementById('employeeModal')?.classList.add('hidden');
+  });
+  if (btnCloseEmpBottom) btnCloseEmpBottom.addEventListener('click', () => {
+    document.getElementById('employeeModal')?.classList.add('hidden');
+  });
+  if (formAddEmp) formAddEmp.addEventListener('submit', handleAddEmployee);
+
+  // Eventos de Tareas
+  const formNewTask = document.getElementById('formNewTask');
+  if (formNewTask) formNewTask.addEventListener('submit', handleCreateTask);
+
+  const tasksChips = document.querySelectorAll('.tasks-chip');
+  tasksChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      tasksChips.forEach(c => {
+        c.className = 'tasks-chip px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0';
+      });
+      chip.className = 'tasks-chip active px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-xs cursor-pointer shrink-0';
+      currentTasksFilter = chip.getAttribute('data-tasks-filter');
+      renderTasksList();
+    });
+  });
+
+  // Router por URL hash
+  window.addEventListener('hashchange', handleHashChange);
+  handleHashChange();
+}
+
+function handleHashChange() {
+  const hash = window.location.hash.replace('#', '').toLowerCase();
+  if (hash === 'faro') {
+    switchPortalView('faro', false);
+  } else if (hash === 'horarios' || hash === 'schedules') {
+    switchPortalView('schedules', false);
+  } else if (hash === 'tareas' || hash === 'tasks') {
+    switchPortalView('tasks', false);
+  } else if (hash === 'catalogo' || hash === 'catalog') {
+    switchPortalView('catalog', false);
+  } else {
+    switchPortalView('hub', false);
+  }
+}
+
+async function switchPortalView(viewName, updateHash = true) {
+  currentPortalView = viewName;
+  if (updateHash) {
+    if (viewName === 'hub') window.location.hash = '';
+    else if (viewName === 'faro') window.location.hash = '#faro';
+    else if (viewName === 'schedules') window.location.hash = '#horarios';
+    else if (viewName === 'tasks') window.location.hash = '#tareas';
+    else if (viewName === 'catalog') window.location.hash = '#catalogo';
+  }
+
+  const vHub = document.getElementById('viewHub');
+  const vFaro = document.getElementById('viewFaro');
+  const vSchedules = document.getElementById('viewSchedules');
+  const vTasks = document.getElementById('viewTasks');
+
+  const btnBack = document.getElementById('btnBackToHub');
+  const faroActions = document.getElementById('faroHeaderActions');
+  const auditBar = document.getElementById('auditSelectorBar');
+  const faroTabs = document.getElementById('faroTabsBar');
+
+  const titleEl = document.getElementById('headerTitle');
+  const subEl = document.getElementById('headerSubtitle');
+
+  // Ocultar todas las vistas
+  if (vHub) vHub.classList.add('hidden');
+  if (vFaro) vFaro.classList.add('hidden');
+  if (vSchedules) vSchedules.classList.add('hidden');
+  if (vTasks) vTasks.classList.add('hidden');
+
+  if (viewName === 'hub') {
+    if (vHub) vHub.classList.remove('hidden');
+    if (btnBack) btnBack.classList.add('hidden');
+    if (faroActions) faroActions.classList.add('hidden');
+    if (auditBar) auditBar.classList.add('hidden');
+    if (faroTabs) faroTabs.classList.add('hidden');
+
+    if (titleEl) titleEl.textContent = 'FARO';
+    if (subEl) subEl.textContent = 'Portal Operativo Seven Seven';
+    await loadHubSummary();
+  } else if (viewName === 'faro') {
+    if (vFaro) vFaro.classList.remove('hidden');
+    if (btnBack) btnBack.classList.remove('hidden');
+    if (faroActions) faroActions.classList.remove('hidden');
+    if (auditBar) auditBar.classList.remove('hidden');
+    if (faroTabs) faroTabs.classList.remove('hidden');
+
+    if (titleEl) titleEl.textContent = 'FARO · Inventario';
+    if (subEl) subEl.textContent = 'Conciliación de Diferencias y Auditoría RFID';
+    switchTab('audit');
+  } else if (viewName === 'schedules') {
+    if (vSchedules) vSchedules.classList.remove('hidden');
+    if (btnBack) btnBack.classList.remove('hidden');
+    if (faroActions) faroActions.classList.add('hidden');
+    if (auditBar) auditBar.classList.add('hidden');
+    if (faroTabs) faroTabs.classList.add('hidden');
+
+    if (titleEl) titleEl.textContent = 'Creador de Horarios';
+    if (subEl) subEl.textContent = 'Planificador Semanal Tienda Seven Seven';
+    await loadWeeklySchedule(currentScheduleWeek);
+  } else if (viewName === 'tasks') {
+    if (vTasks) vTasks.classList.remove('hidden');
+    if (btnBack) btnBack.classList.remove('hidden');
+    if (faroActions) faroActions.classList.add('hidden');
+    if (auditBar) auditBar.classList.add('hidden');
+    if (faroTabs) faroTabs.classList.add('hidden');
+
+    if (titleEl) titleEl.textContent = 'Tareas y Recordatorios';
+    if (subEl) subEl.textContent = 'Rutinas Operativas Diarias y Auditorías';
+    await loadTasks();
+  } else if (viewName === 'catalog') {
+    if (vFaro) vFaro.classList.remove('hidden');
+    if (btnBack) btnBack.classList.remove('hidden');
+    if (faroActions) faroActions.classList.add('hidden');
+    if (auditBar) auditBar.classList.add('hidden');
+    if (faroTabs) faroTabs.classList.remove('hidden');
+
+    if (titleEl) titleEl.textContent = 'Catálogo Maestro';
+    if (subEl) subEl.textContent = 'Buscador y Directorio de Referencias';
+    switchTab('catalog');
+  }
+
+  initIcons();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ----------------------------------------------------------------------------
+// LOGICA DE HUB SUMMARY
+// ----------------------------------------------------------------------------
+async function loadHubSummary() {
+  try {
+    const res = await fetch('/api/hub/summary');
+    if (!res.ok) return;
+    hubSummaryData = await res.json();
+
+    const dayBadge = document.getElementById('hubLiveDayBadge');
+    if (dayBadge) {
+      dayBadge.textContent = `Hoy: ${hubSummaryData.today_day_name || ''} · ${hubSummaryData.today_date || ''}`;
+    }
+
+    // Alerta contextual
+    const alertText = document.getElementById('hubDayAlertText');
+    if (alertText) {
+      const dName = (hubSummaryData.today_day_name || '').toLowerCase();
+      if (dName.includes('lunes')) {
+        alertText.innerHTML = '<strong>Lunes de Auditoría:</strong> Recuerda tomar lectura con pistola RFID, subir el archivo a FARO y conciliar diferencias.';
+      } else if (dName.includes('miércoles') || dName.includes('miercoles')) {
+        alertText.innerHTML = '<strong>Miércoles de Informe:</strong> Realiza el segundo conteo semanal de diferencias y descarga el Excel oficial para enviar por correo.';
+      } else if (dName.includes('sábado') || dName.includes('domingo')) {
+        alertText.innerHTML = '<strong>Fin de Semana de Tráfico Alto:</strong> Supervisa reposición continua desde bodega y sensorizado de prendas en probadores.';
+      } else {
+        alertText.innerHTML = '<strong>Operación Diaria:</strong> Revisa la apertura, fondos de caja, reposición de tallas faltantes y sensorizado RFID.';
+      }
+    }
+
+    // Info Tarjeta FARO
+    const auditInfo = document.getElementById('hubCardAuditInfo');
+    if (auditInfo) {
+      if (hubSummaryData.latest_audit) {
+        const la = hubSummaryData.latest_audit;
+        auditInfo.textContent = `Última: ${la.total_items} prendas (${la.total_faltantes} faltantes, ${la.total_sobrantes} sobrantes)`;
+      } else {
+        auditInfo.textContent = 'Sin inventarios cargados';
+      }
+    }
+
+    // Info Tarjeta Horarios
+    const schedInfo = document.getElementById('hubCardScheduleInfo');
+    if (schedInfo) {
+      const sc = hubSummaryData.schedules_summary;
+      schedInfo.textContent = `${sc.active_employees} colaboradores · ${sc.total_hours || 0} hrs asignadas`;
+    }
+
+    // Info Tarjeta Tareas
+    const tasksInfo = document.getElementById('hubCardTasksInfo');
+    const quickTasksCount = document.getElementById('hubQuickTasksCount');
+    if (tasksInfo) {
+      const ts = hubSummaryData.tasks_summary;
+      tasksInfo.textContent = `${ts.today_pending} pendientes para hoy (${ts.pending} total)`;
+    }
+    if (quickTasksCount) {
+      quickTasksCount.textContent = hubSummaryData.tasks_summary?.today_pending || 0;
+    }
+
+    // Info Tarjeta Catálogo
+    const catInfo = document.getElementById('hubCardCatalogInfo');
+    if (catInfo) {
+      const cs = hubSummaryData.catalog_summary;
+      catInfo.textContent = `${cs.total_models} modelos (${cs.total_photos} fotos)`;
+    }
+
+  } catch (err) {
+    console.warn('[Hub Summary Error]', err);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// LOGICA DE CREADOR DE HORARIOS SEMANALES
+// ----------------------------------------------------------------------------
+async function loadWeeklySchedule(weekStartDate) {
+  try {
+    const res = await fetch(`/api/schedules/week/${weekStartDate}`);
+    if (!res.ok) throw new Error('Error al cargar horario');
+    scheduleData = await res.json();
+
+    await loadEmployees();
+    renderScheduleGrid();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al cargar la programación de horarios', 'error');
+  }
+}
+
+async function loadEmployees() {
+  try {
+    const res = await fetch('/api/employees?active_only=true');
+    if (res.ok) {
+      employeesList = await res.json();
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+function renderScheduleGrid() {
+  if (!scheduleData) return;
+
+  const start = scheduleData.week_start_date;
+  const end = scheduleData.week_end_date;
+
+  const [sy, sm, sd] = start.split('-').map(Number);
+  const [ey, em, ed] = end.split('-').map(Number);
+
+  const titleEl = document.getElementById('scheduleWeekTitle');
+  const printSub = document.getElementById('printScheduleSubtitle');
+  const subEl = document.getElementById('scheduleWeekSubtitle');
+
+  const titleText = `Semana: Lunes ${String(sd).padStart(2,'0')}/${String(sm).padStart(2,'0')} al Domingo ${String(ed).padStart(2,'0')}/${String(em).padStart(2,'0')}/${ey}`;
+  if (titleEl) titleEl.textContent = titleText;
+  if (printSub) printSub.textContent = titleText;
+  if (subEl) subEl.textContent = `${employeesList.length} colaboradores activos · 47 horas reglamentarias por semana`;
+
+  const notesInput = document.getElementById('scheduleNotesInput');
+  if (notesInput) notesInput.value = scheduleData.notes || '';
+
+  // Actualizar encabezados con fecha de cada día
+  const dayHeaderKeys = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+  for (let i = 0; i < 7; i++) {
+    const dCur = new Date(sy, sm - 1, sd + i);
+    const dayDateStr = `${String(dCur.getDate()).padStart(2, '0')}/${String(dCur.getMonth() + 1).padStart(2, '0')}`;
+    const el = document.getElementById(`colDate${dayHeaderKeys[i]}`);
+    if (el) el.textContent = dayDateStr;
+  }
+
+  const tbody = document.getElementById('scheduleTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (employeesList.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="p-8 text-center text-slate-400">
+          No hay colaboradores registrados en la tienda. Haz clic en <strong>Equipo</strong> para registrar al personal.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  employeesList.forEach(emp => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-slate-50/70 transition-colors';
+
+    let rowHtml = `
+      <td class="py-2.5 px-3 sm:px-4 sticky left-0 bg-white z-10 border-r border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full ${emp.color_tag === 'purple' ? 'bg-purple-500' : emp.color_tag === 'emerald' ? 'bg-emerald-500' : emp.color_tag === 'amber' ? 'bg-amber-500' : emp.color_tag === 'rose' ? 'bg-rose-500' : 'bg-blue-500'} shrink-0"></div>
+          <div class="min-w-0">
+            <span class="font-black text-slate-900 block truncate text-xs sm:text-sm">${emp.name}</span>
+            <span class="text-[10px] text-slate-400 font-medium block truncate">${emp.role}</span>
+          </div>
+        </div>
+      </td>
+    `;
+
+    // Celdas de turnos (Lun .. Dom)
+    STORE_DAYS.forEach((day, dIdx) => {
+      const shift = (scheduleData.shifts || []).find(s => s.employee_id === emp.id && s.day_of_week === day);
+      const selectedType = shift ? shift.shift_type : (dIdx === 6 ? 'Libre' : 'Apertura');
+
+      const isWeekend = dIdx >= 5;
+      rowHtml += `
+        <td class="p-1 sm:p-1.5 text-center ${isWeekend ? 'bg-slate-50/50' : ''}">
+          <select data-emp-id="${emp.id}" data-day="${day}" class="shift-selector w-full bg-white text-[11px] font-bold rounded-lg px-1.5 py-1.5 border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all cursor-pointer truncate">
+            ${Object.entries(STORE_SHIFT_TYPES).map(([stKey, stVal]) => `
+              <option value="${stKey}" ${stKey === selectedType ? 'selected' : ''}>
+                ${stVal.icon} ${stVal.label} (${stVal.hours}h)
+              </option>
+            `).join('')}
+          </select>
+        </td>
+      `;
+    });
+
+    // Celda Total Horas
+    rowHtml += `
+      <td class="py-2.5 px-2 sm:px-3 text-center bg-slate-50/70 border-l border-slate-100">
+        <span id="empHours_${emp.id}" class="badge-pill px-2.5 py-1 rounded-full text-xs font-black">
+          0h
+        </span>
+      </td>
+    `;
+
+    tr.innerHTML = rowHtml;
+    tbody.appendChild(tr);
+  });
+
+  // Listeners para selects
+  document.querySelectorAll('.shift-selector').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const empId = parseInt(e.target.getAttribute('data-emp-id'), 10);
+      const day = e.target.getAttribute('data-day');
+      const shiftType = e.target.value;
+      const shiftInfo = STORE_SHIFT_TYPES[shiftType] || { time: '', hours: 0 };
+
+      if (!scheduleData.shifts) scheduleData.shifts = [];
+      const existingIdx = scheduleData.shifts.findIndex(s => s.employee_id === empId && s.day_of_week === day);
+      if (existingIdx >= 0) {
+        scheduleData.shifts[existingIdx].shift_type = shiftType;
+        scheduleData.shifts[existingIdx].hours = shiftInfo.hours;
+        scheduleData.shifts[existingIdx].start_time = shiftInfo.time.split(' - ')[0] || '';
+        scheduleData.shifts[existingIdx].end_time = shiftInfo.time.split(' - ')[1] || '';
+      } else {
+        scheduleData.shifts.push({
+          schedule_id: scheduleData.id,
+          employee_id: empId,
+          day_of_week: day,
+          shift_type: shiftType,
+          hours: shiftInfo.hours,
+          start_time: shiftInfo.time.split(' - ')[0] || '',
+          end_time: shiftInfo.time.split(' - ')[1] || '',
+          notes: ''
+        });
+      }
+
+      calculateScheduleMetrics();
+    });
+  });
+
+  calculateScheduleMetrics();
+}
+
+function calculateScheduleMetrics() {
+  if (!scheduleData || !employeesList.length) return;
+
+  const dayCoverage = { 'Lun': 0, 'Mar': 0, 'Mié': 0, 'Jue': 0, 'Vie': 0, 'Sáb': 0, 'Dom': 0 };
+  let grandTotalHours = 0;
+
+  employeesList.forEach(emp => {
+    let empHours = 0;
+    STORE_DAYS.forEach(day => {
+      const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
+      const shiftType = sel ? sel.value : 'Libre';
+      const info = STORE_SHIFT_TYPES[shiftType] || { hours: 0 };
+      empHours += info.hours;
+
+      if (shiftType !== 'Libre' && shiftType !== 'Vacaciones' && shiftType !== 'Incapacidad') {
+        dayCoverage[day] = (dayCoverage[day] || 0) + 1;
+      }
+    });
+
+    grandTotalHours += empHours;
+
+    const pill = document.getElementById(`empHours_${emp.id}`);
+    if (pill) {
+      pill.textContent = `${empHours}h`;
+      if (empHours >= 47 && empHours <= 48) {
+        pill.className = 'badge-pill px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+      } else if (empHours > 48) {
+        pill.className = 'badge-pill px-2.5 py-1 rounded-full text-xs font-black bg-red-100 text-red-800 border border-red-300';
+      } else {
+        pill.className = 'badge-pill px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300';
+      }
+    }
+  });
+
+  // Actualizar Cobertura en el footer
+  const dayKeys = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+  STORE_DAYS.forEach((day, idx) => {
+    const el = document.getElementById(`coverage${dayKeys[idx]}`);
+    if (el) {
+      const count = dayCoverage[day] || 0;
+      el.textContent = `${count} pers`;
+      if (count === 0) {
+        el.className = 'py-2.5 px-2 text-center text-xs font-black text-red-600 bg-red-50';
+      } else {
+        el.className = idx >= 5 ? 'py-2.5 px-2 text-center text-xs font-black text-purple-900 bg-purple-50' : 'py-2.5 px-2 text-center text-xs';
+      }
+    }
+  });
+
+  const totEl = document.getElementById('coverageTotalHours');
+  if (totEl) totEl.textContent = `${grandTotalHours} h`;
+}
+
+async function saveScheduleShifts() {
+  if (!scheduleData) return;
+
+  const btnSave = document.getElementById('btnSaveSchedule');
+  if (btnSave) {
+    btnSave.disabled = true;
+    btnSave.innerHTML = `<span class="animate-spin mr-1">⌛</span> Guardando...`;
+  }
+
+  const notes = document.getElementById('scheduleNotesInput')?.value?.trim() || '';
+
+  const shiftsToSave = [];
+  employeesList.forEach(emp => {
+    STORE_DAYS.forEach(day => {
+      const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
+      const shiftType = sel ? sel.value : 'Libre';
+      const info = STORE_SHIFT_TYPES[shiftType] || { time: '', hours: 0 };
+      shiftsToSave.push({
+        employee_id: emp.id,
+        day_of_week: day,
+        shift_type: shiftType,
+        hours: info.hours,
+        start_time: info.time.split(' - ')[0] || '',
+        end_time: info.time.split(' - ')[1] || '',
+        notes: ''
+      });
+    });
+  });
+
+  try {
+    const res = await fetch(`/api/schedules/${scheduleData.id}/shifts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        shifts: shiftsToSave,
+        notes: notes
+      })
+    });
+
+    if (!res.ok) throw new Error('Error al guardar');
+
+    showToast('¡Horario semanal guardado exitosamente!', 'success');
+    if (window.confetti) {
+      window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
+    }
+    await loadHubSummary();
+  } catch (err) {
+    console.error(err);
+    showToast('No se pudo guardar el horario', 'error');
+  } finally {
+    if (btnSave) {
+      btnSave.disabled = false;
+      btnSave.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i><span>Guardar Horario</span>`;
+      initIcons();
+    }
+  }
+}
+
+function openWhatsappModal() {
+  const text = generateWhatsappText();
+  const textarea = document.getElementById('whatsappTextarea');
+  const modal = document.getElementById('whatsappModal');
+  if (textarea) textarea.value = text;
+  if (modal) modal.classList.remove('hidden');
+  initIcons();
+}
+
+function generateWhatsappText() {
+  if (!scheduleData) return '';
+  const start = scheduleData.week_start_date || '';
+  const end = scheduleData.week_end_date || '';
+
+  const [sy, sm, sd] = start.split('-');
+  const [ey, em, ed] = end.split('-');
+
+  let text = `🗓️ *HORARIO SEMANAL SEVEN SEVEN*\n`;
+  text += `📅 *Semana:* ${sd}/${sm} al ${ed}/${em}/${ey}\n`;
+  text += `🏪 *Tienda Seven Seven*\n`;
+  text += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  employeesList.forEach(emp => {
+    text += `👤 *${emp.name.toUpperCase()}* (${emp.role})\n`;
+    let empHours = 0;
+
+    STORE_DAYS.forEach((day, idx) => {
+      const sel = document.querySelector(`.shift-selector[data-emp-id="${emp.id}"][data-day="${day}"]`);
+      const shiftType = sel ? sel.value : 'Libre';
+      const info = STORE_SHIFT_TYPES[shiftType] || { hours: 0, time: shiftType, icon: '•' };
+      empHours += info.hours;
+
+      if (shiftType === 'Libre') {
+        text += `  • ${day}: 🌴 LIBRE\n`;
+      } else if (shiftType === 'Vacaciones') {
+        text += `  • ${day}: ✈️ VACACIONES\n`;
+      } else if (shiftType === 'Incapacidad') {
+        text += `  • ${day}: 🏥 INCAPACIDAD\n`;
+      } else {
+        text += `  • ${day}: ${info.icon} ${shiftType} (${info.time})\n`;
+      }
+    });
+
+    text += `⏱️ *Total:* ${empHours} hrs\n\n`;
+  });
+
+  const notes = document.getElementById('scheduleNotesInput')?.value?.trim();
+  if (notes) {
+    text += `📝 *Avisos de la semana:*\n${notes}\n\n`;
+  }
+
+  text += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  text += `✨ *¡Excelente semana de ventas equipo Seven Seven!* ✨`;
+  return text;
+}
+
+async function doCopyWhatsappText() {
+  const textarea = document.getElementById('whatsappTextarea');
+  if (!textarea) return;
+  try {
+    await navigator.clipboard.writeText(textarea.value);
+    showToast('¡Texto copiado para WhatsApp! Pégalo en tu grupo.', 'success');
+    if (window.confetti) {
+      window.confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+    }
+  } catch (err) {
+    textarea.select();
+    document.execCommand('copy');
+    showToast('¡Texto copiado!', 'success');
+  }
+}
+
+// ----------------------------------------------------------------------------
+// GESTION DE COLABORADORES
+// ----------------------------------------------------------------------------
+function openEmployeeModal() {
+  const modal = document.getElementById('employeeModal');
+  if (modal) modal.classList.remove('hidden');
+  renderEmployeesList();
+  initIcons();
+}
+
+function renderEmployeesList() {
+  const cont = document.getElementById('employeesListContainer');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  if (employeesList.length === 0) {
+    cont.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No hay colaboradores registrados.</p>`;
+    return;
+  }
+
+  employeesList.forEach(emp => {
+    const div = document.createElement('div');
+    div.className = 'py-2 flex items-center justify-between text-xs';
+    div.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full ${emp.color_tag === 'purple' ? 'bg-purple-500' : emp.color_tag === 'emerald' ? 'bg-emerald-500' : emp.color_tag === 'amber' ? 'bg-amber-500' : emp.color_tag === 'rose' ? 'bg-rose-500' : 'bg-blue-500'}"></span>
+        <div>
+          <span class="font-bold text-slate-900 block">${emp.name}</span>
+          <span class="text-[10px] text-slate-500">${emp.role}</span>
+        </div>
+      </div>
+      <button data-delete-emp="${emp.id}" type="button" class="p-1 text-slate-400 hover:text-red-600 rounded-md transition-colors cursor-pointer" title="Eliminar colaborador">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+      </button>
+    `;
+    cont.appendChild(div);
+  });
+
+  cont.querySelectorAll('[data-delete-emp]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const empId = btn.getAttribute('data-delete-emp');
+      if (!confirm('¿Eliminar a este colaborador de la tienda?')) return;
+      try {
+        const res = await fetch(`/api/employees/${empId}`, { method: 'DELETE' });
+        if (res.ok) {
+          showToast('Colaborador eliminado', 'info');
+          await loadEmployees();
+          renderEmployeesList();
+          renderScheduleGrid();
+          loadHubSummary();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  initIcons();
+}
+
+async function handleAddEmployee(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('inputEmpName');
+  const roleSelect = document.getElementById('selectEmpRole');
+  const colorSelect = document.getElementById('selectEmpColor');
+
+  const name = nameInput.value.trim();
+  const role = roleSelect.value;
+  const color = colorSelect.value;
+
+  if (!name) return;
+
+  try {
+    const res = await fetch('/api/employees', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, role, color_tag: color })
+    });
+    if (res.ok) {
+      nameInput.value = '';
+      showToast('Colaborador agregado correctamente', 'success');
+      await loadEmployees();
+      renderEmployeesList();
+      renderScheduleGrid();
+      loadHubSummary();
+    }
+  } catch (err) {
+    showToast('Error al agregar colaborador', 'error');
+  }
+}
+
+// ----------------------------------------------------------------------------
+// LOGICA DE TAREAS Y RECORDATORIOS
+// ----------------------------------------------------------------------------
+async function loadTasks() {
+  try {
+    const res = await fetch('/api/tasks');
+    if (res.ok) {
+      tasksList = await res.json();
+      renderTasksList();
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderTasksList() {
+  const cont = document.getElementById('tasksListContainer');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  const diasEsp = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const todayDow = diasEsp[new Date().getDay()];
+
+  let filtered = tasksList;
+  if (currentTasksFilter === 'today') {
+    filtered = tasksList.filter(t => t.day_of_week === todayDow || t.day_of_week === 'Diario' || !t.day_of_week);
+  } else if (currentTasksFilter === 'Diario') {
+    filtered = tasksList.filter(t => t.day_of_week === 'Diario');
+  } else if (currentTasksFilter === 'Lunes') {
+    filtered = tasksList.filter(t => t.day_of_week === 'Lunes');
+  } else if (currentTasksFilter === 'Miercoles') {
+    filtered = tasksList.filter(t => t.day_of_week === 'Miércoles' || t.day_of_week === 'Miercoles');
+  }
+
+  const total = tasksList.length;
+  const completed = tasksList.filter(t => t.is_completed === 1).length;
+  const compEl = document.getElementById('tasksCompletedCount');
+  const totEl = document.getElementById('tasksTotalCount');
+  const barEl = document.getElementById('tasksProgressBar');
+
+  if (compEl) compEl.textContent = completed;
+  if (totEl) totEl.textContent = total;
+  if (barEl) {
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    barEl.style.width = `${pct}%`;
+  }
+
+  if (filtered.length === 0) {
+    cont.innerHTML = `
+      <div class="bg-white rounded-2xl p-8 border border-slate-200 text-center flex flex-col items-center justify-center">
+        <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
+          <i data-lucide="check-check" class="w-6 h-6"></i>
+        </div>
+        <h4 class="font-bold text-slate-800 text-sm">¡Al día! No hay tareas pendientes en este filtro</h4>
+        <p class="text-xs text-slate-400 mt-0.5">Todas las actividades de la tienda han sido atendidas.</p>
+      </div>
+    `;
+    initIcons();
+    return;
+  }
+
+  filtered.forEach(task => {
+    const isDone = task.is_completed === 1;
+    const prioColor = task.priority === 'Alta'
+      ? 'bg-red-50 text-red-700 border-red-200'
+      : task.priority === 'Media'
+        ? 'bg-amber-50 text-amber-700 border-amber-200'
+        : 'bg-blue-50 text-blue-700 border-blue-200';
+
+    const div = document.createElement('div');
+    div.className = `bg-white rounded-2xl p-3.5 border transition-all flex items-center justify-between gap-3 shadow-xs ${isDone ? 'border-slate-200/80 bg-slate-50/70 opacity-70' : 'border-slate-200 hover:border-emerald-300'}`;
+
+    div.innerHTML = `
+      <div class="flex items-center gap-3 min-w-0">
+        <input type="checkbox" ${isDone ? 'checked' : ''} data-toggle-task="${task.id}" class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer shrink-0">
+        <div class="min-w-0">
+          <h4 class="text-xs sm:text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-900'} truncate">
+            ${task.title}
+          </h4>
+          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border ${prioColor}">
+              ${task.priority}
+            </span>
+            <span class="text-[10px] text-slate-400 font-semibold">
+              📅 ${task.day_of_week || 'Diario'}
+            </span>
+            ${task.category ? `<span class="text-[10px] text-slate-400 font-medium">· ${task.category}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <button data-delete-task="${task.id}" type="button" class="text-slate-300 hover:text-red-500 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0" title="Eliminar tarea">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      </button>
+    `;
+    cont.appendChild(div);
+  });
+
+  // Listeners para checkboxes
+  cont.querySelectorAll('[data-toggle-task]').forEach(chk => {
+    chk.addEventListener('change', async () => {
+      const id = chk.getAttribute('data-toggle-task');
+      try {
+        const res = await fetch(`/api/tasks/${id}/toggle`, { method: 'POST' });
+        if (res.ok) {
+          const updated = await res.json();
+          const tIdx = tasksList.findIndex(t => t.id == id);
+          if (tIdx >= 0) tasksList[tIdx].is_completed = updated.is_completed;
+          renderTasksList();
+          loadHubSummary();
+          if (updated.is_completed === 1 && window.confetti) {
+            window.confetti({ particleCount: 20, spread: 45, origin: { y: 0.8 } });
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  // Listeners para eliminar
+  cont.querySelectorAll('[data-delete-task]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-delete-task');
+      if (!confirm('¿Eliminar esta tarea?')) return;
+      try {
+        const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          tasksList = tasksList.filter(t => t.id != id);
+          renderTasksList();
+          loadHubSummary();
+          showToast('Tarea eliminada', 'info');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  initIcons();
+}
+
+async function handleCreateTask(e) {
+  e.preventDefault();
+  const inputTitle = document.getElementById('inputNewTaskTitle');
+  const selectPrio = document.getElementById('selectNewTaskPriority');
+  const selectDay = document.getElementById('selectNewTaskDay');
+
+  const title = inputTitle.value.trim();
+  const priority = selectPrio.value;
+  const day = selectDay.value;
+
+  if (!title) return;
+
+  try {
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        priority,
+        day_of_week: day,
+        category: 'Operación'
+      })
+    });
+
+    if (res.ok) {
+      inputTitle.value = '';
+      showToast('Tarea agregada exitosamente', 'success');
+      await loadTasks();
+      loadHubSummary();
+    }
+  } catch (err) {
+    showToast('Error al crear tarea', 'error');
+  }
+}
+
 

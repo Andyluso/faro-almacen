@@ -4,7 +4,7 @@ import shutil
 import socket
 import tempfile
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,7 +28,19 @@ try:
         get_recurring_summary,
         get_connection,
         get_master_catalog,
-        get_catalog_stats
+        get_catalog_stats,
+        list_employees,
+        create_employee,
+        update_employee,
+        delete_employee,
+        get_or_create_weekly_schedule,
+        save_schedule_shifts,
+        list_schedules,
+        list_store_tasks,
+        create_store_task,
+        toggle_store_task,
+        delete_store_task,
+        get_hub_summary
     )
     from .excel_parser import parse_excel_file
     from .excel_exporter import generate_validation_excel, generate_email_table_html, modify_original_excel
@@ -48,7 +60,19 @@ except ImportError:
         get_recurring_summary,
         get_connection,
         get_master_catalog,
-        get_catalog_stats
+        get_catalog_stats,
+        list_employees,
+        create_employee,
+        update_employee,
+        delete_employee,
+        get_or_create_weekly_schedule,
+        save_schedule_shifts,
+        list_schedules,
+        list_store_tasks,
+        create_store_task,
+        toggle_store_task,
+        delete_store_task,
+        get_hub_summary
     )
     from excel_parser import parse_excel_file
     from excel_exporter import generate_validation_excel, generate_email_table_html, modify_original_excel
@@ -573,6 +597,148 @@ def api_database_status():
         "database": "PostgreSQL (Supabase Cloud)" if supabase_active else "SQLite Local",
         "storage": "Supabase Storage (garment-photos)" if supabase_active else "Almacenamiento Local (/uploads)"
     }
+
+# -------------------------------------------------------------
+# PYDANTIC MODELS & RUTAS DEL PORTAL / HUB OPERATIVO
+# -------------------------------------------------------------
+
+class EmployeeCreate(BaseModel):
+    name: str
+    role: Optional[str] = "Asesor Comercial"
+    phone: Optional[str] = ""
+    color_tag: Optional[str] = "blue"
+
+class EmployeeUpdate(BaseModel):
+    name: str
+    role: str
+    phone: Optional[str] = ""
+    color_tag: Optional[str] = "blue"
+    is_active: Optional[int] = 1
+
+class ShiftItem(BaseModel):
+    employee_id: int
+    day_of_week: str
+    shift_type: str
+    start_time: Optional[str] = ""
+    end_time: Optional[str] = ""
+    hours: Optional[float] = 0.0
+    notes: Optional[str] = ""
+
+class ScheduleSaveRequest(BaseModel):
+    shifts: List[ShiftItem]
+    notes: Optional[str] = ""
+
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    category: Optional[str] = "General"
+    day_of_week: Optional[str] = ""
+    due_date: Optional[str] = ""
+    due_time: Optional[str] = ""
+    priority: Optional[str] = "Media"
+    assigned_to: Optional[str] = ""
+
+
+@app.get("/api/hub/summary")
+def api_get_hub_summary():
+    """Retorna métricas consolidadas para las tarjetas principales del Hub."""
+    return get_hub_summary()
+
+
+# Rutas de Colaboradores / Empleados
+@app.get("/api/employees")
+def api_list_employees(active_only: bool = True):
+    return list_employees(active_only=active_only)
+
+@app.post("/api/employees")
+def api_create_employee(emp: EmployeeCreate):
+    if not emp.name or not emp.name.strip():
+        raise HTTPException(status_code=400, detail="El nombre del colaborador es obligatorio")
+    created = create_employee(
+        name=emp.name,
+        role=emp.role or "Asesor Comercial",
+        phone=emp.phone or "",
+        color_tag=emp.color_tag or "blue"
+    )
+    return created
+
+@app.put("/api/employees/{emp_id}")
+def api_update_employee(emp_id: int, emp: EmployeeUpdate):
+    updated = update_employee(
+        emp_id=emp_id,
+        name=emp.name,
+        role=emp.role,
+        phone=emp.phone or "",
+        color_tag=emp.color_tag or "blue",
+        is_active=emp.is_active if emp.is_active is not None else 1
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Colaborador no encontrado")
+    return updated
+
+@app.delete("/api/employees/{emp_id}")
+def api_delete_employee(emp_id: int):
+    ok = delete_employee(emp_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Colaborador no encontrado")
+    return {"message": "Colaborador eliminado correctamente", "id": emp_id}
+
+
+# Rutas de Horarios Semanales
+@app.get("/api/schedules")
+def api_list_schedules():
+    return list_schedules()
+
+@app.get("/api/schedules/week/{week_start_date}")
+def api_get_schedule_week(week_start_date: str):
+    """Obtiene o inicializa el horario de la semana que inicia en week_start_date (YYYY-MM-DD)."""
+    return get_or_create_weekly_schedule(week_start_date)
+
+@app.post("/api/schedules/{schedule_id}/shifts")
+def api_save_schedule_shifts(schedule_id: int, payload: ScheduleSaveRequest):
+    shifts_dicts = [s.model_dump() for s in payload.shifts]
+    save_schedule_shifts(schedule_id, shifts_dicts, notes=payload.notes)
+    return {"message": "Horario guardado exitosamente", "schedule_id": schedule_id, "total_shifts": len(shifts_dicts)}
+
+
+# Rutas de Tareas y Recordatorios
+@app.get("/api/tasks")
+def api_list_tasks(
+    day_of_week: Optional[str] = None,
+    due_date: Optional[str] = None,
+    completed: Optional[int] = None
+):
+    return list_store_tasks(day_of_week=day_of_week, due_date=due_date, is_completed=completed)
+
+@app.post("/api/tasks")
+def api_create_task(task: TaskCreate):
+    if not task.title or not task.title.strip():
+        raise HTTPException(status_code=400, detail="El título de la tarea es obligatorio")
+    created = create_store_task(
+        title=task.title,
+        description=task.description or "",
+        category=task.category or "General",
+        day_of_week=task.day_of_week or "",
+        due_date=task.due_date or "",
+        due_time=task.due_time or "",
+        priority=task.priority or "Media",
+        assigned_to=task.assigned_to or ""
+    )
+    return created
+
+@app.post("/api/tasks/{task_id}/toggle")
+def api_toggle_task(task_id: int):
+    updated = toggle_store_task(task_id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return updated
+
+@app.delete("/api/tasks/{task_id}")
+def api_delete_task(task_id: int):
+    ok = delete_store_task(task_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return {"message": "Tarea eliminada correctamente", "id": task_id}
 
 # Montar frontend al final para que la raíz '/' sirva el cliente web
 if os.path.exists(FRONTEND_DIR):
