@@ -476,11 +476,10 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
     cursor.execute("""
     SELECT 
         i.*,
-        COALESCE(p_exact.photo_url, p_base.photo_url, p_name.photo_url) as photo_url
+        COALESCE(p_exact.photo_url, p_base.photo_url) as photo_url
     FROM audit_items i
     LEFT JOIN catalog_photos p_exact ON i.reference = p_exact.reference
     LEFT JOIN catalog_photos p_base ON (i.base_reference IS NOT NULL AND i.base_reference != '' AND i.base_reference = p_base.reference)
-    LEFT JOIN catalog_photos p_name ON (i.name IS NOT NULL AND i.name != '' AND i.name = p_name.reference)
     WHERE i.audit_id = ?
     ORDER BY 
         CASE WHEN i.difference < 0 THEN 0 ELSE 1 END,
@@ -497,7 +496,15 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
         item_id = item["id"]
         item_name = item["name"]
 
-        # 1. Historial en auditorías pasadas
+        # Asegurar decodificación Seven Seven en el item principal antes de consultar historial y tallas
+        if not item.get("gender") or not item.get("garment_type"):
+            g, c, t = decode_seven_seven_reference(ref, item_name)
+            item["gender"] = item.get("gender") or g
+            item["garment_code"] = item.get("garment_code") or c
+            item["garment_type"] = item.get("garment_type") or t or item.get("category", "")
+        item_gender = item.get("gender") or ""
+
+        # 1. Historial en auditorías pasadas (filtrado estrictamente por código de referencia y género idéntico, NUNCA por nombre genérico)
         cursor.execute("""
         SELECT 
             a.id as audit_id,
@@ -514,11 +521,12 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
             i.validation_notes
         FROM audit_items i
         JOIN audits a ON i.audit_id = a.id
-        WHERE (i.reference = ? OR (i.base_reference IS NOT NULL AND i.base_reference = ?) OR (i.name = ? AND length(i.name) > 3))
+        WHERE (i.reference = ? OR (i.base_reference IS NOT NULL AND i.base_reference != '' AND i.base_reference = ?))
+          AND (i.gender = ? OR ? = '' OR i.gender IS NULL)
           AND a.id != ?
         ORDER BY a.uploaded_at DESC
         LIMIT 20
-        """, (ref, base_ref, item_name, audit_id))
+        """, (ref, base_ref, item_gender, item_gender, audit_id))
 
         history = [dict(r) for r in cursor.fetchall()]
         item["history"] = history
@@ -526,7 +534,7 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
         item["recurrence_count"] = len(history)
         item["is_recurrent"] = len(history) > 0
 
-        # 2. Tallas hermanas de este mismo modelo en ESTA auditoría (unificación de diferencias)
+        # 2. Tallas hermanas de este MISMO modelo en ESTA auditoría (unificación de diferencias estricta por base_ref/ref y mismo género)
         cursor.execute("""
         SELECT 
             id, reference, base_reference, name, size, color, barcode,
@@ -535,9 +543,9 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
         FROM audit_items
         WHERE audit_id = ? AND (
             (base_reference IS NOT NULL AND base_reference != '' AND base_reference = ?) OR
-            (name IS NOT NULL AND name != '' AND name = ?) OR
             reference = ?
         )
+        AND (gender = ? OR ? = '' OR gender IS NULL)
         ORDER BY 
             CASE UPPER(TRIM(size))
                 WHEN 'XS' THEN 1 WHEN 'S' THEN 2 WHEN 'M' THEN 3
@@ -547,7 +555,7 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
                 WHEN 'UN' THEN 12 WHEN 'UNICA' THEN 13
                 ELSE 14
             END, size
-        """, (audit_id, base_ref, item_name, ref))
+        """, (audit_id, base_ref, ref, item_gender, item_gender))
 
         siblings = [dict(r) for r in cursor.fetchall()]
         for s in siblings:
@@ -558,13 +566,6 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
                 s["garment_code"] = s.get("garment_code") or sc
                 s["garment_type"] = s.get("garment_type") or st or s.get("category", "")
         item["sibling_sizes"] = siblings
-
-        # Asegurar decodificación Seven Seven en el item principal
-        if not item.get("gender") or not item.get("garment_type"):
-            g, c, t = decode_seven_seven_reference(ref, item_name)
-            item["gender"] = item.get("gender") or g
-            item["garment_code"] = item.get("garment_code") or c
-            item["garment_type"] = item.get("garment_type") or t or item.get("category", "")
 
     conn.close()
     return items
@@ -621,8 +622,8 @@ def save_catalog_photo(reference: str, photo_url: str, base_reference: Optional[
         if b_ref:
             refs_to_save.add(b_ref)
 
-    if name and name.strip():
-        refs_to_save.add(name.strip())
+    # Nunca guardar el nombre de la prenda en catalog_photos (ej. "CAMISETA" o "PANTALON"),
+    # ya que contaminaría todas las demás prendas con ese mismo nombre genérico.
 
     for r in refs_to_save:
         cursor.execute("""
@@ -667,9 +668,6 @@ def delete_catalog_photo(reference: str, base_reference: Optional[str] = None, n
         b_ref = extract_base_reference(reference)
         if b_ref:
             refs_to_delete.add(b_ref)
-
-    if name and str(name).strip():
-        refs_to_delete.add(str(name).strip())
 
     refs_list = [r for r in refs_to_delete if r]
     if not refs_list:
@@ -781,7 +779,7 @@ def get_master_catalog(search: Optional[str] = None, gender: Optional[str] = Non
         COALESCE(i.gender, '') as gender,
         COALESCE(i.garment_code, '') as garment_code,
         COALESCE(i.garment_type, i.category, 'General') as garment_type,
-        COALESCE(p_exact.photo_url, p_base.photo_url, p_name.photo_url) as photo_url,
+        COALESCE(p_exact.photo_url, p_base.photo_url) as photo_url,
         GROUP_CONCAT(DISTINCT i.size) as sizes_raw,
         GROUP_CONCAT(DISTINCT i.color) as colors_raw,
         GROUP_CONCAT(DISTINCT i.barcode) as barcodes_raw,
@@ -791,7 +789,6 @@ def get_master_catalog(search: Optional[str] = None, gender: Optional[str] = Non
     LEFT JOIN audits a ON i.audit_id = a.id
     LEFT JOIN catalog_photos p_exact ON i.reference = p_exact.reference
     LEFT JOIN catalog_photos p_base ON (i.base_reference IS NOT NULL AND i.base_reference != '' AND i.base_reference = p_base.reference)
-    LEFT JOIN catalog_photos p_name ON (i.name IS NOT NULL AND i.name != '' AND i.name = p_name.reference)
     WHERE 1=1
     """
     params = []
@@ -817,7 +814,7 @@ def get_master_catalog(search: Optional[str] = None, gender: Optional[str] = Non
         query += " AND (i.garment_type = ? OR i.category = ?)"
         params.extend([garment_type.strip(), garment_type.strip()])
 
-    query += " GROUP BY COALESCE(i.base_reference, i.reference), i.name"
+    query += " GROUP BY COALESCE(i.base_reference, i.reference), i.gender"
 
     if has_photo is True:
         query += " HAVING photo_url IS NOT NULL AND photo_url != ''"

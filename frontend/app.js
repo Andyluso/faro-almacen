@@ -1470,20 +1470,33 @@ function renderUnifiedDifferences(item) {
   const netBadge = document.getElementById('modalNetBalanceBadge');
   if (!container) return;
 
-  const siblings = (item.sibling_sizes && item.sibling_sizes.length > 0)
-    ? item.sibling_sizes
-    : [{
-        id: item.id,
-        reference: item.reference,
-        size: item.size,
-        difference: item.difference || 0,
-        store_count: item.store_count || 0,
-        warehouse_count: item.warehouse_count || 0,
-        theoretical_count: item.theoretical_count || 0,
-        status: item.status,
-        validation_verdict: item.validation_verdict,
-        barcode: item.barcode
-      }];
+  const curBaseRef = item.base_reference || item.reference;
+  const curGender = item.gender;
+
+  // Filtrar estrictamente hermanos que pertenezcan al mismo modelo y al mismo género (nunca mezclar referencias distintas ni Dama con Caballero)
+  let siblings = (item.sibling_sizes && item.sibling_sizes.length > 0)
+    ? item.sibling_sizes.filter(s => {
+        const sBase = s.base_reference || s.reference;
+        const matchRef = (sBase && curBaseRef && sBase === curBaseRef) || s.reference === item.reference;
+        const matchGender = !curGender || !s.gender || s.gender === curGender;
+        return matchRef && matchGender;
+      })
+    : [];
+
+  if (siblings.length === 0) {
+    siblings = [{
+      id: item.id,
+      reference: item.reference,
+      size: item.size,
+      difference: item.difference || 0,
+      store_count: item.store_count || 0,
+      warehouse_count: item.warehouse_count || 0,
+      theoretical_count: item.theoretical_count || 0,
+      status: item.status,
+      validation_verdict: item.validation_verdict,
+      barcode: item.barcode
+    }];
+  }
 
   const faltantes = siblings.filter(s => (s.difference || 0) < 0);
   const sobrantes = siblings.filter(s => (s.difference || 0) > 0);
