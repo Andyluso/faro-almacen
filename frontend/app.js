@@ -742,11 +742,11 @@ function updateActiveFilterBadges() {
     const drawer = document.getElementById('filterDrawer');
     const isOpen = drawer && !drawer.classList.contains('hidden');
     if (isOpen) {
-      btnToggle.className = 'relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-blue-50 border border-blue-500 text-blue-700 shadow-xs transition-all cursor-pointer touch-target group ring-2 ring-blue-500/20';
+      btnToggle.className = 'relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-blue-50 border border-blue-500 text-blue-700 shadow-xs transition-all cursor-pointer touch-target group ring-2 ring-blue-500/20 gap-2';
     } else if (activeCount > 0) {
-      btnToggle.className = 'relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-blue-50/80 border border-blue-400 text-blue-800 shadow-xs transition-all cursor-pointer touch-target group';
+      btnToggle.className = 'relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-blue-50/80 border border-blue-400 text-blue-800 shadow-xs transition-all cursor-pointer touch-target group gap-2';
     } else {
-      btnToggle.className = 'relative inline-flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group';
+      btnToggle.className = 'relative inline-flex items-center justify-center px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-target group gap-2';
     }
   }
 
@@ -757,9 +757,9 @@ function updateActiveFilterBadges() {
 
     if (activeCount > 0 && !isOpen) {
       summaryBar.innerHTML = activeTags.map(tag => `
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200">
+        <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 shadow-2xs">
           <span>${tag.label}</span>
-          <button type="button" class="text-slate-400 hover:text-red-500 ml-0.5" onclick="removeSpecificFilter('${tag.type}')" title="Quitar este filtro">
+          <button type="button" class="text-slate-400 hover:text-red-500 p-0.5 rounded transition-colors cursor-pointer" onclick="removeSpecificFilter('${tag.type}')" title="Quitar este filtro">
             ×
           </button>
         </span>
@@ -1568,10 +1568,10 @@ function renderUnifiedDifferences(item) {
     return `
       <button type="button" 
               onclick="jumpToSiblingItem(${sib.id})" 
-              class="px-2.5 py-1 rounded-lg text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer ${chipStyle}"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${chipStyle}"
               title="Talla ${sib.size}: Físico ${totalPhys} / Teórico ${sib.theoretical_count}">
         <span>${validatedCheck}Talla ${sib.size}</span>
-        <span class="text-[10px] px-1 py-0.5 rounded font-black badge-pill ${isCurrent ? 'bg-white/25 text-white' : 'bg-black/5'}">${diffTag}</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-md font-black badge-pill ${isCurrent ? 'bg-white/25 text-white' : 'bg-black/5'}">${diffTag}</span>
       </button>
     `;
   }).join('');
@@ -1630,16 +1630,16 @@ function renderVerdictOptions(item) {
   container.innerHTML = options.map(opt => {
     const isSelected = (currentSelectedVerdict === opt.id);
     const selectedClass = isSelected
-      ? 'bg-blue-600 text-white font-black shadow-xs ring-1 ring-blue-500'
+      ? 'bg-blue-600 text-white font-black shadow-xs ring-2 ring-blue-500/30'
       : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold';
 
     return `
       <button type="button" 
               data-verdict="${opt.id}" 
-              class="verdict-btn py-2 px-2.5 rounded-lg text-xs inline-flex items-center justify-center gap-1.5 transition-all touch-target sm:min-w-0 cursor-pointer ${selectedClass}"
+              class="verdict-btn py-2.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-[13px] inline-flex items-center justify-center gap-2 transition-all touch-target sm:min-w-0 cursor-pointer ${selectedClass}"
               title="${opt.label}">
-        <span class="text-xs leading-none shrink-0">${opt.icon}</span>
-        <span class="truncate">${opt.label}</span>
+        <span class="text-xs sm:text-sm leading-none shrink-0">${opt.icon}</span>
+        <span class="truncate text-center">${opt.label}</span>
       </button>
     `;
   }).join('');
@@ -1649,9 +1649,9 @@ function selectVerdict(verdict) {
   currentSelectedVerdict = verdict;
   document.querySelectorAll('#verdictOptions .verdict-btn').forEach(b => {
     if (b.dataset.verdict === currentSelectedVerdict) {
-      b.className = 'verdict-btn py-2 px-2.5 rounded-lg text-xs inline-flex items-center justify-center gap-1.5 transition-all touch-target sm:min-w-0 bg-blue-600 text-white font-black shadow-xs ring-1 ring-blue-500 cursor-pointer';
+      b.className = 'verdict-btn py-2.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-[13px] inline-flex items-center justify-center gap-2 transition-all touch-target sm:min-w-0 bg-blue-600 text-white font-black shadow-xs ring-2 ring-blue-500/30 cursor-pointer';
     } else {
-      b.className = 'verdict-btn py-2 px-2.5 rounded-lg text-xs inline-flex items-center justify-center gap-1.5 transition-all touch-target sm:min-w-0 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold cursor-pointer';
+      b.className = 'verdict-btn py-2.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-[13px] inline-flex items-center justify-center gap-2 transition-all touch-target sm:min-w-0 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold cursor-pointer';
     }
   });
 }
@@ -2082,20 +2082,20 @@ function renderAuditHistoryList() {
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
-          <a href="/api/audits/${a.id}/download-original" download class="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 transition-colors flex items-center gap-1 text-xs" title="Descargar documento Excel original de este inventario">
+        <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 self-end sm:self-center">
+          <a href="/api/audits/${a.id}/download-original" download class="px-3 py-1.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 transition-colors flex items-center justify-center gap-1.5 text-xs" title="Descargar documento Excel original de este inventario">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span class="hidden md:inline font-semibold">Excel</span>
           </a>
-          <button type="button" onclick="selectAuditFromHistory(${a.id})" class="px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+          <button type="button" onclick="selectAuditFromHistory(${a.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
             isCurrent
               ? 'bg-blue-600 text-white shadow-xs cursor-default'
-              : 'bg-slate-900 hover:bg-blue-600 active:bg-blue-700 text-white shadow-xs'
-          } flex items-center gap-1.5">
+              : 'bg-slate-900 hover:bg-blue-600 active:bg-blue-700 text-white shadow-xs cursor-pointer'
+          } flex items-center justify-center gap-1.5">
             <i data-lucide="${isCurrent ? 'check' : 'arrow-right'}" class="w-3.5 h-3.5"></i>
-            ${isCurrent ? 'Activo' : 'Cargar'}
+            <span>${isCurrent ? 'Activo' : 'Cargar'}</span>
           </button>
-          <button type="button" onclick="deleteAuditFromHistory(${a.id})" class="px-2.5 py-1.5 rounded-lg text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-600 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs" title="Eliminar este archivo de inventario">
+          <button type="button" onclick="deleteAuditFromHistory(${a.id})" class="px-3 py-1.5 rounded-xl text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-600 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer" title="Eliminar este archivo de inventario">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             <span class="hidden xs:inline">Eliminar</span>
           </button>
@@ -3243,11 +3243,11 @@ function renderCatalogGrid(items) {
     const imageSection = item.photo_url
       ? `<div class="relative w-full h-44 sm:h-48 bg-slate-100 flex items-center justify-center overflow-hidden group cursor-pointer" onclick="zoomCatalogPhoto('${item.photo_url}', '${escapeHtml(item.name)}', '${escapeHtml(item.master_ref)}')">
            <img src="${item.photo_url}" alt="${escapeHtml(item.name)}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200" loading="lazy">
-           <div class="absolute top-2 right-2 flex items-center gap-1">
-             <button type="button" onclick="event.stopPropagation(); triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}');" class="bg-slate-900/75 hover:bg-slate-900 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Cambiar foto universal">
+           <div class="absolute top-2.5 right-2.5 flex items-center gap-2">
+             <button type="button" onclick="event.stopPropagation(); triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}');" class="bg-slate-900/75 hover:bg-slate-900 text-white p-2 rounded-xl shadow-sm backdrop-blur-xs transition-colors cursor-pointer" title="Cambiar foto universal">
                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
              </button>
-             <button type="button" onclick="event.stopPropagation(); deleteReferencePhoto('${escapeHtml(item.master_ref)}');" class="bg-red-600/85 hover:bg-red-700 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Eliminar foto incorrecta del catálogo">
+             <button type="button" onclick="event.stopPropagation(); deleteReferencePhoto('${escapeHtml(item.master_ref)}');" class="bg-red-600/85 hover:bg-red-700 text-white p-2 rounded-xl shadow-sm backdrop-blur-xs transition-colors cursor-pointer" title="Eliminar foto incorrecta del catálogo">
                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
              </button>
            </div>
@@ -3257,7 +3257,7 @@ function renderCatalogGrid(items) {
              <i data-lucide="camera" class="w-5 h-5"></i>
            </div>
            <span class="text-xs font-bold text-slate-600">Sin foto registrada</span>
-           <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}')" class="mt-2.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+           <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}')" class="mt-2.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs inline-flex items-center justify-center gap-2 transition-colors cursor-pointer">
              <i data-lucide="camera" class="w-3.5 h-3.5 shrink-0"></i>
              <span>Subir Foto</span>
            </button>
@@ -3319,7 +3319,7 @@ function renderCatalogGrid(items) {
 
         <!-- Botón Inferior: Abrir en Auditoría -->
         <div class="p-3 pt-0">
-          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
+          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
             <i data-lucide="clipboard-check" class="w-4 h-4 text-blue-600 shrink-0"></i>
             <span>Consultar en Auditoría</span>
           </button>
@@ -3367,7 +3367,7 @@ function renderCatalogTable(items) {
           </div>
         </td>
         <td class="py-2.5 px-3 align-middle text-center">
-          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer">
+          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
             <i data-lucide="clipboard-check" class="w-3.5 h-3.5 shrink-0"></i>
             <span>Auditar</span>
           </button>
@@ -3531,18 +3531,18 @@ function zoomCatalogPhoto(photoUrl, title, ref) {
       <div class="p-4 bg-slate-100 flex items-center justify-center overflow-auto max-h-[70vh]">
         <img src="${photoUrl}" alt="${escapeHtml(title)}" class="max-h-[65vh] w-auto object-contain rounded-lg shadow-sm">
       </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2.5 sm:gap-3 flex-wrap">
+        <div class="flex items-center gap-2 sm:gap-2.5">
+          <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer">
             <i data-lucide="camera" class="w-3.5 h-3.5"></i>
             <span>Cambiar Foto</span>
           </button>
-          <button type="button" onclick="deleteReferencePhoto('${escapeHtml(ref)}');" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer" title="Eliminar foto incorrecta">
+          <button type="button" onclick="deleteReferencePhoto('${escapeHtml(ref)}');" class="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer" title="Eliminar foto incorrecta">
             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-600"></i>
             <span>Eliminar Foto</span>
           </button>
         </div>
-        <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+        <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer">
           <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
           <span>Buscar en Auditoría</span>
         </button>
@@ -3652,14 +3652,14 @@ function renderFilesSection() {
           </div>
         </div>
 
-        <!-- Acciones Directas del Archivo -->
-        <div class="flex items-center gap-1.5 pt-2.5 border-t border-slate-100">
-          <a href="/api/audits/${audit.id}/download-original" download class="flex-1 py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap" title="Descargar archivo Excel original subido">
+        <!-- Acciones Directas del Archivo (Separadas y Centradas) -->
+        <div class="flex items-center gap-2 sm:gap-2.5 pt-2.5 border-t border-slate-100">
+          <a href="/api/audits/${audit.id}/download-original" download class="flex-1 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition-colors inline-flex items-center justify-center gap-2 shadow-2xs whitespace-nowrap" title="Descargar archivo Excel original subido">
             <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
             <span>Descargar .xlsx</span>
           </a>
 
-          <button type="button" onclick="selectAuditAndSwitchToAuditTab(${audit.id})" class="flex-1 py-2 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap cursor-pointer" title="Abrir y conciliar en pestaña Auditoría">
+          <button type="button" onclick="selectAuditAndSwitchToAuditTab(${audit.id})" class="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-2 shadow-2xs whitespace-nowrap cursor-pointer" title="Abrir y conciliar en pestaña Auditoría">
             <i data-lucide="clipboard-check" class="w-3.5 h-3.5 shrink-0"></i>
             <span>Auditar</span>
           </button>

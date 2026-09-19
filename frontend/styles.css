@@ -163,6 +163,15 @@ svg.lucide, [data-lucide] {
   user-select: none;
 }
 
+/* Dictámenes y botones de acción con texto centrado y márgenes de confort */
+.verdict-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+}
+
 /* Centrado exacto de pastillas, badges e insignias numéricas */
 .badge-pill {
   display: inline-flex;
@@ -171,3 +180,4 @@ svg.lucide, [data-lucide] {
   line-height: 1;
   text-align: center;
 }
+
