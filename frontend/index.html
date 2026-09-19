@@ -176,371 +176,395 @@
     <!-- ======================================================================= -->
     <!-- VISTA 1: MENÚ PRINCIPAL / HUB DE OPERACIONES SEVEN SEVEN               -->
     <!-- ======================================================================= -->
-    <div id="viewHub" class="flex flex-col gap-5 sm:gap-6 flex-1 pb-16 pt-2 sm:pt-4">
+    <!-- ======================================================================= -->
+    <!-- VISTA 1: MENÚ PRINCIPAL / HUB DE OPERACIONES SEVEN SEVEN               -->
+    <!-- ======================================================================= -->
+    <div id="viewHub" class="flex flex-col items-center justify-center flex-1 py-2 sm:py-4 w-full">
       
-      <!-- BARRA SUPERIOR: TIENDA, ALERTA DEL DÍA Y FECHA EN VIVO -->
-      <div class="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-        <!-- Izquierda: Identificador de Tienda -->
-        <div class="px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white/90 text-slate-800 border border-slate-300/80 shadow-2xs shrink-0">
-          Seven Seven · Tienda #32
-        </div>
+      <div class="hub-deck-wrapper flex flex-col gap-3.5 sm:gap-4 px-1 sm:px-2 w-full">
 
-        <!-- Centro: Alerta Contextual del Día (Cálida y destacada) -->
-        <div id="hubDayAlertBanner" class="px-4 py-1.5 rounded-2xl text-xs sm:text-sm font-bold bg-[#fbe7ce] text-[#8a4e12] border border-[#f8cf9c] shadow-sm flex items-center gap-2 cursor-default transition-transform hover:scale-[1.02] mx-auto sm:mx-0">
-          <i data-lucide="bell" class="w-4 h-4 text-amber-700 shrink-0"></i>
-          <span id="hubDayAlertText">Fin de Semana de Tráfico Alto.</span>
-        </div>
-
-        <!-- Derecha: Fecha en vivo -->
-        <div id="hubLiveDayBadge" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/90 text-slate-700 border border-slate-300/80 shadow-2xs shrink-0">
-          Hoy: Sábado - 19/09/2026
-        </div>
-      </div>
-
-      <!-- TÍTULO PRINCIPAL CENTRADO -->
-      <div class="text-center my-2 sm:my-3">
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-950 font-sans">
-          Gestión Operativa de Tienda
-        </h2>
-      </div>
-
-      <!-- FILA DE TARJETAS TIPO DECK (RECTAS POR DEFECTO, CON INCLINACIÓN INTERACTIVA AL PASAR EL CURSOR) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 xl:gap-5 items-stretch pt-2 pb-6">
-        
-        <!-- TARJETA 1: FARO INVENTARIO -->
-        <div id="cardLaunchFaro" class="hub-card hub-card-tilt-1 group p-3.5 sm:p-4 cursor-pointer flex flex-col justify-between">
-          <div>
-            <h3 class="font-black text-slate-950 text-sm sm:text-base tracking-tight mb-2.5">
-              FARO Inventario
-            </h3>
-            
-            <!-- Ilustración: Hoja de cálculo Excel con ondas RFID -->
-            <div class="w-full h-40 sm:h-44 rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-inner flex flex-col relative select-none">
-              <!-- Barra verde Excel -->
-              <div class="bg-[#107c41] text-white px-2.5 py-1 flex items-center gap-1.5 shrink-0">
-                <div class="w-3.5 h-3.5 bg-white text-[#107c41] font-black text-[9px] flex items-center justify-center rounded-2xs leading-none">X</div>
-                <span class="text-[10px] font-bold tracking-wide">Excel</span>
-              </div>
-              <!-- Encabezado de columnas -->
-              <div class="grid grid-cols-12 bg-slate-100 text-slate-500 font-mono text-[9px] border-b border-slate-200 py-0.5 text-center shrink-0">
-                <div class="col-span-1 border-r border-slate-200"></div>
-                <div class="col-span-3 border-r border-slate-200 font-bold text-slate-700">A · REF</div>
-                <div class="col-span-5 border-r border-slate-200 font-bold text-slate-700">B · DESC</div>
-                <div class="col-span-3 font-bold text-slate-700">C · STOCK</div>
-              </div>
-              <!-- Cuadrícula de datos -->
-              <div class="flex-1 bg-white relative font-mono text-[8px] text-slate-400 overflow-hidden divide-y divide-slate-100">
-                <div class="grid grid-cols-12 py-1 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">1</span><span class="col-span-3 px-1 text-slate-700">0337095</span><span class="col-span-5 px-1 truncate text-slate-600">JEANS STRAIGHT</span><span class="col-span-3 px-1 text-right text-slate-800 font-bold">12</span></div>
-                <div class="grid grid-cols-12 py-1 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">2</span><span class="col-span-3 px-1 text-slate-700">0338142</span><span class="col-span-5 px-1 truncate text-slate-600">CAMISA LINO</span><span class="col-span-3 px-1 text-right text-slate-800 font-bold">8</span></div>
-                <div class="grid grid-cols-12 py-1 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">3</span><span class="col-span-3 px-1 text-slate-700">0339210</span><span class="col-span-5 px-1 truncate text-slate-600">CHAQUETA DENIM</span><span class="col-span-3 px-1 text-right text-slate-800 font-bold">4</span></div>
-                <div class="grid grid-cols-12 py-1 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">4</span><span class="col-span-3 px-1 text-slate-700">0340118</span><span class="col-span-5 px-1 truncate text-slate-600">VESTIDO MIDI</span><span class="col-span-3 px-1 text-right text-slate-800 font-bold">15</span></div>
-                <div class="grid grid-cols-12 py-1 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">5</span><span class="col-span-3 px-1 text-slate-700">0341002</span><span class="col-span-5 px-1 truncate text-slate-600">CAMISETA POLO</span><span class="col-span-3 px-1 text-right text-slate-800 font-bold">22</span></div>
-
-                <!-- Placa flotante RFID centrada -->
-                <div class="absolute inset-0 m-auto w-28 h-20 bg-white/95 backdrop-blur-2xs rounded-xl border-2 border-slate-800 shadow-lg flex flex-col items-center justify-center pointer-events-none group-hover:scale-105 transition-transform">
-                  <svg class="w-8 h-8 text-slate-800 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 8.5C5.5 5 10 3 12 3s6.5 2 10 5.5"></path>
-                    <path d="M5 12c2.5-2.5 5.5-3.5 7-3.5s4.5 1 7 3.5"></path>
-                    <path d="M8.5 15.5c1.2-1.2 2.3-1.5 3.5-1.5s2.3.3 3.5 1.5"></path>
-                    <circle cx="12" cy="18" r="1.5" fill="currentColor"></circle>
-                  </svg>
-                  <span class="font-black text-slate-900 tracking-wider text-[11px] font-mono leading-none">RFID</span>
-                </div>
-              </div>
-            </div>
+        <!-- BARRA SUPERIOR: TIENDA, ALERTA DEL DÍA Y FECHA EN VIVO -->
+        <div class="flex items-center justify-between gap-2 sm:gap-3 flex-wrap sm:flex-nowrap w-full">
+          <!-- Izquierda: Identificador de Tienda -->
+          <div class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-white/85 text-slate-800 border border-slate-300 shadow-2xs shrink-0">
+            SEVEN SEVEN - TIENDA #32
           </div>
 
-          <!-- Pie de tarjeta -->
-          <div class="mt-3">
-            <h4 class="font-black text-slate-950 text-xs sm:text-sm tracking-tight mb-2">
-              FARO Inventario
-            </h4>
-            <div class="flex items-center justify-between gap-1.5">
-              <span id="hubCardAuditInfo" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#e6f0fa] text-[#1e5180] border border-[#bcd7f0] truncate max-w-[130px]">
-                271 prendas
-              </span>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-300 shadow-2xs group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors flex items-center gap-1 shrink-0">
-                Entrar <span>→</span>
-              </span>
-            </div>
+          <!-- Centro: Alerta Contextual del Día (Pastilla melocotón destacada) -->
+          <div id="hubDayAlertBanner" class="px-4 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-[#fbe7ce] text-[#8a4e12] border border-[#f8cf9c] shadow-md flex items-center gap-2 cursor-default transition-transform hover:scale-[1.02] shrink-0 mx-auto sm:mx-0">
+            <i data-lucide="bell" class="w-4 h-4 text-amber-700 shrink-0"></i>
+            <span id="hubDayAlertText">Fin de Semana de Tráfico Alto.</span>
+          </div>
+
+          <!-- Derecha: Fecha en vivo -->
+          <div id="hubLiveDayBadge" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white/85 text-slate-700 border border-slate-300 shadow-2xs shrink-0">
+            Hoy: Sábado - 19/09/2026
           </div>
         </div>
 
-        <!-- TARJETA 2: CREADOR DE HORARIOS -->
-        <div id="cardLaunchSchedules" class="hub-card hub-card-tilt-2 group p-3.5 sm:p-4 cursor-pointer flex flex-col justify-between">
-          <div>
-            <h3 class="font-black text-slate-950 text-sm sm:text-base tracking-tight mb-2.5">
-              Creador de Horarios
-            </h3>
-            
-            <!-- Ilustración: Cronograma semanal con turnos -->
-            <div class="w-full h-40 sm:h-44 rounded-xl border border-slate-200/90 bg-[#fafbfc] overflow-hidden shadow-inner flex flex-col p-1.5 select-none">
-              <div class="grid grid-cols-6 text-[9px] font-bold text-slate-500 border-b border-slate-200 pb-1 text-center">
-                <span class="text-left pl-1 text-slate-400">Colab.</span>
-                <span>Mon</span>
-                <span>Tue</span>
-                <span>Wed</span>
-                <span>Thu</span>
-                <span>Sat</span>
-              </div>
-              <div class="flex-1 flex flex-col justify-between py-1 text-[8.5px] font-semibold">
-                <div class="grid grid-cols-6 items-center">
-                  <span class="truncate pl-1 text-slate-600">A. Gómez</span>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                </div>
-                <div class="grid grid-cols-6 items-center">
-                  <span class="truncate pl-1 text-slate-600">B. Díaz</span>
-                  <div></div>
-                  <div></div>
-                  <div class="col-span-2 px-0.5"><div class="h-4 rounded bg-[#9ab1ca] border border-[#7d99b7] shadow-2xs"></div></div>
-                  <div></div>
-                </div>
-                <div class="grid grid-cols-6 items-center">
-                  <span class="truncate pl-1 text-slate-600">C. Dnec</span>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                  <div></div>
-                </div>
-                <div class="grid grid-cols-6 items-center">
-                  <span class="truncate pl-1 text-slate-600">D. Cora</span>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-5 rounded bg-[#829dbb] border border-[#6b8aa9] shadow-2xs flex items-center justify-center text-[7px] text-white">Pico</div></div>
-                  <div></div>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                </div>
-                <div class="grid grid-cols-6 items-center">
-                  <span class="truncate pl-1 text-slate-600">E. Chat</span>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                  <div></div>
-                  <div></div>
-                </div>
-                <div class="grid grid-cols-6 items-center">
-                  <span class="truncate pl-1 text-slate-600">F. Pamo</span>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                  <div class="px-0.5"><div class="h-4 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pie de tarjeta -->
-          <div class="mt-3">
-            <h4 class="font-black text-slate-950 text-xs sm:text-sm tracking-tight mb-2">
-              Creador de Horarios
-            </h4>
-            <div class="flex items-center justify-between gap-1.5">
-              <span id="hubCardScheduleInfo" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#e8f7ee] text-[#1e6f3e] border border-[#b8e5c8] truncate max-w-[130px]">
-                Asignación Comp...
-              </span>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-300 shadow-2xs group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors flex items-center gap-1 shrink-0">
-                Programar <span>→</span>
-              </span>
-            </div>
-          </div>
+        <!-- TÍTULO PRINCIPAL CENTRADO -->
+        <div class="text-center my-1 sm:my-2">
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 font-sans">
+            Gestión Operativa de Tienda
+          </h2>
         </div>
 
-        <!-- TARJETA 3: TAREAS Y RECORDATORIOS -->
-        <div id="cardLaunchTasks" class="hub-card hub-card-tilt-3 group p-3.5 sm:p-4 cursor-pointer flex flex-col justify-between">
-          <div>
-            <h3 class="font-black text-slate-950 text-sm sm:text-base tracking-tight mb-2.5">
-              Tareas y Recordatorios
-            </h3>
-            
-            <!-- Ilustración: Tabla de checklist con ganchito y casillas marcadas -->
-            <div class="w-full h-40 sm:h-44 rounded-xl border border-slate-200/90 bg-[#dbe6ee] overflow-hidden shadow-inner flex items-center justify-center p-3 select-none">
-              <div class="w-28 sm:w-32 h-34 sm:h-36 bg-white rounded-xl border-[2.5px] border-slate-800 shadow-md relative flex flex-col p-2.5 pt-3.5 justify-between">
-                <!-- Gancho superior -->
-                <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-11 h-3 bg-slate-800 rounded-t-md flex items-center justify-center">
-                  <div class="w-4 h-1 bg-white/40 rounded-full"></div>
-                </div>
-                <!-- Fila 1 -->
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 rounded border-2 border-slate-800 flex items-center justify-center text-[#1e5180] font-black text-xs leading-none shrink-0">✓</div>
-                  <div class="flex-1 space-y-1">
-                    <div class="h-1.5 bg-slate-700 rounded-full w-4/5"></div>
-                    <div class="h-1 bg-slate-300 rounded-full w-2/3"></div>
-                  </div>
-                </div>
-                <!-- Fila 2 -->
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 rounded border-2 border-slate-800 flex items-center justify-center text-[#1e5180] font-black text-xs leading-none shrink-0">✓</div>
-                  <div class="flex-1 space-y-1">
-                    <div class="h-1.5 bg-slate-700 rounded-full w-3/4"></div>
-                    <div class="h-1 bg-slate-300 rounded-full w-1/2"></div>
-                  </div>
-                </div>
-                <!-- Fila 3 -->
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 rounded border-2 border-slate-800 shrink-0"></div>
-                  <div class="flex-1 space-y-1">
-                    <div class="h-1.5 bg-slate-700 rounded-full w-5/6"></div>
-                    <div class="h-1 bg-slate-300 rounded-full w-3/5"></div>
-                  </div>
-                </div>
-                <!-- Fila 4 -->
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 rounded border-2 border-slate-400 shrink-0"></div>
-                  <div class="flex-1 space-y-1">
-                    <div class="h-1 bg-slate-300 rounded-full w-2/3"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pie de tarjeta -->
-          <div class="mt-3">
-            <h4 class="font-black text-slate-950 text-xs sm:text-sm tracking-tight mb-2">
-              Tareas y Recordatorios
-            </h4>
-            <div class="flex items-center justify-between gap-1.5">
-              <span id="hubCardTasksInfo" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#e8f7ee] text-[#1e6f3e] border border-[#b8e5c8] truncate max-w-[130px]">
-                4 Pendientes Hoy
-              </span>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-300 shadow-2xs group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors flex items-center gap-1 shrink-0">
-                Revisar <span>→</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- TARJETA 4: CATÁLOGO DE REFERENCIAS -->
-        <div id="cardLaunchCatalog" class="hub-card hub-card-tilt-4 group p-3.5 sm:p-4 cursor-pointer flex flex-col justify-between">
-          <div>
-            <h3 class="font-black text-slate-950 text-sm sm:text-base tracking-tight mb-2.5">
-              Catálogo de Referencias
-            </h3>
-            
-            <!-- Ilustración: Muestrario de prendas con lupa -->
-            <div class="w-full h-40 sm:h-44 rounded-xl border border-slate-200/90 bg-[#dbe6ee] overflow-hidden shadow-inner flex items-center justify-center p-2 relative select-none">
-              <div class="grid grid-cols-3 gap-1.5 w-full h-full p-0.5">
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6l1 4-4 2-4-2 1-4z"></path><path d="M8 9l-4 12h16l-4-12"></path></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3l-3 4 3 2 1-2v14h10V7l1 2 3-2-3-4h-4a2 2 0 0 1-4 0H6z"></path></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12v4l-1 16h-4l-1-10-1 10H7L6 6V2z"></path></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v4l-1.5 15h-3.5l-1-9-1 9H7.5L6 7V3z"></path><line x1="9" y1="6" x2="15" y2="6"></line></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4L2 9l3 3 2-2v11h10V10l2 2 3-3-5-5-2 2h-4L7 4z"></path></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2h6v12c0 2 2 4 4 4h2v4h-6c-4 0-6-3-6-6V2z"></path></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 17c0-2 2-3 5-3h4l5-5h4v10H2v-2z"></path></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                </div>
-                <div class="bg-white/85 rounded-lg border border-slate-200/70 flex items-center justify-center text-slate-700 shadow-2xs">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                </div>
-              </div>
-
-              <!-- Lupa de gran tamaño superpuesta -->
-              <div class="absolute inset-0 m-auto w-24 h-24 flex items-center justify-center pointer-events-none group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                <div class="relative w-14 sm:w-16 h-14 sm:h-16 rounded-full border-[3px] border-slate-800 bg-white/40 backdrop-blur-2xs shadow-xl flex items-center justify-center">
-                  <div class="absolute top-1.5 left-2 w-4 h-2 bg-white/70 rounded-full rotate-[-35deg]"></div>
-                  <div class="absolute -bottom-5 -right-4 w-3 h-8 bg-slate-800 rounded-full rotate-[-45deg] shadow-md border border-slate-900"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pie de tarjeta -->
-          <div class="mt-3">
-            <h4 class="font-black text-slate-950 text-xs sm:text-sm tracking-tight mb-2">
-              Catálogo de Referencias
-            </h4>
-            <div class="flex items-center justify-between gap-1.5">
-              <span id="hubCardCatalogInfo" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#fef2e2] text-[#935212] border border-[#fbd4a6] truncate max-w-[130px]">
-                277 modelos
-              </span>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-300 shadow-2xs group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors flex items-center gap-1 shrink-0">
-                Buscar <span>→</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- TARJETA 5: AVERÍAS Y GARANTÍAS (PRÓXIMAMENTE) -->
-        <div class="hub-card hub-card-tilt-5 group p-3.5 sm:p-4 opacity-85 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-1 mb-2.5">
-              <h3 class="font-black text-slate-950 text-sm sm:text-base tracking-tight truncate">
-                Averías y G...
+        <!-- FILA DE TARJETAS TIPO DECK (MEDIDAS COMPACTAS EXACTAS 195px x 315px, RECTAS EN REPOSO, HOVER TILT) -->
+        <div class="flex overflow-x-auto pb-4 pt-1 lg:grid lg:grid-cols-5 gap-2 sm:gap-2.5 justify-center items-center w-full mx-auto">
+          
+          <!-- TARJETA 1: FARO INVENTARIO -->
+          <div id="cardLaunchFaro" class="hub-card hub-card-tilt-1 group cursor-pointer shrink-0">
+            <div>
+              <h3 class="font-black text-slate-950 text-[13px] tracking-tight mb-1.5 leading-none">
+                FARO Inventario
               </h3>
-              <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-200/90 text-slate-600 border border-slate-300 shrink-0">
-                Próximamente
-              </span>
-            </div>
-            
-            <!-- Ilustración: Cajas de bodega y candado -->
-            <div class="w-full h-40 sm:h-44 rounded-xl border border-slate-200/90 bg-[#dbe6ee] overflow-hidden shadow-inner flex items-center justify-center p-2 relative select-none">
-              <svg class="w-full h-full text-slate-600 opacity-60" viewBox="0 0 160 120" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="15" y="45" width="38" height="48" rx="3" fill="white" stroke="currentColor"/>
-                <line x1="22" y1="55" x2="46" y2="55"/>
-                <line x1="22" y1="62" x2="43" y2="62"/>
-                <line x1="22" y1="69" x2="46" y2="69"/>
-                <rect x="22" y="38" width="38" height="48" rx="3" fill="white" stroke="currentColor"/>
-                <line x1="29" y1="48" x2="53" y2="48"/>
-                <line x1="29" y1="55" x2="50" y2="55"/>
-                <path d="M85 35 L125 15 L145 30 L105 50 Z" fill="#e8e1d7" stroke="currentColor"/>
-                <path d="M85 35 L105 50 L105 85 L85 70 Z" fill="#d9cebf" stroke="currentColor"/>
-                <path d="M105 50 L145 30 L145 65 L105 85 Z" fill="#cfbfac" stroke="currentColor"/>
-                <line x1="105" y1="25" x2="125" y2="40" stroke="#b09f8a" stroke-width="2"/>
-                <path d="M60 80 L85 68 L100 78 L75 90 Z" fill="#e8e1d7" stroke="currentColor"/>
-                <path d="M60 80 L75 90 L75 110 L60 100 Z" fill="#d9cebf" stroke="currentColor"/>
-                <path d="M75 90 L100 78 L100 98 L75 110 Z" fill="#cfbfac" stroke="currentColor"/>
-              </svg>
-
-              <!-- Candado e insignia En desarrollo -->
-              <div class="absolute inset-0 m-auto w-32 h-20 flex flex-col items-center justify-center pointer-events-none group-hover:scale-105 transition-transform">
-                <div class="w-10 h-10 rounded-full bg-white/95 border-2 border-slate-700 shadow-md flex items-center justify-center text-slate-800 mb-1.5">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
+              
+              <!-- Ilustración: Hoja de cálculo Excel con ondas RFID -->
+              <div class="w-full h-[168px] rounded-lg border border-slate-300/80 bg-white overflow-hidden shadow-2xs flex flex-col relative select-none">
+                <!-- Barra verde Excel -->
+                <div class="bg-[#107c41] text-white px-2 py-0.5 flex items-center gap-1 shrink-0">
+                  <div class="w-3 h-3 bg-white text-[#107c41] font-black text-[8px] flex items-center justify-center rounded-2xs leading-none">X</div>
+                  <span class="text-[9px] font-bold tracking-wide">Excel</span>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full bg-white/95 border border-slate-300 text-slate-800 font-black text-[10px] shadow-sm tracking-wide">
-                  En desarrollo
+                <!-- Encabezado de columnas -->
+                <div class="grid grid-cols-12 bg-slate-100 text-slate-500 font-mono text-[8px] border-b border-slate-200 py-0.5 text-center shrink-0">
+                  <div class="col-span-1 border-r border-slate-200"></div>
+                  <div class="col-span-3 border-r border-slate-200 font-bold text-slate-700">A · REF</div>
+                  <div class="col-span-5 border-r border-slate-200 font-bold text-slate-700">B · DESC</div>
+                  <div class="col-span-3 font-bold text-slate-700">C · STOCK</div>
+                </div>
+                <!-- Cuadrícula de datos -->
+                <div class="flex-1 bg-white relative font-mono text-[7.5px] text-slate-400 overflow-hidden divide-y divide-slate-100">
+                  <div class="grid grid-cols-12 py-0.5 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">1</span><span class="col-span-3 px-0.5 text-slate-700 font-semibold">0337095</span><span class="col-span-5 px-0.5 truncate text-slate-600">JEANS STRAIGHT</span><span class="col-span-3 px-0.5 text-right text-slate-800 font-bold">12</span></div>
+                  <div class="grid grid-cols-12 py-0.5 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">2</span><span class="col-span-3 px-0.5 text-slate-700 font-semibold">0338142</span><span class="col-span-5 px-0.5 truncate text-slate-600">CAMISA LINO</span><span class="col-span-3 px-0.5 text-right text-slate-800 font-bold">8</span></div>
+                  <div class="grid grid-cols-12 py-0.5 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">3</span><span class="col-span-3 px-0.5 text-slate-700 font-semibold">0339210</span><span class="col-span-5 px-0.5 truncate text-slate-600">CHAQUETA DENIM</span><span class="col-span-3 px-0.5 text-right text-slate-800 font-bold">4</span></div>
+                  <div class="grid grid-cols-12 py-0.5 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">4</span><span class="col-span-3 px-0.5 text-slate-700 font-semibold">0340118</span><span class="col-span-5 px-0.5 truncate text-slate-600">VESTIDO MIDI</span><span class="col-span-3 px-0.5 text-right text-slate-800 font-bold">15</span></div>
+                  <div class="grid grid-cols-12 py-0.5 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">5</span><span class="col-span-3 px-0.5 text-slate-700 font-semibold">0341002</span><span class="col-span-5 px-0.5 truncate text-slate-600">CAMISETA POLO</span><span class="col-span-3 px-0.5 text-right text-slate-800 font-bold">22</span></div>
+                  <div class="grid grid-cols-12 py-0.5 px-0.5"><span class="col-span-1 text-center text-slate-300 border-r border-slate-100">6</span><span class="col-span-3 px-0.5 text-slate-700 font-semibold">0342550</span><span class="col-span-5 px-0.5 truncate text-slate-600">BUSO CUELLO R</span><span class="col-span-3 px-0.5 text-right text-slate-800 font-bold">6</span></div>
+
+                  <!-- Placa flotante RFID centrada -->
+                  <div class="absolute inset-0 m-auto w-24 h-16 bg-white/95 backdrop-blur-2xs rounded-xl border-2 border-slate-900 shadow-md flex flex-col items-center justify-center pointer-events-none group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6 text-slate-900 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 8.5C5.5 5 10 3 12 3s6.5 2 10 5.5"></path>
+                      <path d="M5 12c2.5-2.5 5.5-3.5 7-3.5s4.5 1 7 3.5"></path>
+                      <path d="M8.5 15.5c1.2-1.2 2.3-1.5 3.5-1.5s2.3.3 3.5 1.5"></path>
+                      <circle cx="12" cy="18" r="1.5" fill="currentColor"></circle>
+                    </svg>
+                    <span class="font-black text-slate-950 tracking-wider text-[10px] font-mono leading-none">RFID</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="mt-2">
+              <h4 class="font-black text-slate-950 text-[12px] tracking-tight mb-1.5 leading-none">
+                FARO Inventario
+              </h4>
+              <div class="flex items-center justify-between gap-1">
+                <span id="hubCardAuditInfo" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#dce8f5] text-[#1c4d7d] border border-[#bbd5ee] truncate max-w-[95px]">
+                  271 prendas
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-800 border border-[#c4bcaf] shadow-2xs group-hover:bg-slate-900 group-hover:text-white transition-colors flex items-center gap-1 shrink-0">
+                  Entrar <span>→</span>
                 </span>
               </div>
             </div>
           </div>
 
-          <!-- Pie de tarjeta -->
-          <div class="mt-3">
-            <h4 class="font-black text-slate-950 text-xs sm:text-sm tracking-tight mb-2">
-              Averías y Garantías
-            </h4>
-            <div class="flex items-center justify-between gap-1.5">
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
-                En desarrollo
-              </span>
-              <span class="p-1 rounded-full text-slate-400">
-                <i data-lucide="lock" class="w-4 h-4"></i>
-              </span>
+          <!-- TARJETA 2: CREADOR DE HORARIOS -->
+          <div id="cardLaunchSchedules" class="hub-card hub-card-tilt-2 group cursor-pointer shrink-0">
+            <div>
+              <h3 class="font-black text-slate-950 text-[13px] tracking-tight mb-1.5 leading-none">
+                Creador de Horarios
+              </h3>
+              
+              <!-- Ilustración: Cronograma semanal con turnos -->
+              <div class="w-full h-[168px] rounded-lg border border-slate-300/80 bg-[#fafbfc] overflow-hidden shadow-2xs flex flex-col p-1.5 select-none">
+                <div class="grid grid-cols-6 text-[8px] font-bold text-slate-500 border-b border-slate-200 pb-0.5 text-center">
+                  <span class="text-left pl-0.5 text-slate-400"></span>
+                  <span>Mon</span>
+                  <span>Tue</span>
+                  <span>Wed</span>
+                  <span>Thu</span>
+                  <span>Sat</span>
+                </div>
+                <div class="flex-1 flex flex-col justify-between py-0.5 text-[7.5px] font-semibold">
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">A. Gómez</span>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">B. Díaz</span>
+                    <div></div>
+                    <div></div>
+                    <div class="col-span-2 px-0.5"><div class="h-3.5 rounded bg-[#9ab1ca] border border-[#7d99b7] shadow-2xs"></div></div>
+                    <div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">C. Dnec</span>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">D. Cora</span>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-4.5 rounded bg-[#829dbb] border border-[#6b8aa9] shadow-2xs flex items-center justify-center text-[6.5px] text-white">Pico</div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">E. Chat</span>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">F. Pamo</span>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">A. Gómez</span>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                  </div>
+                  <div class="grid grid-cols-6 items-center">
+                    <span class="truncate pl-0.5 text-slate-600">B. Díaz</span>
+                    <div class="px-0.5"><div class="h-3.5 rounded bg-[#b8c7d9] border border-[#9ab1ca] shadow-2xs"></div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="mt-2">
+              <h4 class="font-black text-slate-950 text-[12px] tracking-tight mb-1.5 leading-none">
+                Creador de Horarios
+              </h4>
+              <div class="flex items-center justify-between gap-1">
+                <span id="hubCardScheduleInfo" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#d8efdf] text-[#1e6338] border border-[#b3e2c0] truncate max-w-[95px]">
+                  Asignación Comp...
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-800 border border-[#c4bcaf] shadow-2xs group-hover:bg-slate-900 group-hover:text-white transition-colors flex items-center gap-1 shrink-0">
+                  Programar <span>→</span>
+                </span>
+              </div>
             </div>
           </div>
+
+          <!-- TARJETA 3: TAREAS Y RECORDATORIOS -->
+          <div id="cardLaunchTasks" class="hub-card hub-card-tilt-3 group cursor-pointer shrink-0">
+            <div>
+              <h3 class="font-black text-slate-950 text-[13px] tracking-tight mb-1.5 leading-none">
+                Tareas y Recordatorios
+              </h3>
+              
+              <!-- Ilustración: Tabla de checklist con ganchito y casillas marcadas -->
+              <div class="w-full h-[168px] rounded-lg border border-slate-300/80 bg-[#ccd7dd] overflow-hidden shadow-2xs flex items-center justify-center p-2 select-none relative">
+                <div class="w-[105px] h-[138px] bg-white rounded-xl border-[2.5px] border-[#1a2530] shadow-sm relative flex flex-col p-2 pt-3 justify-between">
+                  <!-- Gancho superior -->
+                  <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#1a2530] rounded-t-md flex items-center justify-center">
+                    <div class="w-3.5 h-1 bg-white/40 rounded-full"></div>
+                  </div>
+                  <!-- Fila 1 -->
+                  <div class="flex items-center gap-1.5">
+                    <div class="w-3.5 h-3.5 rounded border-2 border-[#1a2530] flex items-center justify-center text-[#1c4d7d] font-black text-[10px] leading-none shrink-0">✓</div>
+                    <div class="flex-1 space-y-0.5">
+                      <div class="h-1 bg-slate-700 rounded-full w-4/5"></div>
+                      <div class="h-0.5 bg-slate-300 rounded-full w-2/3"></div>
+                    </div>
+                  </div>
+                  <!-- Fila 2 -->
+                  <div class="flex items-center gap-1.5">
+                    <div class="w-3.5 h-3.5 rounded border-2 border-[#1a2530] flex items-center justify-center text-[#1c4d7d] font-black text-[10px] leading-none shrink-0">✓</div>
+                    <div class="flex-1 space-y-0.5">
+                      <div class="h-1 bg-slate-700 rounded-full w-3/4"></div>
+                      <div class="h-0.5 bg-slate-300 rounded-full w-1/2"></div>
+                    </div>
+                  </div>
+                  <!-- Fila 3 -->
+                  <div class="flex items-center gap-1.5">
+                    <div class="w-3.5 h-3.5 rounded border-2 border-[#1a2530] shrink-0"></div>
+                    <div class="flex-1 space-y-0.5">
+                      <div class="h-1 bg-slate-700 rounded-full w-5/6"></div>
+                      <div class="h-0.5 bg-slate-300 rounded-full w-3/5"></div>
+                    </div>
+                  </div>
+                  <!-- Fila 4 -->
+                  <div class="flex items-center gap-1.5">
+                    <div class="w-3.5 h-3.5 rounded border-2 border-slate-400 shrink-0"></div>
+                    <div class="flex-1 space-y-0.5">
+                      <div class="h-0.5 bg-slate-300 rounded-full w-2/3"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="mt-2">
+              <h4 class="font-black text-slate-950 text-[12px] tracking-tight mb-1.5 leading-none">
+                Tareas y Recordatorios
+              </h4>
+              <div class="flex items-center justify-between gap-1">
+                <span id="hubCardTasksInfo" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#d8efdf] text-[#1e6338] border border-[#b3e2c0] truncate max-w-[95px]">
+                  4 Pendientes Hoy
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-800 border border-[#c4bcaf] shadow-2xs group-hover:bg-slate-900 group-hover:text-white transition-colors flex items-center gap-1 shrink-0">
+                  Revisar <span>→</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA 4: CATÁLOGO DE REFERENCIAS -->
+          <div id="cardLaunchCatalog" class="hub-card hub-card-tilt-4 group cursor-pointer shrink-0">
+            <div>
+              <h3 class="font-black text-slate-950 text-[13px] tracking-tight mb-1.5 leading-none">
+                Catálogo de Referencias
+              </h3>
+              
+              <!-- Ilustración: Muestrario de prendas con lupa -->
+              <div class="w-full h-[168px] rounded-lg border border-slate-300/80 bg-[#ccd7dd] overflow-hidden shadow-2xs flex items-center justify-center p-1.5 relative select-none">
+                <div class="grid grid-cols-3 gap-1 w-full h-full p-0.5">
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6l1 4-4 2-4-2 1-4z"></path><path d="M8 9l-4 12h16l-4-12"></path></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3l-3 4 3 2 1-2v14h10V7l1 2 3-2-3-4h-4a2 2 0 0 1-4 0H6z"></path></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12v4l-1 16h-4l-1-10-1 10H7L6 6V2z"></path></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v4l-1.5 15h-3.5l-1-9-1 9H7.5L6 7V3z"></path><line x1="9" y1="6" x2="15" y2="6"></line></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4L2 9l3 3 2-2v11h10V10l2 2 3-3-5-5-2 2h-4L7 4z"></path></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2h6v12c0 2 2 4 4 4h2v4h-6c-4 0-6-3-6-6V2z"></path></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 17c0-2 2-3 5-3h4l5-5h4v10H2v-2z"></path></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  </div>
+                  <div class="bg-white/90 rounded-md border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                  </div>
+                </div>
+
+                <!-- Lupa de gran tamaño superpuesta -->
+                <div class="absolute inset-0 m-auto w-20 h-20 flex items-center justify-center pointer-events-none group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                  <div class="relative w-13 h-13 rounded-full border-[2.8px] border-[#1a2530] bg-white/35 backdrop-blur-2xs shadow-lg flex items-center justify-center">
+                    <div class="absolute top-1 left-1.5 w-3.5 h-1.5 bg-white/70 rounded-full rotate-[-35deg]"></div>
+                    <div class="absolute -bottom-4 -right-3 w-2.5 h-7 bg-[#1a2530] rounded-full rotate-[-45deg] shadow-md"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="mt-2">
+              <h4 class="font-black text-slate-950 text-[12px] tracking-tight mb-1.5 leading-none">
+                Catálogo de Referencias
+              </h4>
+              <div class="flex items-center justify-between gap-1">
+                <span id="hubCardCatalogInfo" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fde7d2] text-[#874b17] border border-[#f8cba2] truncate max-w-[95px]">
+                  277 modelos
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-800 border border-[#c4bcaf] shadow-2xs group-hover:bg-slate-900 group-hover:text-white transition-colors flex items-center gap-1 shrink-0">
+                  Buscar <span>→</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA 5: AVERÍAS Y GARANTÍAS (PRÓXIMAMENTE) -->
+          <div class="hub-card hub-card-tilt-5 group opacity-85 shrink-0">
+            <div>
+              <div class="flex items-center justify-between gap-1 mb-1.5">
+                <h3 class="font-black text-slate-950 text-[13px] tracking-tight truncate leading-none">
+                  Averías y G...
+                </h3>
+                <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-slate-200/90 text-slate-600 border border-slate-300 shrink-0 leading-none">
+                  PRÓXIMAMENTE
+                </span>
+              </div>
+              
+              <!-- Ilustración: Cajas de bodega y candado -->
+              <div class="w-full h-[168px] rounded-lg border border-slate-300/80 bg-[#ccd7dd] overflow-hidden shadow-2xs flex items-center justify-center p-1.5 relative select-none">
+                <svg class="w-full h-full text-slate-600 opacity-60" viewBox="0 0 160 120" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="15" y="45" width="38" height="48" rx="3" fill="white" stroke="currentColor"/>
+                  <line x1="22" y1="55" x2="46" y2="55"/>
+                  <line x1="22" y1="62" x2="43" y2="62"/>
+                  <line x1="22" y1="69" x2="46" y2="69"/>
+                  <rect x="22" y="38" width="38" height="48" rx="3" fill="white" stroke="currentColor"/>
+                  <line x1="29" y1="48" x2="53" y2="48"/>
+                  <line x1="29" y1="55" x2="50" y2="55"/>
+                  <path d="M85 35 L125 15 L145 30 L105 50 Z" fill="#e8e1d7" stroke="currentColor"/>
+                  <path d="M85 35 L105 50 L105 85 L85 70 Z" fill="#d9cebf" stroke="currentColor"/>
+                  <path d="M105 50 L145 30 L145 65 L105 85 Z" fill="#cfbfac" stroke="currentColor"/>
+                  <line x1="105" y1="25" x2="125" y2="40" stroke="#b09f8a" stroke-width="2"/>
+                  <path d="M60 80 L85 68 L100 78 L75 90 Z" fill="#e8e1d7" stroke="currentColor"/>
+                  <path d="M60 80 L75 90 L75 110 L60 100 Z" fill="#d9cebf" stroke="currentColor"/>
+                  <path d="M75 90 L100 78 L100 98 L75 110 Z" fill="#cfbfac" stroke="currentColor"/>
+                </svg>
+
+                <!-- Candado e insignia En desarrollo -->
+                <div class="absolute inset-0 m-auto w-28 h-18 flex flex-col items-center justify-center pointer-events-none group-hover:scale-105 transition-transform">
+                  <div class="w-9 h-9 rounded-full bg-white/95 border-2 border-slate-700 shadow-md flex items-center justify-center text-slate-800 mb-1">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full bg-white/95 border border-slate-300 text-slate-800 font-black text-[9px] shadow-sm tracking-wide">
+                    En desarrollo
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="mt-2">
+              <h4 class="font-black text-slate-950 text-[12px] tracking-tight mb-1.5 leading-none">
+                Averías y Garantías
+              </h4>
+              <div class="flex items-center justify-between gap-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/90 text-slate-600 border border-slate-300">
+                  En desarrollo
+                </span>
+                <span class="p-0.5 rounded-full text-slate-400">
+                  <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
