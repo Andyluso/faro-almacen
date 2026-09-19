@@ -228,16 +228,88 @@ svg.lucide, [data-lucide] {
 /* ========================================================================= */
 #viewHub {
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 1024px) {
   #viewHub:not(.hidden) {
-    min-height: calc(100vh - 5.5rem);
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    margin-top: auto !important;
-    margin-bottom: auto !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+  }
+}
+
+/* Encabezado Hero: Título imponente en la parte superior y gran separación */
+.hub-header-hero {
+  text-align: center;
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .hub-header-hero {
+    margin-top: 1.5rem;
+    margin-bottom: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hub-header-hero {
+    margin-top: 2rem;
+    margin-bottom: 5.5rem; /* ~88px separación real con el buscador */
+  }
+}
+
+.hub-hero-title {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.035em;
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (min-width: 640px) {
+  .hub-hero-title {
+    font-size: 3.25rem;
+    line-height: 1.08;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hub-hero-title {
+    font-size: 4rem; /* 64px */
+    line-height: 1.05;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hub-hero-title {
+    font-size: 4.5rem; /* 72px */
+    line-height: 1.02;
+  }
+}
+
+.hub-hero-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 0.85rem;
+  margin-bottom: 0;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.55;
+}
+
+@media (min-width: 640px) {
+  .hub-hero-subtitle {
+    font-size: 1.15rem;
+    margin-top: 1.15rem;
   }
 }
 
