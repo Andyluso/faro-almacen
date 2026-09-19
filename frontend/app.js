@@ -1589,20 +1589,21 @@ function renderVerdictOptions(item) {
     if (label) label.textContent = `Motivo del faltante (-${Math.abs(diff)} en Talla ${item.size}):`;
     options = [
       { id: 'Faltante Real', label: 'Faltante Real', icon: '🚨' },
-      { id: 'Trocada de Talla', label: 'Trocada de Talla', icon: '🔄' },
-      { id: 'Prenda Refundida', label: 'Prenda Refundida', icon: '📦' },
+      { id: 'Tag Defectuoso', label: 'Tag Defectuoso', icon: '🏷️' },
+      { id: 'Sin Tag', label: 'Sin Tag', icon: '🚫' },
+      { id: 'Averías', label: 'Averías', icon: '⚠️' },
       { id: 'Error Conteo', label: 'Error Conteo', icon: '🔢' },
-      { id: 'Mercancía Averiada', label: 'Averiada', icon: '⚠️' },
       { id: 'Otro Motivo', label: 'Otro Motivo', icon: '💬' },
     ];
   } else if (diff > 0) {
     if (label) label.textContent = `Motivo del sobrante (+${diff} en Talla ${item.size}):`;
     options = [
       { id: 'Sobrante Real', label: 'Sobrante Real', icon: '📦' },
-      { id: 'Trocada de Talla', label: 'Trocada de Talla', icon: '🔄' },
-      { id: 'Doble Lectura', label: 'Doble Lectura', icon: '🔢' },
-      { id: 'Exhibición', label: 'Exhibición', icon: '🏷️' },
-      { id: 'Sin Ingreso Sistema', label: 'No Ingresada', icon: '📥' },
+      { id: 'Doble Tag', label: 'Doble Tag', icon: '🏷️' },
+      { id: 'Error Conteo', label: 'Error Conteo', icon: '🔢' },
+      { id: 'Tag Defectuoso', label: 'Tag Defectuoso', icon: '⚠️' },
+      { id: 'Sin Tag', label: 'Sin Tag', icon: '🚫' },
+      { id: 'Averías', label: 'Averías', icon: '🛠️' },
       { id: 'Otro Motivo', label: 'Otro Motivo', icon: '💬' },
     ];
   } else {
@@ -1610,13 +1611,19 @@ function renderVerdictOptions(item) {
     options = [
       { id: 'Conteo Correcto', label: 'Conteo Correcto', icon: '✅' },
       { id: 'Ajuste Confirmado', label: 'Ajuste Confirmado', icon: '📋' },
+      { id: 'Error Conteo', label: 'Error Conteo', icon: '🔢' },
       { id: 'Otro Motivo', label: 'Otro Motivo', icon: '💬' },
     ];
   }
 
-  // Si el dictamen previo no pertenece a las opciones válidas, resetearlo
+  // Compatibilidad con registros antiguos
+  if (currentSelectedVerdict === 'Mercancía Averiada') currentSelectedVerdict = 'Averías';
+  if (currentSelectedVerdict === 'Doble Lectura') currentSelectedVerdict = 'Doble Tag';
+
+  // Si el dictamen previo no pertenece a las opciones válidas y no está vacío, adaptarlo
   const validIds = options.map(o => o.id);
   if (currentSelectedVerdict && !validIds.includes(currentSelectedVerdict)) {
+    // Si era un dictamen viejo que ya no existe, dejar que el usuario elija de las nuevas opciones
     currentSelectedVerdict = '';
   }
 
