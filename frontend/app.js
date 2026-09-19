@@ -4103,7 +4103,13 @@ async function switchPortalView(viewName, updateHash = true) {
   }
 
   initIcons();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Resetear scroll al inicio para la vista independiente
+  const mainEl = document.querySelector('main');
+  if (mainEl) mainEl.scrollTop = 0;
+  window.scrollTo(0, 0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
 }
 
 // ----------------------------------------------------------------------------

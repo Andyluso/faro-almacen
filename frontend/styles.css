@@ -224,21 +224,42 @@ svg.lucide, [data-lucide] {
 }
 
 /* ========================================================================= */
-/* ESTILOS DEL DASHBOARD EJECUTIVO SEVEN SEVEN (3 COLUMNAS REALES)           */
+/* CONTROL ESTRICTO DE PÁGINAS Y VISTAS INDEPENDIENTES                       */
 /* ========================================================================= */
-#viewHub {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+.hidden,
+[hidden],
+#viewHub.hidden,
+#viewFaro.hidden,
+#viewSchedules.hidden,
+#viewTasks.hidden {
+  display: none !important;
 }
 
-@media (min-width: 1024px) {
-  #viewHub:not(.hidden) {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    width: 100% !important;
-  }
+#viewHub:not(.hidden) {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+#viewFaro:not(.hidden) {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 1rem !important;
+}
+
+#viewSchedules:not(.hidden) {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 1rem !important;
+}
+
+#viewTasks:not(.hidden) {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 1rem !important;
 }
 
 /* Encabezado Hero: Título proporcional en la parte superior y buena separación */
