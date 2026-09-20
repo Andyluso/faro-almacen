@@ -1056,6 +1056,18 @@ function openInspector(index) {
     ? `${item.garment_type}${item.garment_code ? ' · Cód. ' + item.garment_code : ''}`
     : (item.category || 'General');
   document.getElementById('modalCategoryBadge').textContent = catBadgeText;
+
+  // Badge de Color Oficial en cabecera
+  const colorBadge = document.getElementById('modalColorBadge');
+  if (colorBadge) {
+    if (item.color) {
+      colorBadge.textContent = item.color;
+      colorBadge.classList.remove('hidden');
+    } else {
+      colorBadge.classList.add('hidden');
+    }
+  }
+
   document.getElementById('modalGarmentName').textContent = item.name;
   document.getElementById('modalSize').textContent = item.size;
   document.getElementById('modalColor').textContent = item.color;
@@ -1473,14 +1485,17 @@ function renderUnifiedDifferences(item) {
 
   const curBaseRef = item.base_reference || item.reference;
   const curGender = item.gender;
+  const curColor = (item.color || '').trim().toUpperCase();
 
-  // Filtrar estrictamente hermanos que pertenezcan al mismo modelo y al mismo género (nunca mezclar referencias distintas ni Dama con Caballero)
+  // Filtrar estrictamente hermanos que pertenezcan al mismo modelo, al mismo género y al MISMO COLOR (nunca mezclar colores distintos de la misma referencia)
   let siblings = (item.sibling_sizes && item.sibling_sizes.length > 0)
     ? item.sibling_sizes.filter(s => {
         const sBase = s.base_reference || s.reference;
         const matchRef = (sBase && curBaseRef && sBase === curBaseRef) || s.reference === item.reference;
         const matchGender = !curGender || !s.gender || s.gender === curGender;
-        return matchRef && matchGender;
+        const sColor = (s.color || '').trim().toUpperCase();
+        const matchColor = !curColor || (sColor === curColor);
+        return matchRef && matchGender && matchColor;
       })
     : [];
 
@@ -1489,6 +1504,7 @@ function renderUnifiedDifferences(item) {
       id: item.id,
       reference: item.reference,
       size: item.size,
+      color: item.color,
       difference: item.difference || 0,
       store_count: item.store_count || 0,
       warehouse_count: item.warehouse_count || 0,

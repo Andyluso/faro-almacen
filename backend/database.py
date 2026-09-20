@@ -572,8 +572,9 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
             item["garment_code"] = item.get("garment_code") or c
             item["garment_type"] = item.get("garment_type") or t or item.get("category", "")
         item_gender = item.get("gender") or ""
+        item_color = (item.get("color") or "").strip()
 
-        # 1. Historial en auditorías pasadas (filtrado estrictamente por código de referencia y género idéntico, NUNCA por nombre genérico)
+        # 1. Historial en auditorías pasadas (filtrado estrictamente por código de referencia, género y COLOR idéntico)
         cursor.execute("""
         SELECT 
             a.id as audit_id,
@@ -583,6 +584,7 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
             a.uploaded_at,
             i.difference,
             i.size,
+            i.color,
             i.store_count,
             i.warehouse_count,
             i.theoretical_count,
@@ -592,10 +594,11 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
         JOIN audits a ON i.audit_id = a.id
         WHERE (i.reference = ? OR (i.base_reference IS NOT NULL AND i.base_reference != '' AND i.base_reference = ?))
           AND (i.gender = ? OR ? = '' OR i.gender IS NULL)
+          AND (? = '' OR TRIM(UPPER(COALESCE(i.color, ''))) = TRIM(UPPER(?)))
           AND a.id != ?
         ORDER BY a.uploaded_at DESC
         LIMIT 20
-        """, (ref, base_ref, item_gender, item_gender, audit_id))
+        """, (ref, base_ref, item_gender, item_gender, item_color, item_color, audit_id))
 
         history = [dict(r) for r in cursor.fetchall()]
         item["history"] = history
@@ -603,7 +606,7 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
         item["recurrence_count"] = len(history)
         item["is_recurrent"] = len(history) > 0
 
-        # 2. Tallas hermanas de este MISMO modelo en ESTA auditoría (unificación de diferencias estricta por base_ref/ref y mismo género)
+        # 2. Tallas hermanas de este MISMO modelo y MISMO COLOR en ESTA auditoría (unificación estricta sin mezclar colores distintos)
         cursor.execute("""
         SELECT 
             id, reference, base_reference, name, size, color, barcode,
@@ -615,6 +618,7 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
             reference = ?
         )
         AND (gender = ? OR ? = '' OR gender IS NULL)
+        AND (? = '' OR TRIM(UPPER(COALESCE(color, ''))) = TRIM(UPPER(?)))
         ORDER BY 
             CASE UPPER(TRIM(size))
                 WHEN 'XS' THEN 1 WHEN 'S' THEN 2 WHEN 'M' THEN 3
@@ -624,7 +628,7 @@ def get_audit_items_with_history(audit_id: int) -> List[Dict[str, Any]]:
                 WHEN 'UN' THEN 12 WHEN 'UNICA' THEN 13
                 ELSE 14
             END, size
-        """, (audit_id, base_ref, ref, item_gender, item_gender))
+        """, (audit_id, base_ref, ref, item_gender, item_gender, item_color, item_color))
 
         siblings = [dict(r) for r in cursor.fetchall()]
         for s in siblings:
@@ -813,6 +817,7 @@ def get_recurring_summary() -> List[Dict[str, Any]]:
     SELECT 
         i.reference,
         i.name,
+        COALESCE(i.color, '') as color,
         i.category,
         p.photo_url,
         COUNT(DISTINCT i.audit_id) as appearances,
@@ -821,7 +826,7 @@ def get_recurring_summary() -> List[Dict[str, Any]]:
         AVG(i.difference) as avg_diff
     FROM audit_items i
     LEFT JOIN catalog_photos p ON i.reference = p.reference
-    GROUP BY i.reference
+    GROUP BY i.reference, COALESCE(i.color, '')
     HAVING appearances > 1
     ORDER BY appearances DESC
     LIMIT 50
