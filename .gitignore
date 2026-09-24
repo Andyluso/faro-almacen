@@ -22,7 +22,7 @@ backend/uploads/*.jpg
 backend/uploads/*.png
 backend/uploads/excels/*
 
-# Archivos de túnel local y logs
+# Archivos de tï¿½nel local y logs
 tunnel.log
 cloudflared.exe
 tunnel_url.txt
@@ -30,3 +30,9 @@ tunnel_url.txt
 # Archivos de sistema
 .DS_Store
 Thumbs.db
+
+backend/.faro-access.json
+backend/backups/
+backend/uploads/.faro/
+backend/uploads/cloud_originals/
+.pytest_cache/

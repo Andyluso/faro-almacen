@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title FARO - Flujo de Almacen y Reorden Operativo
 color 0b
 echo ================================================================

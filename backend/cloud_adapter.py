@@ -25,14 +25,14 @@ def get_client():
         return _client
         
     url = os.environ.get("SUPABASE_URL", "").strip()
-    key = os.environ.get("SUPABASE_KEY", "").strip()
+    key = (os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_KEY", "")).strip()
     
     if not url or not key or "tu-proyecto" in url:
         return None
         
     try:
-        from supabase import create_client
-        _client = create_client(url, key)
+        from supabase import create_client, ClientOptions
+        _client = create_client(url, key, options=ClientOptions(postgrest_client_timeout=8, storage_client_timeout=15))
         return _client
     except Exception as e:
         print(f"[Supabase] Error al crear cliente: {e}")
