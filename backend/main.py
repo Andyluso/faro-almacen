@@ -83,7 +83,7 @@ except ImportError:
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
-UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
+UPLOADS_DIR = os.getenv('FARO_UPLOADS_DIR', os.path.join(BASE_DIR, "uploads"))
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
 
 os.makedirs(UPLOADS_DIR, exist_ok=True)
@@ -92,18 +92,20 @@ os.makedirs(EXCELS_DIR, exist_ok=True)
 os.makedirs(FRONTEND_DIR, exist_ok=True)
 
 # Inicializar base de datos
+from .database import DB_PATH
+from .persistence import ensure_database
+ensure_database(DB_PATH, UPLOADS_DIR)
 init_db()
 
 app = FastAPI(title="FARO - Flujo de Almacén y Reorden Operativo")
 
-# Habilitar CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from .security import AccessMiddleware
+from .reliability import status as replication_status, start_worker, make_backup
+app.add_middleware(AccessMiddleware)
+
+@app.on_event("startup")
+def start_reliability_worker():
+    start_worker()
 
 # Middleware para evitar caché en navegadores y celulares (actualizaciones instantáneas)
 @app.middleware("http")
@@ -120,7 +122,14 @@ async def add_no_cache_headers(request, call_next):
     return response
 
 # Montar carpeta de uploads para servir imágenes
-app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+class PublicUploads(StaticFiles):
+    async def get_response(self, path, scope):
+        from pathlib import PurePosixPath
+        if any(part.startswith('.') for part in PurePosixPath(path.replace('\\', '/')).parts):
+            raise HTTPException(status_code=404)
+        return await super().get_response(path, scope)
+
+app.mount("/uploads", PublicUploads(directory=UPLOADS_DIR), name="uploads")
 
 def get_local_ip():
     """Detecta la dirección IP local de la máquina en la red Wi-Fi/Ethernet."""
@@ -211,25 +220,6 @@ def get_network_info():
         "local_url": f"http://localhost:{port}"
     }
 
-@app.get("/api/system/database-status")
-def get_database_status():
-    """Reporta el motor de base de datos activo (Supabase Nube vs SQLite Local)."""
-    try:
-        from .cloud_adapter import is_supabase_enabled
-        enabled = is_supabase_enabled()
-    except Exception:
-        try:
-            from cloud_adapter import is_supabase_enabled
-            enabled = is_supabase_enabled()
-        except Exception:
-            enabled = False
-
-    return {
-        "mode": "supabase" if enabled else "sqlite",
-        "provider": "Supabase PostgreSQL (Nube 24/7)" if enabled else "SQLite Local (Disco)",
-        "connected": True
-    }
-
 @app.get("/api/audits")
 def api_list_audits(
     search: Optional[str] = None,
@@ -307,21 +297,8 @@ async def api_upload_audit(
         permanent_excel_path = os.path.join(EXCELS_DIR, f"audit_{audit_id}_{safe_fname}")
         shutil.copyfile(tmp_path, permanent_excel_path)
 
-        # 1.1 Sincronizar archivo original con Supabase Storage para persistencia 24/7 en la nube
-        if is_supabase_enabled():
-            try:
-                try:
-                    from .cloud_adapter import get_client, get_storage_bucket
-                except Exception:
-                    from cloud_adapter import get_client, get_storage_bucket
-                client = get_client()
-                if client:
-                    bucket = get_storage_bucket()
-                    storage_path = f"excels/audit_{audit_id}_{safe_fname}"
-                    with open(permanent_excel_path, "rb") as ef:
-                        client.storage.from_(bucket).upload(storage_path, ef.read(), file_options={"upsert": "true"})
-            except Exception as st_err:
-                print(f"[Supabase Storage] Error respaldando Excel original en la nube: {st_err}")
+        from .reliability import queue_file
+        queue_file(permanent_excel_path, f"excels/audit_{audit_id}_{safe_fname}")
 
         # 2. Comparación automática histórica: calcular cuántas prendas de este nuevo archivo ya se repetían en auditorías pasadas
         conn = get_connection()
@@ -348,8 +325,10 @@ async def api_upload_audit(
             "meta": meta
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al procesar el Excel: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="No se pudo procesar el Excel. Comprueba su formato.")
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
@@ -392,13 +371,13 @@ def optimize_and_save_photo(upload_file: UploadFile, reference: str, base_refere
     if not clean_ref:
         clean_ref = "prenda"
         
-    filename = f"ref_{clean_ref}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+    filename = f"ref_{clean_ref}_{__import__('uuid').uuid4().hex}.jpg"
     dest_path = os.path.join(UPLOADS_DIR, filename)
 
     try:
         image = Image.open(upload_file.file)
         # Convertir a RGB en caso de PNG o formato transparente
-        if image.mode in ("RGBA", "P"):
+        if image.mode != "RGB":
             image = image.convert("RGB")
 
         # Redimensionar si es muy grande (máximo 1600x1600)
@@ -406,10 +385,9 @@ def optimize_and_save_photo(upload_file: UploadFile, reference: str, base_refere
         # Guardar comprimida en JPEG de buena calidad
         image.save(dest_path, "JPEG", quality=85, optimize=True)
     except Exception:
-        # Si Pillow falla por algún formato extraño, guardar directo
-        upload_file.file.seek(0)
-        with open(dest_path, "wb") as buffer:
-            shutil.copyfileobj(upload_file.file, buffer)
+        if os.path.exists(dest_path):
+            os.remove(dest_path)
+        raise HTTPException(status_code=400, detail="El archivo no es una imagen válida.")
 
     photo_url = f"/uploads/{filename}"
     save_catalog_photo(reference, photo_url, base_reference, name)
@@ -527,11 +505,10 @@ def api_export_audit_excel(audit_id: int):
             print(f"[Supabase Storage] No se pudo recuperar copia del Excel en la nube: {e}")
 
     # Nombre de salida conservando el nombre original
-    base, ext = os.path.splitext(filename)
-    if not ext:
-        ext = ".xlsx"
+    base, ext = os.path.splitext(safe_fname)
+    ext = ".xlsx"
     out_filename = f"{base}_REVISADO{ext}"
-    out_path = os.path.join(tempfile.gettempdir(), f"audit_{audit_id}_{out_filename}")
+    out_path = os.path.join(tempfile.mkdtemp(prefix="faro_export_"), out_filename)
 
     # 3. Intentar modificar el archivo original exacto
     success = False
@@ -589,14 +566,39 @@ def api_get_catalog_stats():
 
 @app.get("/api/system/database-status")
 def api_database_status():
-    """Retorna el estado de la conexión a la base de datos (Supabase Cloud o SQLite)."""
-    supabase_active = is_supabase_enabled()
-    return {
-        "mode": "supabase" if supabase_active else "sqlite",
-        "supabase_connected": supabase_active,
-        "database": "PostgreSQL (Supabase Cloud)" if supabase_active else "SQLite Local",
-        "storage": "Supabase Storage (garment-photos)" if supabase_active else "Almacenamiento Local (/uploads)"
-    }
+    return replication_status(probe=True)
+
+@app.get("/api/system/photo")
+def api_private_photo(url: str):
+    from urllib.parse import urlparse, unquote
+    from fastapi.responses import Response
+    from .cloud_adapter import get_client, get_storage_bucket
+    conn = get_connection()
+    try:
+        known = conn.execute("SELECT 1 FROM catalog_photos WHERE photo_url=? LIMIT 1", (url,)).fetchone()
+    finally:
+        conn.close()
+    parsed = urlparse(url)
+    trusted = urlparse(os.getenv("SUPABASE_URL", ""))
+    bucket = get_storage_bucket()
+    prefix = f"/storage/v1/object/public/{bucket}/"
+    if not known or parsed.scheme != "https" or parsed.netloc != trusted.netloc or not parsed.path.startswith(prefix):
+        raise HTTPException(status_code=404, detail="Foto no disponible")
+    from pathlib import Path
+    cache = (Path(UPLOADS_DIR) / 'cloud_originals').resolve()
+    original = (cache / unquote(parsed.path[len(prefix):])).resolve()
+    if original.is_relative_to(cache) and original.is_file():
+        return FileResponse(original, media_type="image/jpeg")
+    try:
+        content = get_client().storage.from_(bucket).download(unquote(parsed.path[len(prefix):]))
+        return Response(content, media_type="image/jpeg")
+    except Exception:
+        raise HTTPException(status_code=503, detail="No se pudo recuperar la foto privada")
+
+@app.get("/api/system/backup")
+def api_backup():
+    path = make_backup(force=True)
+    return FileResponse(path, filename=os.path.basename(path), media_type="application/zip")
 
 # -------------------------------------------------------------
 # PYDANTIC MODELS & RUTAS DEL PORTAL / HUB OPERATIVO

@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title Seven Seven - Control de Inventario
 color 0B
 

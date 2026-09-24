@@ -1,3 +1,4 @@
+from html import escape
 import os
 import re
 from datetime import datetime
@@ -337,6 +338,8 @@ def generate_email_table_html(audit_info: Dict[str, Any], items: List[Dict[str, 
     Genera una tabla HTML limpia y formateada para copiar y pegar directamente
     en el cuerpo de un correo electrónico (Outlook, Gmail, etc.), con consolidado de tallas.
     """
+    audit_info = {k: escape(v, quote=True) if isinstance(v, str) else v for k, v in audit_info.items()}
+    items = [{k: escape(v, quote=True) if isinstance(v, str) else v for k, v in item.items()} for item in items]
     target_items = items
     if only_validated:
         target_items = [i for i in items if i.get("status") == "validada"]

@@ -54,24 +54,27 @@ CREATE INDEX IF NOT EXISTS idx_audit_items_base_ref ON audit_items(base_referenc
 CREATE INDEX IF NOT EXISTS idx_audit_items_barcode ON audit_items(barcode);
 CREATE INDEX IF NOT EXISTS idx_audits_date ON audits(audit_date DESC);
 
--- 5. POLÍTICAS DE ACCESO (ROW LEVEL SECURITY - RLS)
--- Habilitar RLS pero permitir acceso completo con clave anónima o autenticada
-ALTER TABLE audits ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE catalog_photos ENABLE ROW LEVEL SECURITY;
-
--- Políticas de lectura y escritura públicas para la app FARO
-CREATE POLICY "Permitir lectura publica de audits" ON audits FOR SELECT USING (true);
-CREATE POLICY "Permitir insercion y modificacion de audits" ON audits FOR ALL USING (true);
-
-CREATE POLICY "Permitir lectura publica de audit_items" ON audit_items FOR SELECT USING (true);
-CREATE POLICY "Permitir insercion y modificacion de audit_items" ON audit_items FOR ALL USING (true);
-
-CREATE POLICY "Permitir lectura publica de catalog_photos" ON catalog_photos FOR SELECT USING (true);
-CREATE POLICY "Permitir insercion y modificacion de catalog_photos" ON catalog_photos FOR ALL USING (true);
-
--- ============================================================================
--- STORAGE BUCKET PARA FOTOS DE PRENDAS (Ejecutar en Supabase Storage)
--- Nombre del bucket recomendado: "garment-photos"
--- Acceso: "Public bucket" (para que las fotos se puedan ver en cualquier celular)
--- ============================================================================
+-- Ejecutar como administrador en el SQL Editor de TU proyecto Supabase.
+-- Preparado para backend privado: requiere clave service_role o sb_secret_ SOLO en el servidor.
+-- No borra datos. Revoca acceso directo de navegadores anónimos y usuarios no administradores.
+BEGIN;
+DO $$
+DECLARE t text; p record;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['audits','audit_items','catalog_photos'] LOOP
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format('REVOKE ALL ON TABLE public.%I FROM anon, authenticated', t);
+    EXECUTE format('GRANT ALL ON TABLE public.%I TO service_role', t);
+    FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename=t LOOP
+      EXECUTE format('DROP POLICY %I ON public.%I', p.policyname, t);
+    END LOOP;
+  END LOOP;
+END $$;
+DROP POLICY IF EXISTS "Public View Photos" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Photos" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update Photos" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete Photos" ON storage.objects;
+-- El bucket ya contenía Excels: hacerlo privado cierra sus enlaces públicos.
+UPDATE storage.buckets SET public = false WHERE id = 'garment-photos';
+INSERT INTO storage.buckets (id, name, public) VALUES ('faro-backups','faro-backups',false) ON CONFLICT (id) DO UPDATE SET public=false;
+COMMIT;

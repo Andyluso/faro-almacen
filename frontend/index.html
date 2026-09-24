@@ -2,10 +2,8 @@
 <html lang="es" class="h-full bg-slate-900">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
-  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7f2">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>FARO - Flujo de Almacén y Reorden Operativo</title>
@@ -14,12 +12,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="FARO">
   <meta name="application-name" content="FARO">
-  <meta name="msapplication-TileColor" content="#0f172a">
+  <meta name="msapplication-TileColor" content="#26322a">
   <meta name="mobile-web-app-capable" content="yes">
   
   <!-- Tailwind CSS Compilado Estático (Carga instantánea en celulares, ultrarrápido 33KB) -->
   <link rel="stylesheet" href="tailwind.min.css?v=2.8">
-  <link rel="stylesheet" href="styles.css?v=5.2">
+  <link rel="stylesheet" href="styles.css?v=6.1">
+  <link rel="stylesheet" href="studio.css?v=1.1">
 
   <!-- Librerías Locales (100% autónomo, no depende de CDNs externos en móviles) -->
   <script src="lucide.min.js"></script>
@@ -28,391 +27,95 @@
   <script src="jsbarcode.min.js"></script>
 
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-blue-600 selection:text-white bg-slate-100">
+<body class="faro-studio h-full flex flex-col text-slate-800 antialiased selection:bg-blue-600 selection:text-white bg-slate-100">
 
   <!-- ========================================================================= -->
   <!-- HEADER PRINCIPAL (RESPONSIVO PARA CUALQUIER PANTALLA) -->
   <!-- ========================================================================= -->
-  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md border-b border-slate-800 safe-top">
-    <div class="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
-      
-      <!-- Fila Superior: Logo + Acciones Rápidas (Adaptado para Móviles) -->
-      <div class="flex items-center justify-between py-2 sm:py-2.5 gap-1.5 sm:gap-2">
-        
-        <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0">
-          <!-- Botón Volver al Menú Principal (Hub) -->
-          <button id="btnBackToHub" type="button" class="hidden bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs shrink-0" title="Volver al Menú Principal">
-            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-            <span>Inicio</span>
-          </button>
-
-          <!-- Logo & Brand FARO / SEVEN SEVEN -->
-          <div id="brandHeader" class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0 cursor-pointer" title="Ir al Menú Principal">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 border border-slate-700/80 p-0.5 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
-              <img src="faro_icon.svg" alt="Faro Logo" class="w-full h-full object-contain">
-            </div>
-            <div class="min-w-0 truncate">
-              <h1 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2 truncate leading-none">
-                <span id="headerTitle">FARO</span>
-                <span id="headerBadge" class="hidden sm:inline-block text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30 tracking-normal badge-pill">
-                  v2.0
-                </span>
-                <span id="dbStatusBadge" class="hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded tracking-normal items-center gap-1 cursor-default transition-all" title="Estado de Base de Datos">
-                  <span id="dbStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span id="dbStatusText">Cloud</span>
-                </span>
-              </h1>
-              <p id="headerSubtitle" class="text-[9px] sm:text-[10px] font-semibold text-sky-400 truncate leading-tight mt-1 hidden xs:block">Flujo de Almacén y Reorden Operativo</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Acciones en Cabecera (Adaptables según vista activa) -->
-        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-          
-          <!-- Acciones específicas de FARO Inventarios -->
-          <div id="faroHeaderActions" class="flex items-center gap-1 sm:gap-2">
-            <!-- Botón Subir Excel -->
-            <button id="btnOpenUpload" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap touch-target sm:min-w-0" title="Subir archivo Excel de lectura">
-              <i data-lucide="upload-cloud" class="w-4 h-4 shrink-0"></i>
-              <span class="hidden sm:inline">Subir Excel</span>
-            </button>
-
-            <!-- Botón Copiar Correo -->
-            <button id="btnOpenEmailModal" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm whitespace-nowrap touch-target sm:min-w-0" title="Copiar informe para correo de respuesta">
-              <i data-lucide="mail-check" class="w-4 h-4 shrink-0"></i>
-              <span class="hidden md:inline">Para Correo</span>
-            </button>
-
-            <!-- Botón Descargar Excel -->
-            <button id="btnDownloadExcel" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors touch-target sm:min-w-0" title="Descargar la plantilla Excel original modificada con las observaciones para responder al correo">
-              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-              <span class="hidden xl:inline">Exportar Excel</span>
-            </button>
-          </div>
-
-          <!-- Botón Instalar App PWA -->
-          <button id="btnInstallPWA" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-all shadow-md whitespace-nowrap touch-target sm:min-w-0 cursor-pointer" title="Instalar FARO en tu celular o computador">
-            <i data-lucide="download" class="w-4 h-4 shrink-0"></i>
-            <span class="hidden sm:inline">Instalar App</span>
-          </button>
-
-          <!-- Botón Celular / Wi-Fi QR -->
-          <button id="btnOpenMobileQR" class="hidden sm:inline-flex bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs p-2 rounded-lg items-center justify-center transition-colors touch-target" title="Abrir en celular con cámara">
-            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i>
-          </button>
-
-        </div>
-
-      </div>
-
-      <!-- Fila Inferior de Cabecera: Selector de Auditoría y Filtro por Fecha (Solo visible en FARO) -->
-      <div id="auditSelectorBar" class="pb-2 pt-0.5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full transition-all">
-        <!-- Selector desplegable de inventario (ocupa el ancho completo en celular para leerlo cómodo) -->
-        <div class="relative flex-1 min-w-0 w-full">
-          <select id="auditSelector" class="w-full bg-slate-800/90 text-slate-100 text-xs sm:text-sm font-semibold rounded-lg pl-3 pr-8 py-2 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none cursor-pointer truncate shadow-inner">
-            <option value="" disabled selected>Cargando inventarios...</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
-            <i data-lucide="chevron-down" class="w-4 h-4"></i>
-          </div>
-        </div>
-
-        <!-- Fila de Fecha e Historial (se ajusta fluidamente) -->
-        <div class="flex items-center gap-1.5 w-full sm:w-auto shrink-0">
-          <!-- Filtro rápido por fecha -->
-          <div class="relative flex-1 sm:flex-initial flex items-center gap-1 min-w-0">
-            <input type="date" id="auditDateFilter" class="w-full sm:w-auto bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-inner" title="Filtrar inventarios por fecha exacta">
-            <button id="btnClearDateFilter" class="hidden text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800/80 border border-slate-700 transition-colors shrink-0" title="Limpiar filtro de fecha">
-              <i data-lucide="x" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-
-          <!-- Botón Ver Historial Completo -->
-          <button id="btnOpenAuditHistory" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors touch-target shadow-xs" title="Explorar todo el historial de inventarios">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
-            <span>Historial</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Fila 3: Barra de Navegación por Pestañas FARO (Auditoría / Catálogo / Archivos) -->
-      <div id="faroTabsBar" class="flex items-center gap-1 sm:gap-2 pb-2 pt-1 overflow-x-auto no-scrollbar border-t border-slate-800/80">
-        <!-- Pestaña 1: Auditoría -->
-        <button id="tabBtnAudit" type="button" class="tab-nav-btn active py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 bg-blue-600 text-white shadow-xs">
-          <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
-          <span>Auditoría</span>
-        </button>
-
-        <!-- Pestaña 2: Catálogo de Referencias (Buscador) -->
-        <button id="tabBtnCatalog" type="button" class="tab-nav-btn py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>Catálogo de Referencias</span>
-          <span id="tabCatalogBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/30 badge-pill">...</span>
-        </button>
-
-        <!-- Pestaña 3: Archivos Excel -->
-        <button id="tabBtnFiles" type="button" class="tab-nav-btn py-1.5 px-3 rounded-lg text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shrink-0 text-slate-300 hover:text-white hover:bg-slate-800">
-          <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span>Archivos Excel</span>
-          <span id="tabFilesBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 badge-pill">...</span>
-        </button>
-      </div>
-
+  <a class="skip-link" href="#workspace">Saltar al contenido</a>
+  <aside class="studio-sidebar" aria-label="Navegación principal">
+    <button id="brandHeader" class="studio-brand" type="button" aria-label="FARO, ir al inicio">
+      <span class="studio-brand-mark"><i data-lucide="scan-line"></i></span><span>FARO<span class="studio-brand-caption">SEVEN SEVEN</span></span>
+    </button>
+    <span class="studio-nav-label">ESPACIO DE TRABAJO</span>
+    <nav class="studio-nav">
+      <button data-portal-view="hub" class="studio-nav-item is-active" aria-current="page"><i data-lucide="layout-dashboard"></i><span>Inicio</span></button>
+      <button data-portal-view="faro" class="studio-nav-item"><i data-lucide="scan-barcode"></i><span>Inventario</span></button>
+      <button data-portal-view="catalog" class="studio-nav-item"><i data-lucide="shirt"></i><span>Catálogo</span></button>
+      <button data-portal-view="schedules" class="studio-nav-item"><i data-lucide="calendar-days"></i><span>Horarios</span></button>
+      <button data-portal-view="tasks" class="studio-nav-item"><i data-lucide="list-checks"></i><span>Tareas</span></button>
+    </nav>
+    <div class="studio-sidebar-bottom">
+      <div class="studio-store"><span class="studio-store-icon"><i data-lucide="store"></i></span><div><strong>Seven Seven</strong><span>Equipo de tienda · Sev333</span></div></div>
+      <a class="studio-backup" href="/api/system/backup"><i data-lucide="download"></i><span>Descargar respaldo</span></a>
+      <p>Un lugar para tener todo en orden.</p>
     </div>
+  </aside>
+  <header class="studio-topbar safe-top">
+    <div class="studio-topline">
+      <div class="studio-page-context"><span class="studio-breadcrumb">Mi tienda <span>/</span></span><h1 id="headerTitle">Inicio</h1><p id="headerSubtitle" class="sr-only">Portal operativo Seven Seven</p></div>
+      <div class="studio-top-tools">
+        <span id="studioDate" class="studio-date"></span>
+        <span id="dbStatusBadge" class="studio-status" title="Estado del respaldo"><span id="dbStatusDot"></span><span id="dbStatusText">Comprobando…</span></span>
+        <button id="btnOpenMobileQR" class="studio-icon-button" title="Abrir en el celular" aria-label="Abrir en el celular"><i data-lucide="smartphone"></i></button>
+        <button id="btnInstallPWA" class="hidden studio-icon-button" title="Instalar aplicación" aria-label="Instalar aplicación"><i data-lucide="download"></i></button>
+        <a class="studio-icon-button studio-mobile-backup" href="/api/system/backup" title="Descargar respaldo" aria-label="Descargar respaldo"><i data-lucide="download"></i></a>
+        <span class="studio-avatar" title="Equipo Seven Seven">77</span>
+      </div>
+    </div>
+    <div id="faroHeaderActions" class="studio-inventory-actions hidden">
+      <button id="btnOpenUpload" class="studio-button primary"><i data-lucide="upload"></i><span>Subir inventario</span></button>
+      <button id="btnOpenEmailModal" class="studio-button secondary"><i data-lucide="mail"></i><span>Preparar informe</span></button>
+      <button id="btnDownloadExcel" class="studio-button secondary"><i data-lucide="download"></i><span>Exportar Excel</span></button>
+    </div>
+    <div id="auditSelectorBar" class="studio-audit-selector hidden">
+      <label class="studio-audit-field"><span>INVENTARIO ACTIVO</span><select id="auditSelector" aria-label="Inventario activo"><option>Cargando inventarios…</option></select></label>
+      <div class="studio-date-filter"><input type="date" id="auditDateFilter" title="Filtrar inventarios por fecha" aria-label="Fecha del inventario"><button id="btnClearDateFilter" class="hidden studio-icon-button" title="Limpiar fecha" aria-label="Limpiar fecha"><i data-lucide="x"></i></button><button id="btnOpenAuditHistory" class="studio-button secondary"><i data-lucide="history"></i><span>Historial</span></button></div>
+    </div>
+    <nav id="faroTabsBar" class="studio-audit-tabs hidden" aria-label="Secciones del inventario">
+      <button id="tabBtnAudit" class="tab-nav-btn active"><i data-lucide="clipboard-check"></i><span>Auditoría</span></button>
+      <button id="tabBtnCatalog" class="tab-nav-btn"><i data-lucide="shirt"></i><span>Catálogo</span><span id="tabCatalogBadge" class="studio-count">—</span></button>
+      <button id="tabBtnFiles" class="tab-nav-btn"><i data-lucide="files"></i><span>Archivos</span><span id="tabFilesBadge" class="studio-count">—</span></button>
+    </nav>
+    <button id="btnBackToHub" class="hidden" type="button">Volver al inicio</button>
   </header>
 
   <!-- BARRA DE AVISO OFFLINE (Aparece suavemente si el celular entra en zona sin señal) -->
   <div id="offlineBanner" class="hidden bg-amber-600 text-white text-xs font-bold py-1.5 px-4 text-center flex items-center justify-center gap-2 shadow-xs transition-all z-20">
     <i data-lucide="wifi-off" class="w-3.5 h-3.5 shrink-0"></i>
-    <span>Modo sin conexión: Puedes seguir consultando el catálogo y referencias cargadas en caché.</span>
+    <span>Sin conexión. Los cambios necesitan conexión con el servidor para guardarse.</span>
   </div>
 
   <!-- ========================================================================= -->
   <!-- CONTENIDO PRINCIPAL FLUIDO (SE ADAPTA A MÓVILES Y MONITORES ANCHOS) -->
   <!-- ========================================================================= -->
-  <main class="flex-1 w-full max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-4 sm:py-6 lg:py-8 flex flex-col min-h-[calc(100vh-4.5rem)] overflow-y-auto safe-paddings">
+  <main id="workspace" tabindex="-1" class="flex-1 w-full max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-4 sm:py-6 lg:py-8 flex flex-col min-h-[calc(100vh-4.5rem)] overflow-y-auto safe-paddings">
 
     <!-- ======================================================================= -->
     <!-- VISTA 1: MENÚ PRINCIPAL / HUB DE OPERACIONES SEVEN SEVEN (3 COLUMNAS)   -->
     <!-- ======================================================================= -->
-    <div id="viewHub" class="w-full flex flex-col flex-1">
-      
-      <!-- TÍTULO PRINCIPAL EN LA PARTE SUPERIOR: ELEGANTE, PROPORCIONAL Y BIEN SEPARADO -->
-      <div class="hub-header-hero">
-        <h2 class="hub-hero-title">
-          Gestión Operativa de Tienda
-        </h2>
+    <div id="viewHub" class="studio-dashboard">
+      <div class="studio-welcome"><div><p class="studio-eyebrow">TU ESPACIO DE OPERACIONES</p><h2>Tu tienda, en orden<span>.</span></h2><p>Una mirada a lo importante. Un buen comienzo para tu día.</p></div><span class="studio-live"><span></span>Resumen de tienda</span></div>
+      <div class="studio-section-label"><h3>El pulso de tu tienda</h3><span id="studioSummaryDate">Hoy</span></div>
+      <section class="studio-metrics" aria-label="Resumen de operaciones">
+        <button id="hubCenterCardAudit" class="studio-metric"><div class="studio-metric-label">Última lectura<i data-lucide="scan-barcode"></i></div><strong id="hubCenterAuditCount">—</strong><span id="hubCenterAuditDiff">Cargando inventario</span><i class="studio-metric-arrow" data-lucide="arrow-up-right"></i></button>
+        <button id="hubCenterCardSchedule" class="studio-metric"><div class="studio-metric-label">Equipo de hoy<i data-lucide="users"></i></div><strong id="hubCenterSchedCount">—</strong><span id="hubCenterSchedSub">Consultando programación</span><i class="studio-metric-arrow" data-lucide="arrow-up-right"></i></button>
+        <button id="hubCenterCardTasks" class="studio-metric"><div class="studio-metric-label">Por completar<i data-lucide="circle-check"></i></div><strong id="hubCenterTasksCount">—</strong><span id="hubCenterTasksSub">Consultando tareas</span><i class="studio-metric-arrow" data-lucide="arrow-up-right"></i></button>
+      </section>
+      <div class="studio-priorities">
+        <section class="studio-focus" aria-labelledby="focusTitle">
+          <div class="studio-focus-top"><span class="studio-eyebrow">CONTROL DE INVENTARIO</span><span class="studio-focus-tag"><i data-lucide="scan-line"></i>FARO RFID</span></div>
+          <h3 id="focusTitle">Cada prenda cuenta.</h3><p>Revisa las diferencias, encuentra las referencias<br class="desktop-only"> y deja tu inventario al día.</p>
+          <div class="studio-focus-bottom"><button id="cardLaunchFaro" class="studio-button lime">Revisar inventario <i data-lucide="arrow-up-right"></i></button><span id="hubCardAuditInfo">Cargando última lectura…</span></div>
+          <div class="studio-focus-decoration" aria-hidden="true"><div class="studio-scan-corner"></div><i data-lucide="shirt"></i><div class="studio-barcode"></div></div>
+        </section>
+        <section class="studio-panel studio-task-panel"><div class="studio-panel-head"><div><span class="studio-eyebrow">PASO A PASO</span><h3>La agenda de tienda</h3></div><span id="hubTasksPendingCount" class="studio-panel-count">Cargando…</span></div><div id="hubTodayTasksList" class="studio-task-preview"><p class="studio-loading">Cargando tareas…</p></div><button id="btnHubReviewTasks" class="studio-panel-link">Ver todas las tareas<i data-lucide="arrow-right"></i></button></section>
+        <section class="studio-search-card" aria-labelledby="fastSearchTitle"><span class="studio-small-icon"><i data-lucide="search"></i></span><h3 id="fastSearchTitle">¿Qué prenda buscas?</h3><p>Encuentra una referencia en tu catálogo.</p><form id="hubFastSearchForm"><label class="sr-only" for="hubFastSearchInput">Referencia o descripción</label><input id="hubFastSearchInput" placeholder="Referencia o descripción" autocomplete="off"><button type="submit" aria-label="Buscar en el catálogo"><i data-lucide="arrow-right"></i></button></form><div class="studio-search-suggestions"><span>Explora</span><button class="hub-fast-chip" data-search="Jean">Jeans</button><button class="hub-fast-chip" data-search="Camisa">Camisas</button><button class="hub-fast-chip" data-search="Vestido">Vestidos</button></div></section>
+        <section class="studio-panel studio-team-panel"><div class="studio-panel-head"><div><span class="studio-eyebrow">UN MISMO EQUIPO</span><h3>En tienda hoy</h3></div><i data-lucide="calendar-days"></i></div><span id="hubScheduleSubHeader" class="studio-panel-caption">Programación del día</span><div id="hubTodayShiftsList"><p class="studio-loading">Cargando turnos…</p></div><button id="btnHubGoToSchedules" class="studio-panel-link">Organizar la semana<i data-lucide="arrow-right"></i></button></section>
       </div>
-
-      <!-- DASHBOARD EN 3 COLUMNAS REALES (CSS GRID FORZADO): BOTONES IZQ | CENTRO FUNCIONAL | WIDGETS DER -->
-      <div class="hub-3col-layout w-full">
-
-        <!-- =================================================================== -->
-        <!-- COLUMNA 1 (IZQUIERDA): BOTONES DE MÓDULOS DE OPERACIÓN              -->
-        <!-- =================================================================== -->
-        <div class="hub-col-left">
-          
-          <!-- Botón 1: FARO Inventario -->
-          <button id="cardLaunchFaro" type="button" class="hub-nav-button group text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex flex-col items-center justify-center shrink-0 border border-blue-100 transition-colors">
-                <i data-lucide="radio" class="w-4 h-4"></i>
-                <span class="text-[7.5px] font-black tracking-tighter leading-none mt-0.5">RFID</span>
-              </div>
-              <div>
-                <span class="font-bold text-slate-900 text-sm block">FARO Inventario</span>
-                <span id="hubCardAuditInfo" class="text-[10px] text-slate-400 font-medium block">Auditoría y diferencias</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-800 group-hover:translate-x-0.5 transition-all"></i>
-          </button>
-
-          <!-- Botón 2: Creador de Horarios -->
-          <button id="cardLaunchSchedules" type="button" class="hub-nav-button group text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100 transition-colors">
-                <i data-lucide="calendar" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <span class="font-bold text-slate-900 text-sm block">Creador de Horarios</span>
-                <span id="hubCardScheduleInfo" class="text-[10px] text-slate-400 font-medium block">Programación semanal</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-800 group-hover:translate-x-0.5 transition-all"></i>
-          </button>
-
-          <!-- Botón 3: Tareas y Recordatorios -->
-          <button id="cardLaunchTasks" type="button" class="hub-nav-button group text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 transition-colors">
-                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <span class="font-bold text-slate-900 text-sm block">Tareas y Recordatorios</span>
-                <span id="hubCardTasksInfo" class="text-[10px] text-slate-400 font-medium block">Rutinas de tienda</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-800 group-hover:translate-x-0.5 transition-all"></i>
-          </button>
-
-          <!-- Botón 4: Catálogo de Referencias -->
-          <button id="cardLaunchCatalog" type="button" class="hub-nav-button group text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100 transition-colors">
-                <i data-lucide="shirt" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <span class="font-bold text-slate-900 text-sm block">Catálogo de Referencias</span>
-                <span id="hubCardCatalogInfo" class="text-[10px] text-slate-400 font-medium block">Directorio visual</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-800 group-hover:translate-x-0.5 transition-all"></i>
-          </button>
-
-          <!-- SEPARADOR PRÓXIMAMENTE -->
-          <div class="pt-2 pb-0.5 px-1">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">PRÓXIMAMENTE</span>
-          </div>
-
-          <!-- Botón 5: Averías y Garantías (Deshabilitado / Próximamente) -->
-          <div class="hub-nav-button-disabled">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 border border-slate-200">
-                <i data-lucide="package" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <span class="font-bold text-slate-500 text-sm block">Averías y Garantías</span>
-                <span class="text-[10px] text-slate-400 font-medium block">Gestión de prendas defectuosas</span>
-              </div>
-            </div>
-            <i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>
-          </div>
-
-        </div>
-
-        <!-- =================================================================== -->
-        <!-- COLUMNA 2 (CENTRO FUNCIONAL): PULSO DE TIENDA, BUSCADOR Y ACCIONES  -->
-        <!-- =================================================================== -->
-        <div class="hub-col-center">
-
-          <!-- TARJETA FUNCIONAL 1: BUSCADOR RÁPIDO DE PRENDAS Y REFERENCIAS -->
-          <div class="hub-center-card">
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">
-                  <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                </div>
-                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Buscador Rápido de Prenda o Referencia</h3>
-              </div>
-              <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">Escribe código o descripción</span>
-            </div>
-
-            <form id="hubFastSearchForm" class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:bg-white transition-all shadow-inner">
-              <div class="flex items-center gap-2 flex-1 px-2.5">
-                <i data-lucide="barcode" class="w-4 h-4 text-slate-400 shrink-0"></i>
-                <input type="text" id="hubFastSearchInput" placeholder="Ej. 0337095, Jean Straight, Camisa Lino..." class="bg-transparent text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none w-full placeholder:text-slate-400">
-              </div>
-              <button type="submit" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer shrink-0">
-                Buscar
-              </button>
-            </form>
-
-            <!-- Chips de acceso directo -->
-            <div class="flex items-center gap-1.5 flex-wrap pt-2 text-[11px]">
-              <span class="text-slate-400 font-medium">Búsquedas frecuentes:</span>
-              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Jean">Jean</button>
-              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Camisa">Camisa</button>
-              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Pantalón">Pantalón</button>
-              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Vestido">Vestido</button>
-              <button type="button" class="hub-fast-chip px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer" data-search="Chaqueta">Chaqueta</button>
-            </div>
-          </div>
-
-          <!-- TARJETA FUNCIONAL 2: PULSO OPERATIVO DEL DÍA (3 INDICADORES EN TIEMPO REAL) -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full">
-            
-            <!-- Indicador 1: FARO Inventario -->
-            <div id="hubCenterCardAudit" class="hub-stat-card group">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Inventario RFID</span>
-                <i data-lucide="radio" class="w-3.5 h-3.5 text-blue-500"></i>
-              </div>
-              <div id="hubCenterAuditCount" class="text-lg font-black text-slate-900 leading-tight">271 prendas</div>
-              <div id="hubCenterAuditDiff" class="text-[11px] text-rose-600 font-bold mt-0.5">Diferencias pendientes</div>
-              <div class="text-[10px] text-slate-400 font-medium mt-1 group-hover:text-blue-600 transition-colors">Ver auditoría →</div>
-            </div>
-
-            <!-- Indicador 2: Horarios del Día -->
-            <div id="hubCenterCardSchedule" class="hub-stat-card group">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Equipo en Turno</span>
-                <i data-lucide="users" class="w-3.5 h-3.5 text-purple-500"></i>
-              </div>
-              <div id="hubCenterSchedCount" class="text-lg font-black text-slate-900 leading-tight">4 Asesores</div>
-              <div id="hubCenterSchedSub" class="text-[11px] text-emerald-600 font-bold mt-0.5">Cobertura activa hoy</div>
-              <div class="text-[10px] text-slate-400 font-medium mt-1 group-hover:text-purple-600 transition-colors">Ver horario semanal →</div>
-            </div>
-
-            <!-- Indicador 3: Checklist Diario -->
-            <div id="hubCenterCardTasks" class="hub-stat-card group">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Tareas de Hoy</span>
-                <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-              </div>
-              <div id="hubCenterTasksCount" class="text-lg font-black text-slate-900 leading-tight">3 Pendientes</div>
-              <div id="hubCenterTasksSub" class="text-[11px] text-amber-700 font-bold mt-0.5">Rutinas de operación</div>
-              <div class="text-[10px] text-slate-400 font-medium mt-1 group-hover:text-emerald-600 transition-colors">Revisar checklist →</div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- =================================================================== -->
-        <!-- COLUMNA 3 (DERECHA): RECORDATORIOS Y HORARIOS DEL DÍA EN ESPECÍFICO -->
-        <!-- =================================================================== -->
-        <div class="hub-col-right">
-
-          <!-- WIDGET 1: NOTIFICACIONES DE TAREAS Y RECORDATORIOS DEL DÍA -->
-          <div class="hub-widget-card p-4 sm:p-5 flex flex-col justify-between">
-            <!-- Cabecera del Widget -->
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div class="flex items-center gap-2">
-                <h3 class="font-bold text-slate-900 text-xs sm:text-sm leading-tight">
-                  Recordatorios y Tareas
-                </h3>
-              </div>
-              <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 shadow-2xs">
-                <i data-lucide="bell" class="w-3.5 h-3.5"></i>
-              </div>
-            </div>
-
-            <!-- Lista Dinámica de Tareas de Hoy -->
-            <div id="hubTodayTasksList" class="py-2.5 space-y-1.5 flex-1 min-h-[140px]">
-              <!-- Inyectado dinámicamente por loadHubSummary() -->
-              <div class="text-center py-6 text-slate-400 text-xs">Cargando tareas del día...</div>
-            </div>
-
-            <!-- Pie del Widget -->
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span id="hubTasksPendingCount" class="font-bold text-slate-700 text-xs">
-                3 Tareas Pendientes
-              </span>
-              <button id="btnHubReviewTasks" type="button" class="font-bold text-slate-900 hover:text-blue-600 active:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer">
-                <span>Revisar todas</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- WIDGET 2: HORARIOS DEL DÍA EN ESPECÍFICO -->
-          <div class="hub-widget-card p-4 sm:p-5 flex flex-col">
-            <!-- Cabecera del Widget -->
-            <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
-              <div>
-                <h3 class="font-bold text-slate-900 text-xs sm:text-sm">
-                  Horarios del Día (Hoy)
-                </h3>
-                <span id="hubScheduleSubHeader" class="text-[10px] text-slate-400 font-medium block">Personal en turno</span>
-              </div>
-              <button id="btnHubGoToSchedules" type="button" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 active:text-blue-800 transition-colors flex items-center gap-0.5 cursor-pointer">
-                <span>Ver semana</span>
-                <span>→</span>
-              </button>
-            </div>
-
-            <!-- Lista de Turnos y Personal del Día -->
-            <div id="hubTodayShiftsList" class="py-1 divide-y divide-slate-100 max-h-56 overflow-y-auto no-scrollbar">
-              <!-- Inyectado dinámicamente por loadHubSummary() -->
-              <div class="text-center py-6 text-slate-400 text-xs">Cargando turnos de hoy...</div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
+      <div class="studio-section-label studio-modules-label"><h3>Continúa por aquí</h3><span>Tus herramientas, a un clic</span></div>
+      <div class="studio-module-links"><button id="cardLaunchCatalog"><i data-lucide="shirt"></i><span><strong>Catálogo de prendas</strong><small id="hubCardCatalogInfo">Todas tus referencias</small></span><i data-lucide="arrow-up-right"></i></button><button id="cardLaunchSchedules"><i data-lucide="calendar-days"></i><span><strong>Horarios del equipo</strong><small id="hubCardScheduleInfo">Planifica la semana</small></span><i data-lucide="arrow-up-right"></i></button><button id="cardLaunchTasks"><i data-lucide="list-checks"></i><span><strong>Tareas de tienda</strong><small id="hubCardTasksInfo">Organiza cada día</small></span><i data-lucide="arrow-up-right"></i></button></div>
+      <footer class="studio-footer"><span>FARO <span>×</span> SEVEN SEVEN</span><span>Todo en su lugar.</span></footer>
     </div> <!-- /#viewHub -->
 
     <!-- ======================================================================= -->
@@ -860,6 +563,7 @@
     <!-- VISTA 3: CREADOR DE HORARIOS SEMANALES PARA LA ENCARGADA               -->
     <!-- ======================================================================= -->
     <div id="viewSchedules" class="hidden flex flex-col gap-4 flex-1 pb-10">
+      <div class="studio-view-heading no-print"><p class="studio-eyebrow">PLANIFICACIÓN SEMANAL</p><h2>Un equipo bien organizado.</h2><p>Asigna turnos y prepara la semana de tu tienda.</p></div>
       
       <!-- Barra Superior de Control de Semana y Acciones -->
       <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3 no-print">
@@ -1069,6 +773,7 @@
     <!-- VISTA 4: TAREAS Y RECORDATORIOS OPERATIVOS                             -->
     <!-- ======================================================================= -->
     <div id="viewTasks" class="hidden flex flex-col gap-4 flex-1 pb-10">
+      <div class="studio-view-heading"><p class="studio-eyebrow">RUTINAS DE TIENDA</p><h2>Cada pendiente, en su lugar.</h2><p>Organiza las prioridades y avanza una tarea a la vez.</p></div>
       
       <!-- Barra Superior de Tareas: Resumen y Filtros Rápidos -->
       <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1801,6 +1506,7 @@
     <span id="toastMessage" class="flex-1">Mensaje</span>
   </div>
 
-  <script src="app.js?v=5.3"></script>
+<script src="app.js?v=6.1"></script>
+  <script src="studio.js?v=1.1"></script>
 </body>
 </html>

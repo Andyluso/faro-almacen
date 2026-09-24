@@ -202,7 +202,7 @@ async function loadNetworkInfo() {
   try {
     const res = await fetch('/api/system/network-info');
     if (res.ok) {
-      networkInfo = await res.json();
+      networkInfo = withPhotoProxy(await res.json());
       const mobileUrlText = document.getElementById('mobileUrlText');
       if (mobileUrlText) {
         mobileUrlText.textContent = networkInfo.mobile_url;
@@ -217,22 +217,22 @@ async function loadDatabaseStatus() {
   try {
     const res = await fetch('/api/system/database-status');
     if (!res.ok) return;
-    const data = await res.json();
+    const data = withPhotoProxy(await res.json());
     const badge = document.getElementById('dbStatusBadge');
     const dot = document.getElementById('dbStatusDot');
     const text = document.getElementById('dbStatusText');
     if (!badge || !text) return;
 
-    if (data.mode === 'supabase' && data.supabase_connected) {
+    if (data.supabase_connected && data.pending_changes === 0) {
       badge.className = 'hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tracking-normal items-center gap-1 cursor-default';
-      badge.title = 'Base de Datos: PostgreSQL (Supabase Cloud)';
+      badge.title = 'Base local con respaldo de los siete módulos en Supabase. Última comprobación: ' + (data.checked_at || '');
       if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
-      text.textContent = 'Supabase Cloud';
+      text.textContent = 'Respaldo nube al día';
     } else {
       badge.className = 'hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 tracking-normal items-center gap-1 cursor-default';
-      badge.title = 'Base de Datos: SQLite Local';
+      badge.title = data.message;
       if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
-      text.textContent = 'SQLite Local';
+      text.textContent = !data.replication_enabled ? 'Respaldo local' : (data.pending_changes ? `Nube pendiente (${data.pending_changes})` : 'Guardado local');
     }
   } catch (err) {
     console.debug('No se pudo verificar estado de base de datos:', err);
@@ -243,7 +243,7 @@ async function loadAudits(targetAuditId = null) {
   try {
     const res = await fetch('/api/audits');
     if (!res.ok) throw new Error('Error al listar auditorías');
-    allAudits = await res.json();
+    allAudits = withPhotoProxy(await res.json());
     
     // Actualizar contador en la pestaña de archivos
     const badgeFiles = document.getElementById('tabFilesBadge');
@@ -322,7 +322,7 @@ async function loadAuditDetails(auditId) {
   try {
     const res = await fetch(`/api/audits/${auditId}`);
     if (!res.ok) throw new Error('Error al cargar auditoría');
-    const data = await res.json();
+    const data = withPhotoProxy(await res.json());
     
     allItems = (data.items || []).map(item => {
       if (!item.gender || !item.garment_type) {
@@ -459,7 +459,7 @@ function renderSizeBreakdown() {
       : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50/80';
 
     return `
-      <div class="size-pill cursor-pointer p-2 rounded-xl border text-center transition-all shrink-0 min-w-[110px] sm:min-w-[130px] ${activeClass}" onclick="selectSizeFilter('${sz}')" title="Filtrar prendas de Talla ${sz}">
+      <div class="size-pill cursor-pointer p-2 rounded-xl border text-center transition-all shrink-0 min-w-[110px] sm:min-w-[130px] ${activeClass}" onclick="selectSizeFilter('${escapeJsAttribute(sz)}')" title="Filtrar prendas de Talla ${sz}">
         <div class="flex items-center justify-between gap-1 mb-1">
           <span class="text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">Talla ${sz}</span>
           <span class="text-[10px] text-slate-400 font-bold">${item.total_refs} refs</span>
@@ -760,7 +760,7 @@ function updateActiveFilterBadges() {
       summaryBar.innerHTML = activeTags.map(tag => `
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200">
           <span>${tag.label}</span>
-          <button type="button" class="text-slate-400 hover:text-red-500 ml-0.5" onclick="removeSpecificFilter('${tag.type}')" title="Quitar este filtro">
+          <button type="button" class="text-slate-400 hover:text-red-500 ml-0.5" onclick="removeSpecificFilter('${escapeJsAttribute(tag.type)}')" title="Quitar este filtro">
             ×
           </button>
         </span>
@@ -900,20 +900,20 @@ function renderCards(container) {
         <div class="flex items-start gap-2.5 sm:gap-3 mt-0.5 sm:mt-1">
           <div class="w-12 h-14 sm:w-14 sm:h-16 rounded-lg bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center relative">
             ${hasPhoto 
-              ? `<img src="${item.photo_url}" alt="${item.reference}" class="w-full h-full object-cover">` 
+              ? `<img src="${escapeHtml(item.photo_url)}" alt="${escapeHtml(item.reference)}" class="w-full h-full object-cover">` 
               : `<div class="text-slate-400 text-center p-1"><i data-lucide="image" class="w-5 h-5 mx-auto"></i><span class="text-[8px] font-bold block mt-0.5 text-amber-600">Sin foto</span></div>`}
           </div>
 
           <div class="flex-1 min-w-0">
             <span class="text-[11px] font-mono font-black text-slate-900 block truncate">
-              ${item.reference}
+              ${escapeHtml(item.reference)}
             </span>
-            <h4 class="text-xs font-bold text-slate-700 leading-tight line-clamp-2 mt-0.5" title="${item.name}">
-              ${item.name}
+            <h4 class="text-xs font-bold text-slate-700 leading-tight line-clamp-2 mt-0.5" title="${escapeHtml(item.name)}">
+              ${escapeHtml(item.name)}
             </h4>
             <div class="flex items-center gap-2 mt-1.5 text-[11px]">
-              <span class="font-black text-blue-900 bg-blue-100 px-2 py-0.5 rounded badge-pill">Talla: ${item.size}</span>
-              <span class="text-slate-500 truncate">Color: ${item.color}</span>
+              <span class="font-black text-blue-900 bg-blue-100 px-2 py-0.5 rounded badge-pill">Talla: ${escapeHtml(item.size)}</span>
+              <span class="text-slate-500 truncate">Color: ${escapeHtml(item.color)}</span>
             </div>
           </div>
         </div>
@@ -936,7 +936,7 @@ function renderCards(container) {
 
         ${isValidated && item.validation_verdict ? `
           <div class="text-[10px] text-blue-900 bg-blue-50/80 p-1.5 rounded border border-blue-200 truncate">
-            <strong>Dictamen:</strong> ${item.validation_verdict}
+            <strong>Dictamen:</strong> ${escapeHtml(item.validation_verdict)}
           </div>
         ` : ''}
       </div>
@@ -984,7 +984,7 @@ function renderTable(tbody) {
       <td class="py-2.5 px-3">
         <div class="flex flex-col">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="font-mono font-black text-slate-900 text-xs sm:text-[13px] group-hover:text-blue-600 transition-colors">${item.reference}</span>
+            <span class="font-mono font-black text-slate-900 text-xs sm:text-[13px] group-hover:text-blue-600 transition-colors">${escapeHtml(item.reference)}</span>
             ${genderTag}
           </div>
           <div class="flex items-center gap-1 text-[10px] text-slate-400 leading-tight mt-0.5">
@@ -1224,7 +1224,7 @@ async function handleDeleteModalPhoto() {
   const item = filteredItems[currentItemIndex];
   if (!item || !item.photo_url) return;
 
-  const confirmDelete = confirm(`¿Estás seguro de eliminar la foto de la referencia ${item.reference}?`);
+  const confirmDelete = confirm(`¿Estás seguro de eliminar la foto de la referencia ${escapeHtml(item.reference)}?`);
   if (!confirmDelete) return;
 
   try {
@@ -1233,7 +1233,7 @@ async function handleDeleteModalPhoto() {
     });
 
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
+      const errData = withPhotoProxy(await res.json()).catch(() => ({}));
       throw new Error(errData.detail || 'Error al eliminar la foto');
     }
 
@@ -1603,7 +1603,7 @@ function renderVerdictOptions(item) {
   let options = [];
 
   if (diff < 0) {
-    if (label) label.textContent = `Motivo del faltante (-${Math.abs(diff)} en Talla ${item.size}):`;
+    if (label) label.textContent = `Motivo del faltante (-${Math.abs(diff)} en Talla ${escapeHtml(item.size)}):`;
     options = [
       { id: 'Faltante Real', label: 'Faltante Real', icon: '🚨' },
       { id: 'Tag Defectuoso', label: 'Tag Defectuoso', icon: '🏷️' },
@@ -1613,7 +1613,7 @@ function renderVerdictOptions(item) {
       { id: 'Otro Motivo', label: 'Otro Motivo', icon: '💬' },
     ];
   } else if (diff > 0) {
-    if (label) label.textContent = `Motivo del sobrante (+${diff} en Talla ${item.size}):`;
+    if (label) label.textContent = `Motivo del sobrante (+${diff} en Talla ${escapeHtml(item.size)}):`;
     options = [
       { id: 'Sobrante Real', label: 'Sobrante Real', icon: '📦' },
       { id: 'Doble Tag', label: 'Doble Tag', icon: '🏷️' },
@@ -1624,7 +1624,7 @@ function renderVerdictOptions(item) {
       { id: 'Otro Motivo', label: 'Otro Motivo', icon: '💬' },
     ];
   } else {
-    if (label) label.textContent = `Conteo Exacto (0 diferencia en Talla ${item.size}):`;
+    if (label) label.textContent = `Conteo Exacto (0 diferencia en Talla ${escapeHtml(item.size)}):`;
     options = [
       { id: 'Conteo Correcto', label: 'Conteo Correcto', icon: '✅' },
       { id: 'Ajuste Confirmado', label: 'Ajuste Confirmado', icon: '📋' },
@@ -1725,7 +1725,7 @@ async function handlePhotoSelected(file) {
     });
 
     if (!res.ok) throw new Error('Error al subir la foto');
-    const result = await res.json();
+    const result = withPhotoProxy(await res.json());
     const newPhotoUrl = result.photo_url;
 
     // Actualizar en el item local
@@ -2132,7 +2132,7 @@ async function selectAuditFromHistory(auditId) {
 
   const auditDate = audit.audit_date || (audit.uploaded_at ? audit.uploaded_at.substring(0, 10) : '');
   applyAuditDateFilter(auditDate, auditId);
-  showToast(`Inventario "${audit.name}" cargado`, 'success');
+  showToast(`Inventario "${escapeHtml(audit.name)}" cargado`, 'success');
 }
 
 // ============================================================================
@@ -2284,11 +2284,11 @@ async function handleExcelUpload(e) {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
+      const errData = withPhotoProxy(await res.json());
       throw new Error(errData.detail || 'Error al procesar el archivo');
     }
 
-    const result = await res.json();
+    const result = withPhotoProxy(await res.json());
     currentAuditId = result.audit_id;
 
     statusMsg.className = 'text-xs p-3 rounded-lg bg-emerald-50 text-emerald-800 block font-bold';
@@ -3119,7 +3119,7 @@ async function loadCatalogStats() {
   try {
     const res = await fetch('/api/catalog/stats');
     if (!res.ok) return;
-    catalogStats = await res.json();
+    catalogStats = withPhotoProxy(await res.json());
 
     const badge = document.getElementById('tabCatalogBadge');
     if (badge) {
@@ -3149,7 +3149,7 @@ async function loadCatalog() {
   try {
     const res = await fetch('/api/catalog');
     if (!res.ok) throw new Error('Error al cargar catálogo');
-    const data = await res.json();
+    const data = withPhotoProxy(await res.json());
     catalogItems = data.items || [];
     applyCatalogFilters();
   } catch (err) {
@@ -3258,13 +3258,13 @@ function renderCatalogGrid(items) {
     const garmentTypeBadge = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 badge-pill">${escapeHtml(item.garment_type || 'Prenda')}</span>`;
 
     const imageSection = item.photo_url
-      ? `<div class="relative w-full h-44 sm:h-48 bg-slate-100 flex items-center justify-center overflow-hidden group cursor-pointer" onclick="zoomCatalogPhoto('${item.photo_url}', '${escapeHtml(item.name)}', '${escapeHtml(item.master_ref)}')">
-           <img src="${item.photo_url}" alt="${escapeHtml(item.name)}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200" loading="lazy">
+      ? `<div class="relative w-full h-44 sm:h-48 bg-slate-100 flex items-center justify-center overflow-hidden group cursor-pointer" onclick="zoomCatalogPhoto('${escapeJsAttribute(item.photo_url)}', '${escapeJsAttribute(item.name)}', '${escapeJsAttribute(item.master_ref)}')">
+           <img src="${escapeHtml(item.photo_url)}" alt="${escapeHtml(item.name)}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200" loading="lazy">
            <div class="absolute top-2 right-2 flex items-center gap-1">
-             <button type="button" onclick="event.stopPropagation(); triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}');" class="bg-slate-900/75 hover:bg-slate-900 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Cambiar foto universal">
+             <button type="button" onclick="event.stopPropagation(); triggerCatalogUploadPhoto('${escapeJsAttribute(item.master_ref)}');" class="bg-slate-900/75 hover:bg-slate-900 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Cambiar foto universal">
                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
              </button>
-             <button type="button" onclick="event.stopPropagation(); deleteReferencePhoto('${escapeHtml(item.master_ref)}');" class="bg-red-600/85 hover:bg-red-700 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Eliminar foto incorrecta del catálogo">
+             <button type="button" onclick="event.stopPropagation(); deleteReferencePhoto('${escapeJsAttribute(item.master_ref)}');" class="bg-red-600/85 hover:bg-red-700 text-white p-1.5 rounded-lg shadow-sm backdrop-blur-xs transition-colors" title="Eliminar foto incorrecta del catálogo">
                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
              </button>
            </div>
@@ -3274,7 +3274,7 @@ function renderCatalogGrid(items) {
              <i data-lucide="camera" class="w-5 h-5"></i>
            </div>
            <span class="text-xs font-bold text-slate-600">Sin foto registrada</span>
-           <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}')" class="mt-2.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+           <button type="button" onclick="triggerCatalogUploadPhoto('${escapeJsAttribute(item.master_ref)}')" class="mt-2.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
              <i data-lucide="camera" class="w-3.5 h-3.5 shrink-0"></i>
              <span>Subir Foto</span>
            </button>
@@ -3320,7 +3320,7 @@ function renderCatalogGrid(items) {
             ${primaryBarcode ? `
               <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200/60">
                 <span class="truncate">EAN: ${escapeHtml(primaryBarcode)}</span>
-                <button type="button" onclick="copyToClipboard('${escapeHtml(primaryBarcode)}', 'Código EAN')" class="text-slate-400 hover:text-blue-600 p-1 rounded inline-flex items-center justify-center transition-colors shrink-0 cursor-pointer" title="Copiar código de barras">
+                <button type="button" onclick="copyToClipboard('${escapeJsAttribute(primaryBarcode)}', 'Código EAN')" class="text-slate-400 hover:text-blue-600 p-1 rounded inline-flex items-center justify-center transition-colors shrink-0 cursor-pointer" title="Copiar código de barras">
                   <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -3336,7 +3336,7 @@ function renderCatalogGrid(items) {
 
         <!-- Botón Inferior: Abrir en Auditoría -->
         <div class="p-3 pt-0">
-          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
+          <button type="button" onclick="searchCatalogItemInAudit('${escapeJsAttribute(item.master_ref)}')" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
             <i data-lucide="clipboard-check" class="w-4 h-4 text-blue-600 shrink-0"></i>
             <span>Consultar en Auditoría</span>
           </button>
@@ -3358,10 +3358,10 @@ function renderCatalogTable(items) {
       : '<span class="text-slate-400 italic text-[11px]">-</span>';
 
     const photoCol = item.photo_url
-      ? `<div class="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 cursor-pointer shrink-0" onclick="zoomCatalogPhoto('${item.photo_url}', '${escapeHtml(item.name)}', '${escapeHtml(item.master_ref)}')">
-           <img src="${item.photo_url}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover">
+      ? `<div class="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 cursor-pointer shrink-0" onclick="zoomCatalogPhoto('${escapeJsAttribute(item.photo_url)}', '${escapeJsAttribute(item.name)}', '${escapeJsAttribute(item.master_ref)}')">
+           <img src="${escapeHtml(item.photo_url)}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover">
          </div>`
-      : `<button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(item.master_ref)}')" class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-slate-400 hover:text-amber-600 inline-flex items-center justify-center transition-colors shrink-0 cursor-pointer" title="Subir foto">
+      : `<button type="button" onclick="triggerCatalogUploadPhoto('${escapeJsAttribute(item.master_ref)}')" class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-slate-400 hover:text-amber-600 inline-flex items-center justify-center transition-colors shrink-0 cursor-pointer" title="Subir foto">
            <i data-lucide="camera" class="w-4 h-4"></i>
          </button>`;
 
@@ -3380,11 +3380,11 @@ function renderCatalogTable(items) {
         <td class="py-2.5 px-2 align-middle">
           <div class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
             <span>${escapeHtml(primaryBarcode)}</span>
-            ${primaryBarcode !== '-' ? `<button type="button" onclick="copyToClipboard('${primaryBarcode}', 'Código EAN')" class="text-slate-400 hover:text-blue-600 p-0.5 cursor-pointer inline-flex items-center justify-center" title="Copiar EAN"><i data-lucide="copy" class="w-3 h-3"></i></button>` : ''}
+            ${primaryBarcode !== '-' ? `<button type="button" onclick="copyToClipboard('${escapeJsAttribute(primaryBarcode)}', 'Código EAN')" class="text-slate-400 hover:text-blue-600 p-0.5 cursor-pointer inline-flex items-center justify-center" title="Copiar EAN"><i data-lucide="copy" class="w-3 h-3"></i></button>` : ''}
           </div>
         </td>
         <td class="py-2.5 px-3 align-middle text-center">
-          <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(item.master_ref)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer">
+          <button type="button" onclick="searchCatalogItemInAudit('${escapeJsAttribute(item.master_ref)}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer">
             <i data-lucide="clipboard-check" class="w-3.5 h-3.5 shrink-0"></i>
             <span>Auditar</span>
           </button>
@@ -3437,7 +3437,7 @@ async function handleCatalogPhotoFileChange(e) {
       body: formData
     });
     if (!res.ok) throw new Error('Error al subir la foto');
-    const data = await res.json();
+    const data = withPhotoProxy(await res.json());
     showToast('Foto asignada universalmente al catálogo', 'success');
 
     // Actualizar en el catálogo local
@@ -3478,7 +3478,7 @@ async function deleteReferencePhoto(reference) {
     });
 
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
+      const errData = withPhotoProxy(await res.json()).catch(() => ({}));
       throw new Error(errData.detail || 'Error al eliminar la foto');
     }
 
@@ -3546,20 +3546,20 @@ function zoomCatalogPhoto(photoUrl, title, ref) {
         </button>
       </div>
       <div class="p-4 bg-slate-100 flex items-center justify-center overflow-auto max-h-[70vh]">
-        <img src="${photoUrl}" alt="${escapeHtml(title)}" class="max-h-[65vh] w-auto object-contain rounded-lg shadow-sm">
+        <img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(title)}" class="max-h-[65vh] w-auto object-contain rounded-lg shadow-sm">
       </div>
       <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-2">
-          <button type="button" onclick="triggerCatalogUploadPhoto('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+          <button type="button" onclick="triggerCatalogUploadPhoto('${escapeJsAttribute(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
             <i data-lucide="camera" class="w-3.5 h-3.5"></i>
             <span>Cambiar Foto</span>
           </button>
-          <button type="button" onclick="deleteReferencePhoto('${escapeHtml(ref)}');" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer" title="Eliminar foto incorrecta">
+          <button type="button" onclick="deleteReferencePhoto('${escapeJsAttribute(ref)}');" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer" title="Eliminar foto incorrecta">
             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-600"></i>
             <span>Eliminar Foto</span>
           </button>
         </div>
-        <button type="button" onclick="searchCatalogItemInAudit('${escapeHtml(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+        <button type="button" onclick="searchCatalogItemInAudit('${escapeJsAttribute(ref)}'); document.getElementById('catalogZoomModal').classList.add('hidden');" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
           <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
           <span>Buscar en Auditoría</span>
         </button>
@@ -4134,7 +4134,9 @@ async function initHubAndRouter() {
     const catInput = document.getElementById('catalogSearchInput');
     if (catInput) {
       catInput.value = q;
-      handleCatalogSearch();
+      catalogSearchQuery = q;
+      document.getElementById('btnClearCatalogSearch')?.classList.remove('hidden');
+      applyCatalogFilters();
     }
   };
 
@@ -4279,6 +4281,8 @@ function handleHashChange() {
 
 async function switchPortalView(viewName, updateHash = true) {
   currentPortalView = viewName;
+  document.body.dataset.view = viewName;
+  document.dispatchEvent(new CustomEvent('faro:view', { detail: viewName }));
   if (updateHash) {
     if (viewName === 'hub') window.location.hash = '';
     else if (viewName === 'faro') window.location.hash = '#faro';
@@ -4313,7 +4317,7 @@ async function switchPortalView(viewName, updateHash = true) {
     if (auditBar) auditBar.classList.add('hidden');
     if (faroTabs) faroTabs.classList.add('hidden');
 
-    if (titleEl) titleEl.textContent = 'FARO';
+    if (titleEl) titleEl.textContent = 'Inicio';
     if (subEl) subEl.textContent = 'Portal Operativo Seven Seven';
     await loadHubSummary();
   } else if (viewName === 'faro') {
@@ -4323,7 +4327,7 @@ async function switchPortalView(viewName, updateHash = true) {
     if (auditBar) auditBar.classList.remove('hidden');
     if (faroTabs) faroTabs.classList.remove('hidden');
 
-    if (titleEl) titleEl.textContent = 'FARO · Inventario';
+    if (titleEl) titleEl.textContent = 'Inventario';
     if (subEl) subEl.textContent = 'Conciliación de Diferencias y Auditoría RFID';
     switchTab('audit');
   } else if (viewName === 'schedules') {
@@ -4333,7 +4337,7 @@ async function switchPortalView(viewName, updateHash = true) {
     if (auditBar) auditBar.classList.add('hidden');
     if (faroTabs) faroTabs.classList.add('hidden');
 
-    if (titleEl) titleEl.textContent = 'Creador de Horarios';
+    if (titleEl) titleEl.textContent = 'Horarios';
     if (subEl) subEl.textContent = 'Planificador Semanal Tienda Seven Seven';
     await loadWeeklySchedule(currentScheduleWeek);
   } else if (viewName === 'tasks') {
@@ -4343,7 +4347,7 @@ async function switchPortalView(viewName, updateHash = true) {
     if (auditBar) auditBar.classList.add('hidden');
     if (faroTabs) faroTabs.classList.add('hidden');
 
-    if (titleEl) titleEl.textContent = 'Tareas y Recordatorios';
+    if (titleEl) titleEl.textContent = 'Tareas';
     if (subEl) subEl.textContent = 'Rutinas Operativas Diarias y Auditorías';
     await loadTasks();
   } else if (viewName === 'catalog') {
@@ -4353,7 +4357,7 @@ async function switchPortalView(viewName, updateHash = true) {
     if (auditBar) auditBar.classList.add('hidden');
     if (faroTabs) faroTabs.classList.remove('hidden');
 
-    if (titleEl) titleEl.textContent = 'Catálogo Maestro';
+    if (titleEl) titleEl.textContent = 'Catálogo';
     if (subEl) subEl.textContent = 'Buscador y Directorio de Referencias';
     switchTab('catalog');
   }
@@ -4375,7 +4379,7 @@ async function loadHubSummary() {
   try {
     const res = await fetch('/api/hub/summary');
     if (!res.ok) return;
-    hubSummaryData = await res.json();
+    hubSummaryData = withPhotoProxy(await res.json());
 
     const dayBadge = document.getElementById('hubLiveDayBadge');
     if (dayBadge) {
@@ -4442,6 +4446,7 @@ async function loadHubSummary() {
     // Actualizar Indicadores de Pulso Central
     const cAuditCount = document.getElementById('hubCenterAuditCount');
     const cAuditDiff = document.getElementById('hubCenterAuditDiff');
+    if (cAuditCount && !hubSummaryData.latest_audit) { cAuditCount.textContent = 'Sin lecturas'; if (cAuditDiff) cAuditDiff.textContent = 'Sube tu primer inventario'; }
     if (cAuditCount && hubSummaryData.latest_audit) {
       cAuditCount.textContent = `${hubSummaryData.latest_audit.total_items} prendas`;
       if (cAuditDiff) cAuditDiff.textContent = `${hubSummaryData.latest_audit.total_faltantes} faltantes a conciliar`;
@@ -4451,15 +4456,15 @@ async function loadHubSummary() {
     const cSchedSub = document.getElementById('hubCenterSchedSub');
     if (cSchedCount) {
       const activeToday = (hubSummaryData.today_shifts || []).filter(s => !['Libre', 'Vacaciones', 'Incapacidad'].includes(s.shift_type)).length;
-      cSchedCount.textContent = `${activeToday} Asesores`;
-      if (cSchedSub) cSchedSub.textContent = `En turno activo hoy (${hubSummaryData.today_day_name || 'Hoy'})`;
+      cSchedCount.textContent = `${activeToday} en turno`;
+      if (cSchedSub) cSchedSub.textContent = activeToday ? `Programados para hoy` : 'Sin turnos registrados';
     }
 
     const cTasksCount = document.getElementById('hubCenterTasksCount');
     const cTasksSub = document.getElementById('hubCenterTasksSub');
     if (cTasksCount) {
       const pCount = hubSummaryData.tasks_summary?.today_pending ?? 0;
-      cTasksCount.textContent = `${pCount} Pendientes`;
+      cTasksCount.textContent = `${pCount} pendientes`;
       if (cTasksSub) cTasksSub.textContent = `${hubSummaryData.tasks_summary?.completed || 0} completadas en tienda`;
     }
 
@@ -4472,7 +4477,10 @@ async function loadHubSummary() {
     const tasksListEl = document.getElementById('hubTodayTasksList');
     const tasksCountEl = document.getElementById('hubTasksPendingCount');
     if (tasksListEl) {
-      const tasks = hubSummaryData.today_tasks || [];
+      const tasks = [...(hubSummaryData.today_tasks || [])]
+        .sort((a, b) => Number(a.is_completed) - Number(b.is_completed)
+          || Number(String(b.priority).toLowerCase() === 'alta') - Number(String(a.priority).toLowerCase() === 'alta'))
+        .slice(0, 3);
       if (tasks.length === 0) {
         tasksListEl.innerHTML = `
           <div class="flex flex-col items-center justify-center py-6 text-slate-400 gap-1.5">
@@ -4487,10 +4495,10 @@ async function loadHubSummary() {
           if (t.is_completed) {
             badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
             badgeText = 'Listo ✓';
-          } else if (t.priority === 'alta') {
+          } else if (String(t.priority).toLowerCase() === 'alta') {
             badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
-            badgeText = 'Revisar';
-          } else if (t.priority === 'media') {
+            badgeText = 'Prioridad alta';
+          } else if (String(t.priority).toLowerCase() === 'media') {
             badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
             badgeText = 'Normal';
           }
@@ -4498,11 +4506,11 @@ async function loadHubSummary() {
           return `
             <div class="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors">
               <div class="flex items-center gap-2 min-w-0 flex-1">
-                <button type="button" data-toggle-hub-task="${t.id}" class="w-4 h-4 rounded border ${t.is_completed ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-transparent hover:border-slate-400'} flex items-center justify-center text-[10px] shrink-0 transition-colors cursor-pointer" title="Marcar como realizada">
+                <button type="button" data-toggle-hub-task="${t.id}" class="w-4 h-4 rounded border ${t.is_completed ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-transparent hover:border-slate-400'} flex items-center justify-center text-[10px] shrink-0 transition-colors cursor-pointer" title="Cambiar estado de la tarea" aria-label="${escapeHtml(t.title)}" aria-pressed="${Boolean(t.is_completed)}">
                   ✓
                 </button>
-                <span class="text-xs ${t.is_completed ? 'line-through text-slate-400' : 'text-slate-800 font-medium'} truncate" title="${t.title}">
-                  ${t.title}
+                <span class="text-xs ${t.is_completed ? 'line-through text-slate-400' : 'text-slate-800 font-medium'} truncate" title="${escapeHtml(t.title)}">
+                  ${escapeHtml(t.title)}
                 </span>
               </div>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${badgeClass}">
@@ -4531,8 +4539,8 @@ async function loadHubSummary() {
     }
 
     if (tasksCountEl) {
-      const pCount = hubSummaryData.tasks_summary?.today_pending ?? 0;
-      tasksCountEl.textContent = `${pCount} ${pCount === 1 ? 'Tarea Pendiente' : 'Tareas Pendientes'}`;
+      const pCount = hubSummaryData.tasks_summary?.pending ?? 0;
+      tasksCountEl.textContent = `${pCount} ${pCount === 1 ? 'pendiente' : 'pendientes'}`;
     }
 
     // WIDGET 2: Renderizado de Horarios del Día
@@ -4558,11 +4566,11 @@ async function loadHubSummary() {
           return `
             <div class="py-1.5 px-1 flex items-center justify-between text-xs hover:bg-slate-50/80 transition-colors">
               <div class="flex items-center gap-2 min-w-0">
-                <span class="font-mono text-[11px] font-bold text-slate-500 w-11 shrink-0">${timeSlot}</span>
-                <span class="font-bold text-slate-800 truncate text-xs">${shortName}</span>
+                <span class="font-mono text-[11px] font-bold text-slate-500 w-11 shrink-0">${escapeHtml(timeSlot)}</span>
+                <span class="font-bold text-slate-800 truncate text-xs">${escapeHtml(shortName)}</span>
               </div>
               <span class="font-mono text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-md border shrink-0 ${isDescanso ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200/80'}">
-                ${timeDisplay}
+                ${escapeHtml(timeDisplay)}
               </span>
             </div>
           `;
@@ -4584,7 +4592,7 @@ async function loadWeeklySchedule(weekStartDate) {
   try {
     const res = await fetch(`/api/schedules/week/${weekStartDate}`);
     if (!res.ok) throw new Error('Error al cargar horario');
-    scheduleData = await res.json();
+    scheduleData = withPhotoProxy(await res.json());
 
     await loadEmployees();
     renderScheduleGrid();
@@ -4598,7 +4606,7 @@ async function loadEmployees() {
   try {
     const res = await fetch('/api/employees?active_only=true');
     if (res.ok) {
-      employeesList = await res.json();
+      employeesList = withPhotoProxy(await res.json());
     }
   } catch (e) {
     console.warn(e);
@@ -4664,8 +4672,8 @@ function renderScheduleGrid() {
           <div class="flex items-center gap-2 min-w-0">
             <div class="w-2.5 h-2.5 rounded-full ${emp.color_tag === 'purple' ? 'bg-purple-500' : emp.color_tag === 'emerald' ? 'bg-emerald-500' : emp.color_tag === 'amber' ? 'bg-amber-500' : emp.color_tag === 'rose' ? 'bg-rose-500' : 'bg-blue-500'} shrink-0"></div>
             <div class="min-w-0">
-              <span class="font-black text-slate-900 block truncate text-xs sm:text-sm" title="${emp.name}">${emp.name}</span>
-              <span class="text-[10px] text-slate-400 font-medium block truncate">${emp.role}</span>
+              <span class="font-black text-slate-900 block truncate text-xs sm:text-sm" title="${escapeHtml(emp.name)}">${escapeHtml(emp.name)}</span>
+              <span class="text-[10px] text-slate-400 font-medium block truncate">${escapeHtml(emp.role)}</span>
             </div>
           </div>
           <button type="button" data-delete-emp-quick="${emp.id}" class="p-1 rounded text-slate-300 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0" title="Eliminar colaborador">
@@ -4978,7 +4986,7 @@ function generateWhatsappText() {
   text += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   employeesList.forEach(emp => {
-    text += `👤 *${emp.name.toUpperCase()}* · ${emp.role}\n`;
+    text += `👤 *${emp.name.toUpperCase()}* · ${escapeHtml(emp.role)}\n`;
     let empRegHours = 0;
     let empExtHours = 0;
     let redDay = '';
@@ -5059,7 +5067,7 @@ async function handleQuickAddEmployee(e) {
       renderScheduleGrid();
       await loadHubSummary();
     } else {
-      const err = await res.json();
+      const err = withPhotoProxy(await res.json());
       showToast(err.detail || 'Error al registrar colaborador', 'error');
     }
   } catch (err) {
@@ -5091,8 +5099,8 @@ function renderEmployeesList() {
       <div class="flex items-center gap-2">
         <span class="w-3 h-3 rounded-full ${emp.color_tag === 'purple' ? 'bg-purple-500' : emp.color_tag === 'emerald' ? 'bg-emerald-500' : emp.color_tag === 'amber' ? 'bg-amber-500' : emp.color_tag === 'rose' ? 'bg-rose-500' : 'bg-blue-500'}"></span>
         <div>
-          <span class="font-bold text-slate-900 block">${emp.name}</span>
-          <span class="text-[10px] text-slate-500">${emp.role}</span>
+          <span class="font-bold text-slate-900 block">${escapeHtml(emp.name)}</span>
+          <span class="text-[10px] text-slate-500">${escapeHtml(emp.role)}</span>
         </div>
       </div>
       <button data-delete-emp="${emp.id}" type="button" class="p-1 text-slate-400 hover:text-red-600 rounded-md transition-colors cursor-pointer" title="Eliminar colaborador">
@@ -5671,7 +5679,7 @@ async function loadTasks() {
   try {
     const res = await fetch('/api/tasks');
     if (res.ok) {
-      tasksList = await res.json();
+      tasksList = withPhotoProxy(await res.json());
       renderTasksList();
     }
   } catch (err) {
@@ -5738,19 +5746,19 @@ function renderTasksList() {
 
     div.innerHTML = `
       <div class="flex items-center gap-3 min-w-0">
-        <input type="checkbox" ${isDone ? 'checked' : ''} data-toggle-task="${task.id}" class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer shrink-0">
+        <input type="checkbox" ${isDone ? 'checked' : ''} data-toggle-task="${task.id}" aria-label="Completar: ${escapeHtml(task.title)}" class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer shrink-0">
         <div class="min-w-0">
           <h4 class="text-xs sm:text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-900'} truncate">
-            ${task.title}
+            ${escapeHtml(task.title)}
           </h4>
           <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
             <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border ${prioColor}">
-              ${task.priority}
+              ${escapeHtml(task.priority)}
             </span>
             <span class="text-[10px] text-slate-400 font-semibold">
-              📅 ${task.day_of_week || 'Diario'}
+              📅 ${escapeHtml(task.day_of_week || 'Diario')}
             </span>
-            ${task.category ? `<span class="text-[10px] text-slate-400 font-medium">· ${task.category}</span>` : ''}
+            ${task.category ? `<span class="text-[10px] text-slate-400 font-medium">· ${escapeHtml(task.category)}</span>` : ''}
           </div>
         </div>
       </div>
@@ -5768,7 +5776,7 @@ function renderTasksList() {
       try {
         const res = await fetch(`/api/tasks/${id}/toggle`, { method: 'POST' });
         if (res.ok) {
-          const updated = await res.json();
+          const updated = withPhotoProxy(await res.json());
           const tIdx = tasksList.findIndex(t => t.id == id);
           if (tIdx >= 0) tasksList[tIdx].is_completed = updated.is_completed;
           renderTasksList();
@@ -5841,3 +5849,28 @@ async function handleCreateTask(e) {
 }
 
 
+
+setInterval(loadDatabaseStatus, 60000);
+
+function escapeJsAttribute(value) {
+  return String(value ?? '').split('').map(char => String.fromCharCode(92) + 'u' + char.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+}
+function withPhotoProxy(data) {
+  if (Array.isArray(data)) return data.map(withPhotoProxy);
+  if (data && typeof data === 'object') {
+    for (const key of Object.keys(data)) {
+      if (key === 'photo_url' && typeof data[key] === 'string' && /^https?:/.test(data[key])) {
+        data[key] = '/api/system/photo?url=' + encodeURIComponent(data[key]);
+      } else if (data[key] && typeof data[key] === 'object') data[key] = withPhotoProxy(data[key]);
+    }
+  }
+  return data;
+}
+
+
+async function doCopyWhatsappText() {
+  const area = document.getElementById('whatsappTextarea');
+  if (!area) return;
+  try { await navigator.clipboard.writeText(area.value); showToast('Texto copiado. Ya puedes pegarlo en WhatsApp.', 'success'); }
+  catch { area.focus(); area.select(); showToast('Selecciona y copia el texto para compartirlo.', 'info'); }
+}

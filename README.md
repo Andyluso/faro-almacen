@@ -1,3 +1,5 @@
+> Consulta CORRECCIONES.md para acceso, respaldos privados y almacenamiento permanente en Railway. Las instalaciones nuevas requieren configurar el acceso y la nube en el servidor.
+
 # Sistema de Control de Inventario y Catálogo Fotográfico - Seven Seven
 
 Sistema web y móvil diseñado para la gestión de auditorías de inventario de **Tienda y Bodega** (Lunes y Miércoles) en tiendas Seven Seven.

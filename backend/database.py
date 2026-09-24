@@ -34,10 +34,11 @@ except ImportError:
         cloud_upload_photo = None
 
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(DB_DIR, "inventario.db")
+DB_PATH = os.path.join(os.getenv('FARO_DATA_DIR', DB_DIR), "inventario.db")
 
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn.execute("PRAGMA foreign_keys = ON")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -273,67 +274,9 @@ def init_db():
     conn.close()
 
     # Sincronizar automáticamente desde Supabase Cloud si hay datos en la nube
-    sync_from_supabase()
-
-def sync_from_supabase():
-    """Descarga y sincroniza las auditorías, prendas y fotos desde Supabase Cloud a SQLite local."""
-    if not is_supabase_enabled():
-        return
-    client = get_client()
-    if not client:
-        return
-
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        # 1. Audits de Supabase
-        res_a = client.table("audits").select("*").order("id", desc=False).execute()
-        cloud_audits = res_a.data or []
-        for a in cloud_audits:
-            cursor.execute("""
-            INSERT OR REPLACE INTO audits (id, name, filename, uploaded_at, audit_date, total_items, total_faltantes, total_sobrantes, total_validados)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                a.get("id"), a.get("name"), a.get("filename"), a.get("uploaded_at"),
-                a.get("audit_date"), a.get("total_items", 0), a.get("total_faltantes", 0),
-                a.get("total_sobrantes", 0), a.get("total_validados", 0)
-            ))
-
-        # 2. Audit items
-        res_i = client.table("audit_items").select("*").order("id", desc=False).execute()
-        cloud_items = res_i.data or []
-        for item in cloud_items:
-            cursor.execute("""
-            INSERT OR REPLACE INTO audit_items (
-                id, audit_id, reference, base_reference, name, size, color, barcode,
-                store_count, warehouse_count, theoretical_count, difference, category,
-                status, validation_verdict, validation_notes, validated_at,
-                gender, garment_code, garment_type
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                item.get("id"), item.get("audit_id"), item.get("reference"), item.get("base_reference"),
-                item.get("name"), item.get("size"), item.get("color"), item.get("barcode"),
-                item.get("store_count", 0), item.get("warehouse_count", 0), item.get("theoretical_count", 0),
-                item.get("difference", 0), item.get("category"), item.get("status", "pendiente"),
-                item.get("validation_verdict"), item.get("validation_notes"), item.get("validated_at"),
-                item.get("gender"), item.get("garment_code"), item.get("garment_type")
-            ))
-
-        # 3. Catalog photos
-        res_p = client.table("catalog_photos").select("*").execute()
-        cloud_photos = res_p.data or []
-        for p in cloud_photos:
-            cursor.execute("""
-            INSERT OR REPLACE INTO catalog_photos (reference, photo_url, updated_at)
-            VALUES (?, ?, ?)
-            """, (p.get("reference"), p.get("photo_url"), p.get("updated_at")))
-
-        conn.commit()
-        conn.close()
-        print(f"[Supabase Sync] Sincronización exitosa desde la nube: {len(cloud_audits)} auditorías, {len(cloud_items)} prendas, {len(cloud_photos)} fotos.")
-    except Exception as e:
-        print(f"[Supabase Sync] Error sincronizando desde Supabase Cloud: {e}")
+    # Los datos locales nunca se sobrescriben al arrancar.
+    from .reliability import initialize
+    initialize(DB_PATH)
 
 def create_audit(name: str, filename: str, items: List[Dict[str, Any]], audit_date: Optional[str] = None) -> int:
     """Crea una auditoría y guarda todos sus items con su referencia base calculada."""
@@ -417,13 +360,6 @@ def create_audit(name: str, filename: str, items: List[Dict[str, Any]], audit_da
 
     conn.commit()
     conn.close()
-
-    # Sincronizar automáticamente con Supabase Cloud
-    if is_supabase_enabled() and cloud_create_audit:
-        try:
-            cloud_create_audit(name, filename, items_to_sync, audit_date, audit_id=audit_id)
-        except Exception as e:
-            print(f"[Supabase Sync] Error al sincronizar auditoría #{audit_id}: {e}")
 
     return audit_id
 
@@ -674,12 +610,6 @@ def update_item_validation(item_id: int, verdict: str, notes: str) -> bool:
     conn.commit()
     conn.close()
 
-    if success and is_supabase_enabled() and cloud_update_item_validation:
-        try:
-            cloud_update_item_validation(item_id, "validada", verdict, notes)
-        except Exception as e:
-            print(f"[Supabase Sync] Error al sincronizar validación de item #{item_id}: {e}")
-
     return success
 
 def save_catalog_photo(reference: str, photo_url: str, base_reference: Optional[str] = None, name: Optional[str] = None):
@@ -710,25 +640,6 @@ def save_catalog_photo(reference: str, photo_url: str, base_reference: Optional[
     conn.commit()
     conn.close()
 
-    # Sincronizar catálogo con Supabase Cloud si está habilitado
-    if is_supabase_enabled() and cloud_save_catalog_photo:
-        try:
-            cloud_url = photo_url
-            # Si es un archivo local (/uploads/...), intentar subirlo al Storage de Supabase
-            if photo_url.startswith("/uploads/") and cloud_upload_photo:
-                fname = os.path.basename(photo_url)
-                local_fpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", fname)
-                if os.path.exists(local_fpath):
-                    with open(local_fpath, "rb") as f:
-                        uploaded_url = cloud_upload_photo(f.read(), fname)
-                        if uploaded_url:
-                            cloud_url = uploaded_url
-
-            for r in refs_to_save:
-                cloud_save_catalog_photo(r, cloud_url)
-        except Exception as e:
-            print(f"[Supabase Sync] Error al sincronizar foto de {reference}: {e}")
-
 def delete_catalog_photo(reference: str, base_reference: Optional[str] = None, name: Optional[str] = None) -> bool:
     """Elimina la foto de una referencia del catálogo permanente (local SQLite y Supabase Cloud)."""
     conn = get_connection()
@@ -756,24 +667,6 @@ def delete_catalog_photo(reference: str, base_reference: Optional[str] = None, n
     conn.commit()
     conn.close()
 
-    # Eliminar archivos físicos locales si existen
-    for purl in photo_urls:
-        if purl and str(purl).startswith("/uploads/"):
-            fname = os.path.basename(str(purl))
-            local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", fname)
-            if os.path.exists(local_path):
-                try:
-                    os.remove(local_path)
-                except Exception as e:
-                    print(f"Error borrando archivo local {local_path}: {e}")
-
-    # Sincronizar eliminación con Supabase Cloud si está habilitado
-    if is_supabase_enabled() and cloud_delete_catalog_photo:
-        try:
-            cloud_delete_catalog_photo(refs_list, photo_urls)
-        except Exception as e:
-            print(f"[Supabase Sync] Error al eliminar foto de catálogo en Supabase: {e}")
-
     return True
 
 def delete_audit(audit_id: int) -> bool:
@@ -785,26 +678,6 @@ def delete_audit(audit_id: int) -> bool:
     success = cursor.rowcount > 0
     conn.commit()
     conn.close()
-
-    # Eliminar archivo físico de Excel original si existe
-    try:
-        excels_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", "excels")
-        if os.path.exists(excels_dir):
-            for fname in os.listdir(excels_dir):
-                if fname.startswith(f"audit_{audit_id}_"):
-                    try:
-                        os.remove(os.path.join(excels_dir, fname))
-                    except Exception:
-                        pass
-    except Exception as e:
-        print(f"Error limpiando archivo físico de auditoría {audit_id}: {e}")
-
-    # Sincronizar eliminación con Supabase Cloud si está habilitado
-    if success and is_supabase_enabled() and cloud_delete_audit:
-        try:
-            cloud_delete_audit(audit_id)
-        except Exception as e:
-            print(f"[Supabase Sync] Error al eliminar auditoría #{audit_id} en Supabase: {e}")
 
     return success
 
@@ -1257,31 +1130,6 @@ def get_hub_summary() -> Dict[str, Any]:
                 sh.hours DESC, e.name ASC
         """, (sched_data["id"], today_short, today_dow))
         today_shifts = [dict(r) for r in cursor.fetchall()]
-
-    if not today_shifts:
-        cursor.execute("SELECT id, name, role, color_tag FROM employees WHERE is_active = 1 ORDER BY id ASC LIMIT 8")
-        active_emps = cursor.fetchall()
-        default_times = [
-            ("09:00", "18:00", "09:00 - 18:00"),
-            ("10:00", "19:00", "10:00 - 19:00"),
-            ("11:00", "20:00", "11:00 - 20:00"),
-            ("12:00", "21:00", "12:00 - 21:00"),
-            ("13:00", "21:00", "13:00 - 21:00"),
-            ("14:00", "21:00", "14:00 - 21:00")
-        ]
-        today_shifts = [
-            {
-                "id": emp["id"],
-                "shift_type": default_times[idx % len(default_times)][2],
-                "hours": 8,
-                "start_time": default_times[idx % len(default_times)][0],
-                "end_time": default_times[idx % len(default_times)][1],
-                "employee_name": emp["name"],
-                "employee_role": emp["role"],
-                "employee_color": emp["color_tag"]
-            }
-            for idx, emp in enumerate(active_emps)
-        ]
 
     # 4. Catálogo
     cursor.execute("SELECT COUNT(DISTINCT COALESCE(base_reference, reference)) FROM audit_items")
