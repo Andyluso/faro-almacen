@@ -25,52 +25,43 @@ def credentials():
 
 
 class AccessMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app):
-        super().__init__(app)
-        self.failures = OrderedDict()
-
     async def dispatch(self, request, call_next):
-        # An empty worker is safe to probe by hosting services without exposing data.
-        if request.url.path == '/healthz':
-            return JSONResponse({'status': 'ok'})
-        # Deliver the cache-removal worker to existing installations before login.
-        if request.url.path == '/sw.js' and request.method == 'GET':
-            return await call_next(request)
-        config = credentials()
-        if not config:
-            return JSONResponse({'detail': 'Configura el acceso con configurar_acceso.py antes de abrir FARO.'}, status_code=503)
-        peer = request.client.host if request.client else 'unknown'
-        count, until = self.failures.get(peer, (0, 0))
-        if count >= 10 and time.monotonic() < until:
-            return JSONResponse({'detail': 'Espera un minuto antes de volver a intentar.'}, status_code=429)
-        valid = False
-        header = request.headers.get('authorization', '')
-        if header.startswith('Basic ') and len(header) < 4096:
-            try:
-                username, password = base64.b64decode(header[6:], validate=True).decode('utf-8').split(':', 1)
-                expected_user, salt, expected = config
-                actual = hashlib.scrypt(password.encode(), salt=bytes.fromhex(salt), n=16384, r=8, p=1).hex() if salt else password
-                valid = hmac.compare_digest(username.encode(), expected_user.encode()) & hmac.compare_digest(actual.encode(), expected.encode())
-            except (ValueError, UnicodeError):
-                pass
-        if not valid:
-            if header:
-                self.failures[peer] = (count + 1 if time.monotonic() < until else 1, time.monotonic() + 60)
-                if len(self.failures) > 1024:
-                    self.failures.popitem(last=False)
-            return Response('Acceso restringido a FARO', status_code=401,
-                            headers={'WWW-Authenticate': 'Basic realm="FARO", charset="UTF-8"', 'Cache-Control': 'no-store'})
-        self.failures.pop(peer, None)
-        if request.method not in ('GET', 'HEAD', 'OPTIONS'):
+        from .team_store import connection, digest
+        from starlette.responses import RedirectResponse
+        path = request.url.path
+        if path == '/healthz':
+            return JSONResponse({'status': 'ok', 'version': 'team-2026-09'})
+        public = path in ('/login','/activate','/auth.css','/auth.js','/sw.js') or (path in ('/api/auth/login','/api/auth/activate') and request.method == 'POST')
+        if request.method not in ('GET','HEAD','OPTIONS'):
             origin = request.headers.get('origin')
-            # Match the host too when HTTPS is terminated by the local tunnel.
-            if origin and urlsplit(origin).netloc != request.headers.get('host'):
-                return JSONResponse({'detail': 'Origen no permitido'}, status_code=403)
-            if request.headers.get('sec-fetch-site') == 'cross-site':
-                return JSONResponse({'detail': 'Origen no permitido'}, status_code=403)
+            if (origin and urlsplit(origin).netloc != request.headers.get('host')) or request.headers.get('sec-fetch-site') == 'cross-site':
+                return JSONResponse({'detail':'Origen no permitido'},status_code=403)
+        if not public:
+            token = request.cookies.get('faro_session','')
+            with connection() as conn:
+                row = conn.execute('SELECT u.*,s.csrf FROM app_sessions s JOIN app_users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND u.active=1',(digest(token),time.time())).fetchone() if token else None
+            if not row:
+                if path.startswith('/api/'):
+                    return JSONResponse({'detail':'Inicia sesión para continuar'},status_code=401,headers={'Cache-Control':'no-store'})
+                return RedirectResponse('/login',status_code=303,headers={'Cache-Control':'no-store'})
+            request.state.user = dict(row)
+            request.state.csrf = row['csrf']
+            if request.method not in ('GET','HEAD','OPTIONS') and not hmac.compare_digest(request.headers.get('x-csrf-token',''),row['csrf']):
+                return JSONResponse({'detail':'La sesión necesita actualizarse. Recarga la página.'},status_code=403)
+            if path == '/api/system/backup' and row['role'] != 'admin':
+                return JSONResponse({'detail':'Solo el administrador puede descargar respaldos'},status_code=403)
+            if row['role'] == 'employee':
+                allowed = path.startswith('/api/team/') or path.startswith('/api/auth/') or path in ('/','/workspace','/workspace.html','/workspace.css','/workspace.js')
+                if not allowed:
+                    return JSONResponse({'detail':'No tienes permiso para esta sección'},status_code=403)
+            # The new agenda and scheduling API are authoritative. Legacy write routes stay closed.
+            if path.startswith(('/api/schedules','/api/tasks')) and request.method not in ('GET','HEAD'):
+                return JSONResponse({'detail':'Usa la nueva Agenda y Horarios para guardar cambios'},status_code=409)
         response = await call_next(request)
-        response.headers['Cache-Control'] = 'no-store'
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        response.headers['X-Frame-Options'] = 'DENY'
-        response.headers['Referrer-Policy'] = 'same-origin'
+        response.headers['Cache-Control']='no-store'
+        response.headers['X-Content-Type-Options']='nosniff'
+        response.headers['X-Frame-Options']='DENY'
+        response.headers['Referrer-Policy']='same-origin'
+        if path in ('/','/login','/activate','/workspace','/workspace.html'):
+            response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         return response
