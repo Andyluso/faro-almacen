@@ -96,6 +96,8 @@ from .database import DB_PATH
 from .persistence import ensure_database
 ensure_database(DB_PATH, UPLOADS_DIR)
 init_db()
+from .team_store import initialize as initialize_team
+initialize_team()
 
 app = FastAPI(title="FARO - Flujo de Almacén y Reorden Operativo")
 
@@ -741,6 +743,25 @@ def api_delete_task(task_id: int):
     if not ok:
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
     return {"message": "Tarea eliminada correctamente", "id": task_id}
+
+from .accounts import router as accounts_router
+from .team_routes import router as team_router
+app.include_router(accounts_router)
+app.include_router(team_router)
+
+@app.get('/login')
+@app.get('/activate')
+def login_page():
+    return FileResponse(os.path.join(FRONTEND_DIR,'login.html'))
+
+@app.get('/')
+@app.get('/workspace')
+def workspace_page():
+    return FileResponse(os.path.join(FRONTEND_DIR,'workspace.html'))
+
+@app.get('/inventory')
+def inventory_page():
+    return FileResponse(os.path.join(FRONTEND_DIR,'index.html'))
 
 # Montar frontend al final para que la raíz '/' sirva el cliente web
 if os.path.exists(FRONTEND_DIR):

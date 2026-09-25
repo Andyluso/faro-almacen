@@ -74,3 +74,5 @@ html:has(.faro-studio){background:var(--paper)!important}
 .studio-nav-item{font-size:14px}
 #hubTodayTasksList>div>span[class*="bg-rose"]{color:#ac704a;background:#fcf3e8}
 @media(max-width:640px){.studio-nav-item{font-size:9px}.studio-metric-label{font-size:9px}.studio-metric>span{font-size:9px}.studio-welcome p:not(.studio-eyebrow){font-size:12px}.studio-focus-bottom>span{font-size:9px}.studio-search-card>p{font-size:11px}}
+
+.team-return { position: fixed; right: 20px; bottom: 20px; z-index: 100; background: #435b34; color: white; padding: 10px 16px; border-radius: 10px; text-decoration: none; font: 13px system-ui; }

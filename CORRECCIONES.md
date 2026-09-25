@@ -5,7 +5,7 @@
 - Los títulos de tareas, nombres y otros textos se muestran como texto, sin ejecutar HTML.
 - Una sola ruta de estado, con consulta real de conectividad y estado de respaldo.
 - Respaldos locales ZIP de la base completa (siete módulos) y archivos de uploads, cada 30 segundos cuando hay cambios; conserva los 20 más recientes.
-- Botón «Descargar respaldo completo». Las credenciales no se incluyen en esos ZIP.
+- Botón «Descargar respaldo completo». Los ZIP no contienen claves de servicios; sí contienen cuentas, hashes de contraseñas y sesiones de la base, por lo que deben conservarse como archivos privados.
 - Registro transaccional de cambios pendientes; una caída de red no los descarta.
 - Copia privada en Supabase preparada, DESACTIVADA por defecto. No modifica las tablas antiguas: guarda ZIP recuperables con todos los módulos y archivos locales.
 - El arranque no reemplaza datos locales por versiones de la nube.
@@ -16,7 +16,7 @@
 
 ## Entrar
 Abre iniciar_sistema.bat. Usa las credenciales entregadas en el archivo «Acceso FARO.txt».
-Para cambiarlas, ejecuta `python configurar_acceso.py` dentro de esta carpeta.
+Entra ahora desde el formulario de FARO. Cambia tu contraseña en «Cambiar contraseña». Las variables FARO_USERNAME y FARO_PASSWORD y el configurador local crean únicamente el primer administrador cuando aún no hay cuentas; no cambian contraseñas de cuentas existentes.
 En el celular utiliza HTTPS (el túnel existente); no compartas la contraseña por el enlace.
 
 ## Configurar el respaldo privado en una instalación nueva

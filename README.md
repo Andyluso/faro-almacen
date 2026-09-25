@@ -1,3 +1,5 @@
+> Nueva versión de equipo: consulta [EQUIPO_Y_AGENDA.md](EQUIPO_Y_AGENDA.md) para cuentas por invitación, permisos, peticiones, horarios y agenda.
+
 > Consulta CORRECCIONES.md para acceso, respaldos privados y almacenamiento permanente en Railway. Las instalaciones nuevas requieren configurar el acceso y la nube en el servidor.
 
 # Sistema de Control de Inventario y Catálogo Fotográfico - Seven Seven

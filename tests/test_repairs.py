@@ -21,29 +21,47 @@ from backend import reliability
 
 ROOT = Path(__file__).resolve().parents[1]
 
+class SessionClient(TestClient):
+    """Keep legacy regression cases while exercising the new cookie login."""
+    def request(self, method, url, **kwargs):
+        auth = kwargs.pop('auth', None)
+        self.cookies.clear()
+        if isinstance(auth, tuple):
+            login = super().request('POST','/api/auth/login',json={'username':auth[0],'password':auth[1]})
+            if login.status_code != 200: return login
+            headers = dict(kwargs.pop('headers', {}) or {})
+            headers['X-CSRF-Token'] = login.json()['csrf']
+            kwargs['headers'] = headers
+        return super().request(method,url,**kwargs)
+
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     monkeypatch.setattr(db, 'DB_PATH', str(tmp_path / 'inventario.db'))
     # Import main only after replacing the database path; tests cannot touch real data.
     from backend import main
     db.init_db()
+    from backend.team_store import initialize
+    initialize()
     monkeypatch.setattr(main, 'UPLOADS_DIR', str(tmp_path / 'uploads'))
     monkeypatch.setattr(main, 'EXCELS_DIR', str(tmp_path / 'uploads' / 'excels'))
     Path(main.EXCELS_DIR).mkdir(parents=True)
     main.app.middleware_stack = None
-    return TestClient(main.app)
+    return SessionClient(main.app)
 
 AUTH = ('tester', 'test-password-12345')
 
 @pytest.mark.parametrize('path', ['/', '/api/audits', '/api/employees', '/api/tasks', '/api/system/backup', '/uploads/test.xlsx', '/docs'])
 def test_every_private_surface_requires_login(client, path):
-    assert client.get(path).status_code == 401
+    response=client.get(path)
+    assert response.status_code == (401 if path.startswith('/api/') else 200)
+    if not path.startswith('/api/'): assert 'Ingresa a FARO' in response.text
+    assert 'www-authenticate' not in response.headers
 
 def test_auth_and_origin(client):
     assert client.get('/api/audits', auth=AUTH).status_code == 200
     assert client.get('/api/audits', auth=('tester', 'wrong')).status_code == 401
     assert client.post('/api/tasks', auth=AUTH, headers={'Origin':'https://attacker.invalid'}, json={'title':'bad'}).status_code == 403
-    assert client.post('/api/tasks', auth=AUTH, json={'title':'Tarea válida'}).status_code == 200
+    assert client.post('/api/team/agenda', auth=AUTH, json={'title':'Tarea válida','start_date':'2026-09-25'}).status_code == 200
     assert client.get('/api/tasks', auth=AUTH).headers['cache-control'] == 'no-store'
 
 def test_rate_limit(client):

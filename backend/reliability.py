@@ -37,6 +37,8 @@ def initialize(path):
         conn.execute("INSERT OR IGNORE INTO sync_meta VALUES ('revision', '0')")
         for table in TABLES:
             cols = [r['name'] for r in conn.execute(f'PRAGMA table_info({table})')]
+            if not cols:
+                continue
             pk = 'reference' if table == 'catalog_photos' else 'id'
             for event in ('INSERT', 'UPDATE', 'DELETE'):
                 prefix = 'OLD' if event == 'DELETE' else 'NEW'
