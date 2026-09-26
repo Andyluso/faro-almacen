@@ -51,7 +51,7 @@ class AccessMiddleware(BaseHTTPMiddleware):
             if path == '/api/system/backup' and row['role'] != 'admin':
                 return JSONResponse({'detail':'Solo el administrador puede descargar respaldos'},status_code=403)
             if row['role'] == 'employee':
-                allowed = path.startswith('/api/team/') or path.startswith('/api/auth/') or path in ('/','/workspace','/workspace.html','/workspace.css','/workspace.js')
+                allowed = path.startswith('/api/team/') or path.startswith('/api/auth/') or path in ('/','/workspace','/workspace.html','/workspace.css','/workspace.js','/mobile-menu.css','/mobile-menu.js')
                 if not allowed:
                     return JSONResponse({'detail':'No tienes permiso para esta sección'},status_code=403)
             # The new agenda and scheduling API are authoritative. Legacy write routes stay closed.
