@@ -72,6 +72,13 @@ def test_login_page_has_no_browser_challenge_and_sessions_are_private(env):
 def test_employee_cannot_reach_management_or_legacy_routes(env,route):
     assert env['employee'].get(route).status_code==403
 
+def test_employee_can_load_mobile_navigation_without_management_access(env):
+    for path in ['/mobile-menu.js','/mobile-menu.css']:
+        response=env['employee'].get(path)
+        assert response.status_code==200
+        assert 'text/html' not in response.headers['content-type']
+    assert env['employee'].get('/api/team/people').status_code==403
+
 def test_manager_cannot_download_backup_or_escalate_accounts(env):
     assert env['manager'].get('/api/system/backup').status_code==403
     assert env['manager'].post('/api/team/people',json={'username':'evil','name':'Evil','role':'admin'}).status_code==403
